@@ -4,10 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="referrer" content="no-referrer" />
-  <title>하이큐 영어 일본어 단어 퀴즈</title>
+  <title>카라스노 고교 배구부 단어 훈련소</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800;900&display=swap" />
   <!-- CSV 파싱 라이브러리 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -216,6 +217,17 @@
   <div id="app" class="bg-cover-wrapper"></div>
 
   <script>
+    // --------------------------------------------------------------
+    // Supabase cloud save
+    // --------------------------------------------------------------
+    const SUPABASE_URL = "https://lhvjtcxscdlpoxkougdn.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_I15ayHidHSDigXBcG6u5Pw_roCidQMA";
+
+    const supabaseClient =
+      (window.supabase && window.supabase.createClient)
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
+        : null;
+
     const CHAR_AVATARS = {
       kageyama: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="50" fill="#1E293B"/><path d="M25 45 C25 20 75 20 75 45 C75 35 65 25 50 25 C35 25 25 35 25 45 Z" fill="#0F172A"/><circle cx="50" cy="55" r="28" fill="#FDDFB7"/><path d="M22 42 C30 20 70 20 78 42 C70 38 60 35 50 38 C40 35 30 38 22 42 Z" fill="#020617"/><ellipse cx="38" cy="52" rx="4" ry="5" fill="#1E293B"/><ellipse cx="62" cy="52" rx="4" ry="5" fill="#1E293B"/><circle cx="39" cy="50" r="1.5" fill="#FFF"/><circle cx="63" cy="50" r="1.5" fill="#FFF"/><path d="M34 45 L44 48" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round"/><path d="M66 45 L56 48" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round"/><path d="M44 68 Q50 64 56 68" stroke="#0F172A" stroke-width="2" fill="none"/><path d="M30 82 L70 82 L65 100 L35 100 Z" fill="#EA580C"/></svg>`,
       oikawa: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="50" fill="#0D9488"/><circle cx="50" cy="55" r="28" fill="#FDDFB7"/><path d="M20 45 C25 15 75 15 80 45 C72 32 62 28 50 32 C38 28 28 32 20 45 Z" fill="#78350F"/><ellipse cx="38" cy="52" rx="4" ry="5" fill="#451A03"/><ellipse cx="62" cy="52" rx="4" ry="5" fill="#451A03"/><circle cx="39" cy="50" r="1.5" fill="#FFF"/><circle cx="63" cy="50" r="1.5" fill="#FFF"/><path d="M34 46 Q40 43 44 46" stroke="#78350F" stroke-width="2" fill="none"/><path d="M66 46 Q60 43 56 46" stroke="#78350F" stroke-width="2" fill="none"/><path d="M42 66 Q50 72 58 66" stroke="#451A03" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M30 82 L70 82 L65 100 L35 100 Z" fill="#14B8A6"/></svg>`,
@@ -249,7 +261,7 @@
         num: "1", school: "이나리자키", pos: "Wing Spiker (주장)", food: "두부", act: "기본기 훈련", motto: "매일 제대로 하는 게 결국 전부다."
       },
       goshiki: {
-        name: "고시키 ", imgFile: "goshiki.png",
+        name: "고시키", imgFile: "goshiki.png",
         num: "8", school: "시라토리자와", pos: "Wing Spiker (WS)", food: "밥", act: "직선 스파이크", motto: "에이스가 될 거니까 이 정도는 당연하지!"
       }
     };
@@ -548,30 +560,153 @@
       render();
     }
 
-    function loadUserData() {
+    function getDefaultUserData() {
+      return {
+        exp: 0,
+        coins: 200,
+        satisfaction: 3,
+        stamina: 3,
+        myVocabIds: [],
+        attendanceDates: [],
+        studyHistory: [],
+        spacedRepData: {},
+        customWords: []
+      };
+    }
+
+    function normalizeUserData(data) {
+      const base = getDefaultUserData();
+      const src = data || {};
+      return {
+        exp: Number(src.exp ?? base.exp),
+        coins: Number(src.coins ?? base.coins),
+        satisfaction: Number(src.satisfaction ?? base.satisfaction),
+        stamina: Number(src.stamina ?? base.stamina),
+        myVocabIds: Array.isArray(src.myVocabIds ?? src.my_vocab_ids) ? (src.myVocabIds ?? src.my_vocab_ids) : [],
+        attendanceDates: Array.isArray(src.attendanceDates ?? src.attendance_dates) ? (src.attendanceDates ?? src.attendance_dates) : [],
+        studyHistory: Array.isArray(src.studyHistory ?? src.study_history) ? (src.studyHistory ?? src.study_history) : [],
+        spacedRepData: (src.spacedRepData ?? src.spaced_rep_data) && typeof (src.spacedRepData ?? src.spaced_rep_data) === 'object'
+          ? (src.spacedRepData ?? src.spaced_rep_data) : {},
+        customWords: Array.isArray(src.customWords ?? src.custom_words) ? (src.customWords ?? src.custom_words) : []
+      };
+    }
+
+    function saveLocalBackup(userKey, data) {
       try {
-        const saved = localStorage.getItem(getUserKey());
-        if (saved) {
-          state.userData = Object.assign(state.userData, JSON.parse(saved));
+        localStorage.setItem(userKey, JSON.stringify(data));
+      } catch (e) {
+        console.warn('Local backup save failed:', e);
+      }
+    }
+
+    function loadLocalBackup(userKey) {
+      try {
+        const saved = localStorage.getItem(userKey);
+        return saved ? normalizeUserData(JSON.parse(saved)) : null;
+      } catch (e) {
+        console.warn('Local backup load failed:', e);
+        return null;
+      }
+    }
+
+    async function loadUserData() {
+      const requestedUser = state.user;
+      const requestedLang = state.lang;
+      const requestedChar = state.char;
+      const userKey = getUserKey();
+
+      const localBackup = loadLocalBackup(userKey);
+
+      // Supabase가 로드되지 않았거나 네트워크 연결이 실패하면 로컬 백업 사용
+      if (!supabaseClient) {
+        state.userData = localBackup || getDefaultUserData();
+        recordAttendance();
+        return;
+      }
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('haikyu_voca_data')
+          .select('*')
+          .eq('user_name', requestedUser)
+          .eq('lang', requestedLang)
+          .eq('character', requestedChar)
+          .maybeSingle();
+
+        // 기다리는 동안 사용자가 다른 계정/언어/캐릭터로 이동했다면 결과 무시
+        if (
+          state.user !== requestedUser ||
+          state.lang !== requestedLang ||
+          state.char !== requestedChar
+        ) {
+          return;
+        }
+
+        if (error) throw error;
+
+        if (data) {
+          state.userData = normalizeUserData(data);
+          saveLocalBackup(userKey, state.userData);
         } else {
-          state.userData = {
-            exp: 0, coins: 200, satisfaction: 3, stamina: 3,
-            myVocabIds: [], attendanceDates: [], studyHistory: [],
-            spacedRepData: {}, customWords: []
-          };
+          // Supabase에 아직 데이터가 없으면 기존 기기의 localStorage 데이터를
+          // 첫 클라우드 데이터로 자동 이전한다.
+          state.userData = localBackup || getDefaultUserData();
+          await saveUserDataToCloud(requestedUser, requestedLang, requestedChar, state.userData);
         }
       } catch (e) {
-        console.warn(e);
+        console.warn('Supabase load failed. Using local backup:', e);
+        state.userData = localBackup || getDefaultUserData();
       }
+
       recordAttendance();
     }
 
-    function saveUserData() {
-      try {
-        localStorage.setItem(getUserKey(), JSON.stringify(state.userData));
-      } catch (e) {
-        console.warn(e);
+    async function saveUserDataToCloud(userName, lang, character, data) {
+      if (!supabaseClient || !userName || !lang || !character) return false;
+
+      const payload = {
+        user_name: userName,
+        lang,
+        character,
+        exp: Number(data.exp || 0),
+        coins: Number(data.coins ?? 200),
+        satisfaction: Number(data.satisfaction ?? 3),
+        stamina: Number(data.stamina ?? 3),
+        my_vocab_ids: Array.isArray(data.myVocabIds) ? data.myVocabIds : [],
+        attendance_dates: Array.isArray(data.attendanceDates) ? data.attendanceDates : [],
+        study_history: Array.isArray(data.studyHistory) ? data.studyHistory : [],
+        spaced_rep_data: data.spacedRepData && typeof data.spacedRepData === 'object' ? data.spacedRepData : {},
+        custom_words: Array.isArray(data.customWords) ? data.customWords : [],
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabaseClient
+        .from('haikyu_voca_data')
+        .upsert(payload, {
+          onConflict: 'user_name,lang,character'
+        });
+
+      if (error) {
+        console.warn('Supabase save failed:', error);
+        return false;
       }
+      return true;
+    }
+
+    function saveUserData() {
+      // 저장 버튼을 누르거나 보상을 받을 때 UI를 기다리게 하지 않도록
+      // localStorage는 즉시 저장하고 Supabase는 비동기로 동기화한다.
+      const userName = state.user;
+      const lang = state.lang;
+      const character = state.char;
+      const userKey = getUserKey();
+      const snapshot = normalizeUserData(JSON.parse(JSON.stringify(state.userData)));
+
+      saveLocalBackup(userKey, snapshot);
+
+      saveUserDataToCloud(userName, lang, character, snapshot).catch(e => {
+        console.warn('Background Supabase sync failed:', e);
+      });
     }
 
     function recordAttendance() {
@@ -863,11 +998,11 @@
             <h2 style="font-weight: 900; color: #1E293B; margin: 0 0 8px 0;">전국 제패 단어 훈련소</h2>
             <p style="color: #64748B; font-size: 14px; font-weight: 700; margin-bottom: 25px;">훈련할 언어 종목을 선택해 주세요!</p>
             <div class="lang-choice-card" onclick="selectLang('en')">
-              <span>🇺🇸 영어</span>
+              <span>🇺🇸 영어 </span>
               <span>➔</span>
             </div>
             <div class="lang-choice-card" onclick="selectLang('ja')">
-              <span>🇯🇵 일본어</span>
+              <span>🇯🇵 일본어 </span>
               <span>➔</span>
             </div>
           </div>
@@ -933,7 +1068,7 @@
       app.innerHTML = `
         <div class="minihompy-window">
           <div class="window-top-bar">
-            <span style="display:flex; align-items:center; gap:6px;">飛べ 카라스노 고교 체육관 · ${getUserDisplayName()} [${state.lang === 'ja' ? '🇯🇵 일본어' : '🇺🇸 영어'}] : ${charInfo.name} ${renderMikasaBall(17)}</span>
+            <span style="display:flex; align-items:center; gap:6px;">飛べ 카라스노 고교 체육관 · ${getUserDisplayName()} [${state.lang === 'ja' ? '🇯🇵 일본어' : '🇺🇸 영어'}] : ${charInfo.name} ${renderMikasaBall(17)} <span title="Supabase + localStorage 백업" style="font-size:10px; opacity:.72;">☁ 저장</span></span>
             <div style="display: flex; gap: 6px;">
               <div style="width: 12px; height: 12px; background: #FFFFFF; border-radius: 3px;"></div>
               <div style="width: 12px; height: 12px; background: #FFFFFF; border-radius: 3px;"></div>
@@ -1287,9 +1422,9 @@
     function selectLang(l) { state.lang = l; render(); }
     function selectChar(c) { state.char = c; render(); }
 
-    function enterGym() {
+    async function enterGym() {
       state.entered = true;
-      loadUserData();
+      await loadUserData();
       const lName = state.lang === 'ja' ? '일본어' : '토익';
       if (state.char === 'kenma') state.speech = `${lName} 단어도 게임처럼 패턴을 찾으면 돼. 천천히 하나씩 하자.`;
       else if (state.char === 'kita') state.speech = `${lName}도 매일 제대로 반복하는 게 중요하다. 오늘 할 것부터 하자.`;
