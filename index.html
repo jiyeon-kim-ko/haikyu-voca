@@ -177,46 +177,28 @@
   <div id="app" class="bg-cover-wrapper"></div>
 
   <script>
-    // GitHub 원격 리소스 + 로컬 백업 경로 리스트
     const CHAR_META = {
       kageyama: {
         name: "카게야마 토비오",
-        imgs: ["kageyama.jpg", "./kageyama.jpg", "www/kageyama.jpg", "https://raw.githubusercontent.com/jiyeon-kim-ko/haikyu-voca-app/main/kageyama.jpg"],
-        fallback: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&auto=format&fit=crop&q=80",
+        img: "kageyama.jpg",
         num: "9", school: "카라스노 고교", pos: "Setter (세터)", food: "군군 우유", act: "토스 훈련", motto: "볼은 반드시 내가 올린다."
       },
       oikawa: {
         name: "오이카와 토오루",
-        imgs: ["oikawa.jpg", "./oikawa.jpg", "www/oikawa.jpg", "https://raw.githubusercontent.com/jiyeon-kim-ko/haikyu-voca-app/main/oikawa.jpg"],
-        fallback: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        img: "oikawa.jpg",
         num: "1", school: "아오바죠사이", pos: "Setter (주장)", food: "우유빵", act: "살인 서브", motto: "재능은 꽃피우는 것, 센스는 갈고닦는 것!"
       },
       miya: {
         name: "미야 아츠무",
-        imgs: ["miya.jpg", "./miya.jpg", "www/miya.jpg", "https://raw.githubusercontent.com/jiyeon-kim-ko/haikyu-voca-app/main/miya.jpg"],
-        fallback: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+        img: "miya.jpg",
         num: "7", school: "이나리자키", pos: "Setter (세터)", food: "참치 뱃살", act: "2도류 서브", motto: "내 토스 칠 자격 있나? 증명해봐라."
       },
       osamu: {
         name: "미야 오사무",
-        imgs: ["osamu.jpg", "./osamu.jpg", "www/osamu.jpg", "https://raw.githubusercontent.com/jiyeon-kim-ko/haikyu-voca-app/main/osamu.jpg"],
-        fallback: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+        img: "osamu.jpg",
         num: "11", school: "이나리자키", pos: "Wing Spiker (WS)", food: "오니기리", act: "스파이크", motto: "밥심으로 단어 끝까지 씹어묵자."
       }
     };
-
-    function handleImageError(imgEl, charKey, currentIdx) {
-      const meta = CHAR_META[charKey];
-      if (!meta) return;
-      const nextIdx = currentIdx + 1;
-      if (nextIdx < meta.imgs.length) {
-        imgEl.setAttribute('data-idx', nextIdx);
-        imgEl.src = meta.imgs[nextIdx];
-      } else {
-        imgEl.src = meta.fallback;
-        imgEl.onerror = null;
-      }
-    }
 
     const EXP_THRESHOLDS = [0, 100, 250, 450, 700, 1000, 1400, 1850, 2350, 3000];
     const STAGE_TITLES = ["주니어 유소년", "고교 주전 선수", "인터하이 예선", "합숙 원정훈련", "도 대표 결정전", "봄철 전국대회", "유스 강화합숙", "전국대회 8강", "V리그 프로리그", "올림픽 국가대표"];
@@ -377,7 +359,7 @@
           isBgmPlaying = true;
           render();
         }).catch(err => {
-          alert('BGM 음원 파일(bgm.mp3) 재생을 확인해주세요.');
+          alert('BGM 파일(bgm.mp3)이 저장소 루트에 있는지 확인해주세요.');
         });
       }
       render();
@@ -463,7 +445,6 @@
     function render() {
       const app = document.getElementById('app');
 
-      // 1. 언어 선택 화면
       if (!state.lang) {
         app.innerHTML = `
           <div class="login-card-gym">
@@ -483,7 +464,6 @@
         return;
       }
 
-      // 2. 캐릭터 선택 화면
       if (!state.entered) {
         const langLabel = state.lang === 'ja' ? '🇯🇵 일본어 모드' : '🇺🇸 영어 모드';
         app.innerHTML = `
@@ -501,7 +481,7 @@
                 return `
                   <div class="char-radio-card ${state.char === k ? 'active' : ''}" onclick="selectChar('${k}')">
                     <div class="mini-avatar-circle">
-                      <img src="${meta.imgs[0]}" data-idx="0" alt="${meta.name}" onerror="handleImageError(this, '${k}', 0);" />
+                      <img src="${meta.img}" alt="${meta.name}" />
                     </div>
                     <div style="font-size: 12px; font-weight: 900; margin-top: 2px;">${meta.name.split(' ')[0]}</div>
                   </div>
@@ -514,7 +494,6 @@
         return;
       }
 
-      // 3. 메인 체육관 화면
       const charInfo = getCharInfo();
       const histList = state.userData.studyHistory;
       let totQ = 0, totC = 0;
@@ -566,7 +545,7 @@
               <div class="mini-room-box">
                 <div style="font-size: 11px; font-weight: 800; color: #64748B; margin-bottom: 4px;">GYMNASIUM 🏐</div>
                 <div class="large-mii-frame">
-                  <img src="${charInfo.imgs[0]}" data-idx="0" alt="${charInfo.name}" onerror="handleImageError(this, '${state.char}', 0);" />
+                  <img src="${charInfo.img}" alt="${charInfo.name}" />
                 </div>
                 <div class="left-emotion-badge">${state.mood === 'happy' ? '🔥' : (state.mood === 'angry' ? '💢' : '✨')}</div>
               </div>
