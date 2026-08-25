@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>카라스노 고교 배구부 단어 훈련소</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800;900&display=swap" />
   <style>
@@ -11,6 +11,7 @@
       margin: 0; padding: 0;
       font-family: 'Pretendard', sans-serif;
       background-color: #1E293B;
+      color: #1E293B;
     }
     .bg-cover-wrapper {
       min-height: 100vh; width: 100%;
@@ -20,6 +21,8 @@
       display: flex; align-items: center; justify-content: center;
       padding: 20px 10px;
     }
+
+    /* 초기 로그인 카드 */
     .login-card-gym {
       max-width: 480px; width: 100%; background: #FFFFFF;
       padding: 35px 30px; border-radius: 20px; border: 3.5px solid #1E293B;
@@ -50,6 +53,8 @@
     .mini-avatar-circle svg, .mini-avatar-circle img {
       width: 100%; height: 100%; object-fit: cover;
     }
+
+    /* 메인 윈도우 구조 */
     .minihompy-window {
       width: 1180px; max-width: 98vw;
       background: #FFFFFF; border-radius: 20px;
@@ -120,6 +125,7 @@
       overflow: hidden; margin-top: 4px; border: 1px solid #CBD5E1;
     }
     .stamina-progress-fill { height: 100%; background: #EA580C; transition: width 0.3s ease; }
+    
     .hompy-nav-tabs {
       width: 78px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px;
     }
@@ -172,13 +178,46 @@
     .custom-input-row input, .std-input {
       border: 2px solid #CBD5E1; border-radius: 8px; padding: 8px 10px; font-size: 13.5px; height: 38px; width: 100%;
     }
+
+    /* ------------------------------------------------------------- */
+    /* 모바일 반응형 최적화 미디어 쿼리 (768px 이하) */
+    /* ------------------------------------------------------------- */
+    @media (max-width: 768px) {
+      .bg-cover-wrapper { padding: 8px 4px; }
+      .minihompy-window { width: 100%; border-radius: 12px; border-width: 2.5px; }
+      .window-top-bar { padding: 8px 12px; font-size: 12px; }
+      .window-url-bar { display: none; }
+      .minihompy-body {
+        flex-direction: column; padding: 10px; gap: 10px; min-height: auto;
+      }
+      .hompy-left-side {
+        width: 100%; padding: 10px;
+      }
+      .mini-room-box { display: flex; align-items: center; gap: 12px; text-align: left; padding: 8px; }
+      .large-mii-frame { width: 70px; height: 70px; margin: 0; flex-shrink: 0; }
+      .left-emotion-badge { top: 2px; right: 2px; width: 24px; height: 24px; font-size: 13px; }
+      
+      .hompy-nav-tabs {
+        width: 100%; flex-direction: row; overflow-x: auto; gap: 4px; padding-bottom: 2px;
+      }
+      .btn-tab-menu {
+        flex: 1 0 auto; min-width: 60px; padding: 8px 6px; font-size: 11.5px;
+      }
+      .hompy-main-content {
+        padding: 14px 12px;
+      }
+      .main-speech-bubble { font-size: 12.5px; padding: 8px 12px; margin-bottom: 12px; }
+      .flashcard-box { min-height: 190px; padding: 15px; }
+      .custom-input-row { flex-direction: column; align-items: stretch; gap: 6px; }
+      .custom-input-row input { width: 100% !important; }
+      .char-select-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    }
   </style>
 </head>
 <body>
   <div id="app" class="bg-cover-wrapper"></div>
 
   <script>
-    // 독립형 애니메이션 벡터 아바타 (로컬/외부 파일 누락 시에도 100% 렌더링)
     const CHAR_AVATARS = {
       kageyama: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="50" fill="#1E293B"/><path d="M25 45 C25 20 75 20 75 45 C75 35 65 25 50 25 C35 25 25 35 25 45 Z" fill="#0F172A"/><circle cx="50" cy="55" r="28" fill="#FDDFB7"/><path d="M22 42 C30 20 70 20 78 42 C70 38 60 35 50 38 C40 35 30 38 22 42 Z" fill="#020617"/><ellipse cx="38" cy="52" rx="4" ry="5" fill="#1E293B"/><ellipse cx="62" cy="52" rx="4" ry="5" fill="#1E293B"/><circle cx="39" cy="50" r="1.5" fill="#FFF"/><circle cx="63" cy="50" r="1.5" fill="#FFF"/><path d="M34 45 L44 48" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round"/><path d="M66 45 L56 48" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round"/><path d="M44 68 Q50 64 56 68" stroke="#0F172A" stroke-width="2" fill="none"/><path d="M30 82 L70 82 L65 100 L35 100 Z" fill="#EA580C"/></svg>`,
       oikawa: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="50" fill="#0D9488"/><circle cx="50" cy="55" r="28" fill="#FDDFB7"/><path d="M20 45 C25 15 75 15 80 45 C72 32 62 28 50 32 C38 28 28 32 20 45 Z" fill="#78350F"/><ellipse cx="38" cy="52" rx="4" ry="5" fill="#451A03"/><ellipse cx="62" cy="52" rx="4" ry="5" fill="#451A03"/><circle cx="39" cy="50" r="1.5" fill="#FFF"/><circle cx="63" cy="50" r="1.5" fill="#FFF"/><path d="M34 46 Q40 43 44 46" stroke="#78350F" stroke-width="2" fill="none"/><path d="M66 46 Q60 43 56 46" stroke="#78350F" stroke-width="2" fill="none"/><path d="M42 66 Q50 72 58 66" stroke="#451A03" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M30 82 L70 82 L65 100 L35 100 Z" fill="#14B8A6"/></svg>`,
@@ -557,9 +596,12 @@
                 <span style="color: #1E293B;">TOTAL ${totQ}</span>
               </div>
               <div class="mini-room-box">
-                <div style="font-size: 11px; font-weight: 800; color: #64748B; margin-bottom: 4px;">GYMNASIUM 🏐</div>
                 <div class="large-mii-frame">
                   ${renderCharacterAvatar(state.char)}
+                </div>
+                <div style="flex-grow: 1;">
+                  <div style="font-size: 11px; font-weight: 800; color: #64748B;">GYMNASIUM 🏐</div>
+                  <div style="font-weight: 900; font-size: 14px; margin-top: 2px;">${charInfo.name}</div>
                 </div>
                 <div class="left-emotion-badge">${state.mood === 'happy' ? '🔥' : (state.mood === 'angry' ? '💢' : '✨')}</div>
               </div>
@@ -580,12 +622,12 @@
                 <div class="stamina-progress-bg"><div class="stamina-progress-fill" style="width: ${expPct}%; background: #3B82F6;"></div></div>
               </div>
               <div style="display: flex; gap: 4px; margin-top: 4px;">
-                <button class="btn-pixel-white" style="flex: 1; padding: 4px; font-size: 10.5px;" onclick="feedPartner()">🍙 ${charInfo.food}</button>
-                <button class="btn-pixel-white" style="flex: 1; padding: 4px; font-size: 10.5px;" onclick="actionPartner()">🏐 ${charInfo.act}</button>
+                <button class="btn-pixel-white" style="flex: 1; padding: 6px; font-size: 11px;" onclick="feedPartner()">🍙 ${charInfo.food}</button>
+                <button class="btn-pixel-white" style="flex: 1; padding: 6px; font-size: 11px;" onclick="actionPartner()">🏐 ${charInfo.act}</button>
               </div>
               <div style="margin-top: 2px; display: flex; gap: 4px;">
-                <button class="btn-pixel-white" style="flex: 1; padding: 4px; font-size: 11px;" onclick="state.entered=false; render();">🔄 선수 교체</button>
-                <button class="btn-pixel-white" style="flex: 1; padding: 4px; font-size: 11px;" onclick="state.lang=null; state.entered=false; render();">🌐 언어 변경</button>
+                <button class="btn-pixel-white" style="flex: 1; padding: 6px; font-size: 11px;" onclick="state.entered=false; render();">🔄 선수 교체</button>
+                <button class="btn-pixel-white" style="flex: 1; padding: 6px; font-size: 11px;" onclick="state.lang=null; state.entered=false; render();">🌐 언어 변경</button>
               </div>
             </div>
 
