@@ -198,19 +198,6 @@
       padding:4px 7px !important;
       font-size:10px !important;
     }
-    .bgm-volume {
-      width:72px;
-      min-width:0;
-      accent-color:#EA580C;
-      cursor:pointer;
-    }
-    .bgm-volume-label {
-      width:30px;
-      text-align:right;
-      font-size:9.5px;
-      font-weight:800;
-      color:#64748B;
-    }
     .stat-counter-bar {
       display: flex; justify-content: space-around; font-size: 11.5px; font-weight: 800;
       padding-bottom: 6px; border-bottom: 1.5px dashed #CBD5E1;
@@ -363,6 +350,26 @@
       background: #1E293B; color: #FFFFFF;
     }
 
+    .study-timer-wrap{display:flex;flex-direction:column;gap:12px;height:100%}
+    .study-timer-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .study-timer-setting-card{border:1.5px solid #CBD5E1;border-radius:11px;background:#F8FAFC;padding:10px}
+    .study-timer-setting-card label{display:block;font-size:11px;font-weight:900;color:#475569;margin-bottom:5px}
+    .study-timer-setting-card input{width:100%;border:2px solid #CBD5E1;border-radius:8px;height:38px;padding:6px 9px;font-size:14px;font-weight:900;color:#1E293B;background:#FFF}
+    .study-timer-card{border:3px solid #1E293B;border-radius:18px;background:#F8FAFC;box-shadow:4px 4px 0 #1E293B;padding:22px 18px;text-align:center}
+    .study-timer-phase{display:inline-flex;align-items:center;gap:5px;border:2px solid #1E293B;border-radius:999px;padding:5px 11px;background:#FFF;font-size:11px;font-weight:900;margin-bottom:10px}
+    .study-timer-clock{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:52px;line-height:1;font-weight:900;letter-spacing:1px;color:#1E293B;margin:8px 0 12px}
+    .study-timer-progress{width:100%;height:12px;background:#E2E8F0;border:1px solid #CBD5E1;border-radius:999px;overflow:hidden;margin:8px 0 12px}
+    .study-timer-progress>div{height:100%;background:#EA580C;transition:width .25s linear}
+    .study-timer-buttons{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:10px}
+    .study-timer-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .study-timer-stat{border:1.5px solid #E2E8F0;border-radius:10px;padding:9px 6px;text-align:center;background:#FFF}
+    .study-timer-stat .value{font-size:17px;font-weight:900;color:#1E293B}
+    .study-timer-stat .label{margin-top:2px;font-size:9.5px;font-weight:800;color:#64748B}
+    .study-timer-reward-box{border:1.5px solid #FCD34D;border-radius:12px;background:#FFFBEB;padding:10px 12px;font-size:11px;color:#78350F;line-height:1.55}
+    .study-timer-history{max-height:210px;overflow:auto;border:1.5px solid #E2E8F0;border-radius:11px;background:#FFF}
+    .study-timer-history-row{display:grid;grid-template-columns:1.2fr .8fr 1.4fr;gap:6px;align-items:center;padding:8px 10px;border-bottom:1px solid #E2E8F0;font-size:10.5px}
+    .study-timer-history-row:last-child{border-bottom:0}
+
     @media (max-width: 768px) {
       .bg-cover-wrapper { padding: 8px 4px; }
       .minihompy-window { width: 100%; border-radius: 12px; border-width: 2.5px; }
@@ -383,6 +390,7 @@
       .custom-input-row input { width: 100% !important; }
       .char-select-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
       .variant-select-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .study-timer-clock { font-size:42px; }
     }
   </style>
 </head>
@@ -516,6 +524,8 @@
     function selectVariant(id){
       if(!getCharacterVariants().some(v=>v.id===id)) return;
       state.charVariant=id;
+      state.shopPreviewItemId=null;
+      state.shopPreviewTransforms={};
       render();
     }
 
@@ -628,44 +638,90 @@
     function getCharacterShopData(charKey=state.char){
       const shop=state.userData.shop;
       shop.characterData=shop.characterData||{};
+
       if(!shop.characterData[charKey]){
-        shop.characterData[charKey]={ownedItems:[],equipped:{background:null,slogan:null,frame:null,head:null,face:null,side:null,effect:null},transforms:{},characterTransform:{x:0,y:34,scale:78}};
+        shop.characterData[charKey]={
+          ownedItems:[],
+          variantData:{}
+        };
       }
 
       const d=shop.characterData[charKey];
       d.ownedItems=Array.isArray(d.ownedItems)?Array.from(new Set(d.ownedItems)):[];
-      d.equipped={background:null,slogan:null,frame:null,head:null,face:null,side:null,effect:null,...(d.equipped||{})};
-      d.transforms=d.transforms&&typeof d.transforms==='object'?d.transforms:{};
-      d.characterTransform={
-        x:Number(d.characterTransform?.x ?? 0),
-        y:Number(d.characterTransform?.y ?? 34),
-        scale:Number(d.characterTransform?.scale ?? 78)
-      };
+      d.variantData=d.variantData&&typeof d.variantData==='object'?d.variantData:{};
 
-      // 구버전(global shop 데이터) → 현재 캐릭터 인벤토리로 1회 자동 이전
-      // 새 캐릭터별 인벤토리를 도입하기 전에 구매/장착했던 아이템이 사라져 보이는 문제 방지
+      // 기존 캐릭터 단위 장착/위치 데이터를 현재 버전으로 1회 이전
+      if(!d._variantMigrationDone){
+        const legacyEquipped=d.equipped&&typeof d.equipped==='object'?d.equipped:null;
+        const legacyTransforms=d.transforms&&typeof d.transforms==='object'?d.transforms:null;
+        const legacyCharacterTransform=d.characterTransform&&typeof d.characterTransform==='object'?d.characterTransform:null;
+        const variantId=(charKey===state.char ? (state.charVariant||'default') : 'default');
+
+        if(!d.variantData[variantId]){
+          d.variantData[variantId]={
+            equipped:{background:null,slogan:null,frame:null,head:null,face:null,side:null,effect:null},
+            transforms:{},
+            characterTransform:{x:0,y:34,scale:78}
+          };
+        }
+
+        const vd=d.variantData[variantId];
+        if(legacyEquipped && Object.values(legacyEquipped).some(Boolean)){
+          vd.equipped={background:null,slogan:null,frame:null,head:null,face:null,side:null,effect:null,...legacyEquipped};
+        }
+        if(legacyTransforms && Object.keys(legacyTransforms).length){
+          vd.transforms={...legacyTransforms};
+        }
+        if(legacyCharacterTransform){
+          vd.characterTransform={
+            x:Number(legacyCharacterTransform.x ?? 0),
+            y:Number(legacyCharacterTransform.y ?? 34),
+            scale:Number(legacyCharacterTransform.scale ?? 78)
+          };
+        }
+
+        delete d.equipped;
+        delete d.transforms;
+        delete d.characterTransform;
+        d._variantMigrationDone=true;
+      }
+
+      // 더 오래된 global shop 구매 데이터를 캐릭터 공용 인벤토리로 이전
       if(!d._legacyMigrated){
         const legacyOwned=Array.isArray(shop.ownedItems)?shop.ownedItems:[];
         if(legacyOwned.length && d.ownedItems.length===0){
           d.ownedItems=Array.from(new Set(legacyOwned));
         }
-
-        const legacyEq=shop.equipped&&typeof shop.equipped==='object'?shop.equipped:{};
-        const hasCurrentEquip=Object.values(d.equipped).some(Boolean);
-        if(!hasCurrentEquip && Object.values(legacyEq).some(Boolean)){
-          d.equipped={...d.equipped,...legacyEq};
-        }
-
-        const legacyTransforms=shop.transforms&&typeof shop.transforms==='object'?shop.transforms:{};
-        if(Object.keys(d.transforms).length===0 && Object.keys(legacyTransforms).length){
-          d.transforms={...legacyTransforms};
-        }
-
         d._legacyMigrated=true;
       }
 
       return d;
     }
+
+    function getCharacterVariantData(charKey=state.char, variantId=null){
+      const charShop=getCharacterShopData(charKey);
+      const resolvedVariant=variantId || (charKey===state.char ? (state.charVariant||'default') : 'default');
+
+      charShop.variantData=charShop.variantData||{};
+      if(!charShop.variantData[resolvedVariant]){
+        charShop.variantData[resolvedVariant]={
+          equipped:{background:null,slogan:null,frame:null,head:null,face:null,side:null,effect:null},
+          transforms:{},
+          characterTransform:{x:0,y:34,scale:78}
+        };
+      }
+
+      const vd=charShop.variantData[resolvedVariant];
+      vd.equipped={background:null,slogan:null,frame:null,head:null,face:null,side:null,effect:null,...(vd.equipped||{})};
+      vd.transforms=vd.transforms&&typeof vd.transforms==='object'?vd.transforms:{};
+      vd.characterTransform={
+        x:Number(vd.characterTransform?.x ?? 0),
+        y:Number(vd.characterTransform?.y ?? 34),
+        scale:Number(vd.characterTransform?.scale ?? 78)
+      };
+      return vd;
+    }
+
     function getShopDefaultData(){return {tickets:0,ownedItems:[],equipped:{background:null,slogan:null,frame:null,head:null,face:null,side:null,effect:null},ticketClaims:{},transforms:{},characterData:{}}}
     function normalizeShopData(v){const b=getShopDefaultData(),s=v&&typeof v==='object'?v:{};return {tickets:Number(s.tickets||0),ownedItems:Array.isArray(s.ownedItems)?Array.from(new Set(s.ownedItems)):[],equipped:{...b.equipped,...(s.equipped&&typeof s.equipped==='object'?s.equipped:{})},ticketClaims:s.ticketClaims&&typeof s.ticketClaims==='object'?s.ticketClaims:{},transforms:s.transforms&&typeof s.transforms==='object'?s.transforms:{},characterData:s.characterData&&typeof s.characterData==='object'?s.characterData:{}}}
     function getTicketTier(correct,total){if(!total)return 0;const p=correct/total*100;if(p>=99.999)return 3;if(p>=80)return 2;if(p>=60)return 1;return 0}
@@ -699,8 +755,8 @@
         onerror="this.style.display='none';">`;
     }
 
-    function getCharacterTransform(charKey=state.char){
-      return getCharacterShopData(charKey).characterTransform;
+    function getCharacterTransform(charKey=state.char, variantId=null){
+      return getCharacterVariantData(charKey, variantId).characterTransform;
     }
 
     function updateCharacterTransform(key,value){
@@ -725,20 +781,20 @@
     }
 
     function resetCharacterTransform(){
-      getCharacterShopData().characterTransform={x:0,y:34,scale:78};
+      getCharacterVariantData().characterTransform={x:0,y:34,scale:78};
       render();
     }
 
     function saveCharacterTransform(){
       saveUserData();
-      alert('캐릭터 위치를 저장했습니다.');
+      alert(`${getSelectedVariant().name}의 캐릭터 위치와 크기를 저장했습니다.`);
     }
 
     function renderCharacterAdjustControls(){
       const t=getCharacterTransform();
       return `<div class="character-adjust-box">
-        <div class="character-adjust-title">🧍 캐릭터 자체 위치 조정</div>
-        <div class="character-adjust-help">캐릭터를 작게 하거나 아래로 내려서 왕관·귀·슬로건을 놓을 공간을 만들 수 있어요.</div>
+        <div class="character-adjust-title">🧍 캐릭터 자체 위치·크기 조정 · ${getSelectedVariant().name}</div>
+        <div class="character-adjust-help">이 설정은 현재 이미지 버전에만 저장됩니다. 다른 버전의 캐릭터 크기/위치는 영향을 받지 않아요.</div>
         <div class="preview-controls">
           <div class="preview-control"><label><span>↔ 캐릭터 좌우</span><span id="char-x-value">${t.x}px</span></label><input type="range" min="-90" max="90" step="1" value="${t.x}" oninput="updateCharacterTransform('x',this.value)"></div>
           <div class="preview-control"><label><span>↕ 캐릭터 위아래</span><span id="char-y-value">${t.y}px</span></label><input type="range" min="-20" max="100" step="1" value="${t.y}" oninput="updateCharacterTransform('y',this.value)"></div>
@@ -755,7 +811,8 @@
       const meta = getActiveCharacterMeta(charKey);
       const shop = state.userData?.shop || getShopDefaultData();
       const charShop = getCharacterShopData(charKey);
-      const eq = charShop.equipped || {};
+      const variantShop = getCharacterVariantData(charKey);
+      const eq = variantShop.equipped || {};
       const bg = getShopItem(eq.background);
       const slogan = getShopItem(eq.slogan);
       const frame = getShopItem(eq.frame);
@@ -1086,7 +1143,7 @@
     ];
 
     let selectedBgmId = localStorage.getItem('haikyu_bgm_track') || BGM_TRACKS[0].id;
-    let bgmVolume = Math.min(1, Math.max(0, Number(localStorage.getItem('haikyu_bgm_volume') ?? 0.35)));
+    const BGM_FIXED_VOLUME = 0.35;
     let isBgmPlaying = false;
 
     function getSelectedBgmTrack() {
@@ -1095,7 +1152,7 @@
 
     let bgmAudio = new Audio(getSelectedBgmTrack().file);
     bgmAudio.loop = true;
-    bgmAudio.volume = bgmVolume;
+    bgmAudio.volume = BGM_FIXED_VOLUME;
 
     let availableVoices = [];
     let pronunciationAudio = new Audio();
@@ -1131,6 +1188,49 @@
       loadVoices();
     }
 
+
+    // --------------------------------------------------------------
+    // 공부 타이머 / 뽀모도로
+    // --------------------------------------------------------------
+    const TIMER_REWARD_TIERS = [
+      { minMinutes:100, exp:35, coins:30, tickets:2 },
+      { minMinutes:50, exp:15, coins:12, tickets:1 },
+      { minMinutes:25, exp:6, coins:5, tickets:0 },
+      { minMinutes:10, exp:2, coins:2, tickets:0 }
+    ];
+    let studyTimerInterval = null;
+
+    function getDefaultTimerData(){return {totalStudySeconds:0,completedPomodoros:0,history:[]}}
+    function normalizeTimerData(v){const s=v&&typeof v==='object'?v:{};return {totalStudySeconds:Math.max(0,Number(s.totalStudySeconds||0)),completedPomodoros:Math.max(0,Number(s.completedPomodoros||0)),history:Array.isArray(s.history)?s.history:[]}}
+    function getDefaultTimerRuntime(){return {studyMinutes:25,restMinutes:5,phase:'focus',remainingSec:1500,running:false,sessionFocusSec:0,completedFocusBlocks:0,lastTickAt:null}}
+    function getTimerStorageKey(){return `haikyu_study_timer_${state.user||'guest'}_${state.lang||'en'}_${state.char||'kageyama'}`}
+    function stopStudyTimerInterval(){if(studyTimerInterval){clearInterval(studyTimerInterval);studyTimerInterval=null}}
+    function formatStudyTime(seconds){const s=Math.max(0,Math.floor(Number(seconds||0))),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;if(h>0)return `${h}시간 ${m}분`;if(m>0)return `${m}분 ${sec}초`;return `${sec}초`}
+    function formatTimerClock(seconds){const s=Math.max(0,Math.ceil(Number(seconds||0))),m=Math.floor(s/60),sec=s%60;return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`}
+    function getTimerPhaseLengthSec(){const t=state.studyTimer||getDefaultTimerRuntime();return (t.phase==='focus'?t.studyMinutes:t.restMinutes)*60}
+    function getStudyTimerReward(seconds){const minutes=Math.floor(Math.max(0,Number(seconds||0))/60),tier=TIMER_REWARD_TIERS.find(t=>minutes>=t.minMinutes);return tier?{...tier,minutes}:{minMinutes:0,exp:0,coins:0,tickets:0,minutes}}
+
+    function loadTimerRuntime(){
+      const base=getDefaultTimerRuntime();
+      try{
+        const saved=JSON.parse(localStorage.getItem(getTimerStorageKey())||'null');
+        if(saved&&typeof saved==='object'){
+          state.studyTimer={...base,studyMinutes:Math.min(180,Math.max(1,Number(saved.studyMinutes||25))),restMinutes:Math.min(60,Math.max(1,Number(saved.restMinutes||5))),phase:saved.phase==='rest'?'rest':'focus',remainingSec:Math.max(0,Number(saved.remainingSec??1500)),sessionFocusSec:Math.max(0,Number(saved.sessionFocusSec||0)),completedFocusBlocks:Math.max(0,Number(saved.completedFocusBlocks||0)),running:false,lastTickAt:null};
+        }else state.studyTimer=base;
+      }catch(e){state.studyTimer=base}
+      stopStudyTimerInterval();
+    }
+    function saveTimerRuntime(){if(!state.studyTimer)return;try{localStorage.setItem(getTimerStorageKey(),JSON.stringify({...state.studyTimer,running:false,lastTickAt:null}))}catch(e){console.warn('Timer save failed',e)}}
+    function setStudyTimerSetting(key,value){const t=state.studyTimer;if(!t||t.running)return;const n=Math.max(1,Math.floor(Number(value||1)));if(key==='studyMinutes')t.studyMinutes=Math.min(180,n);if(key==='restMinutes')t.restMinutes=Math.min(60,n);if(t.sessionFocusSec===0&&t.completedFocusBlocks===0){t.phase='focus';t.remainingSec=t.studyMinutes*60}else if(t.phase==='focus')t.remainingSec=Math.min(t.remainingSec,t.studyMinutes*60);else t.remainingSec=Math.min(t.remainingSec,t.restMinutes*60);saveTimerRuntime();render()}
+    function startStudyTimer(){const t=state.studyTimer;if(!t||t.running)return;t.running=true;t.lastTickAt=Date.now();if(t.remainingSec<=0)t.remainingSec=getTimerPhaseLengthSec();stopStudyTimerInterval();studyTimerInterval=setInterval(tickStudyTimer,250);updateStudyTimerDom()}
+    function pauseStudyTimer(){const t=state.studyTimer;if(!t)return;if(t.running)tickStudyTimer();t.running=false;t.lastTickAt=null;stopStudyTimerInterval();saveTimerRuntime();updateStudyTimerDom()}
+    function resetStudyTimer(){if(!confirm('현재 공부 타이머 세션을 초기화할까요? 아직 보상받지 않은 공부 시간도 초기화됩니다.'))return;const sm=state.studyTimer?.studyMinutes||25,rm=state.studyTimer?.restMinutes||5;state.studyTimer={...getDefaultTimerRuntime(),studyMinutes:sm,restMinutes:rm,remainingSec:sm*60};stopStudyTimerInterval();saveTimerRuntime();render()}
+    function finishStudyTimerPhase(){const t=state.studyTimer;if(t.phase==='focus'){t.completedFocusBlocks+=1;state.userData.timerData.completedPomodoros+=1;t.phase='rest';t.remainingSec=t.restMinutes*60;state.speech=`집중 구간 완료! ${t.studyMinutes}분 훈련 끝. 잠깐 쉬었다가 다시 가자.`;saveUserData()}else{t.phase='focus';t.remainingSec=t.studyMinutes*60;state.speech=`휴식 끝. 다시 ${t.studyMinutes}분 집중 훈련 시작!`}t.lastTickAt=Date.now();saveTimerRuntime();render()}
+    function tickStudyTimer(){const t=state.studyTimer;if(!t||!t.running)return;const now=Date.now(),elapsed=Math.max(0,Math.min(5,(now-(t.lastTickAt||now))/1000));t.lastTickAt=now;if(t.phase==='focus')t.sessionFocusSec+=elapsed;t.remainingSec-=elapsed;if(t.remainingSec<=0){t.remainingSec=0;finishStudyTimerPhase();return}updateStudyTimerDom()}
+    function updateStudyTimerDom(){const t=state.studyTimer;if(!t)return;const c=document.getElementById('study-timer-clock');if(c)c.textContent=formatTimerClock(t.remainingSec);const p=document.getElementById('study-timer-phase');if(p)p.innerHTML=t.phase==='focus'?'📚 집중 공부':'☕ 휴식';const len=Math.max(1,getTimerPhaseLengthSec()),pct=Math.min(100,Math.max(0,((len-t.remainingSec)/len)*100)),bar=document.getElementById('study-timer-progress-fill');if(bar)bar.style.width=`${pct}%`;const ses=document.getElementById('study-timer-session');if(ses)ses.textContent=formatStudyTime(t.sessionFocusSec);const btn=document.getElementById('study-timer-start-btn');if(btn){btn.textContent=t.running?'⏸ 일시정지':'▶ 시작';btn.onclick=t.running?pauseStudyTimer:startStudyTimer}}
+    function finishStudySession(){const t=state.studyTimer;if(!t)return;if(t.running)pauseStudyTimer();const seconds=Math.floor(t.sessionFocusSec);if(seconds<60)return alert('기록할 공부 시간이 아직 1분 미만입니다.');const reward=getStudyTimerReward(seconds),oldLevel=getCharInfo().level;state.userData.timerData.totalStudySeconds+=seconds;state.userData.exp+=reward.exp;state.userData.coins+=reward.coins;state.userData.shop.tickets+=reward.tickets;state.userData.timerData.history.push({date:new Date().toISOString(),seconds,pomodoros:t.completedFocusBlocks,exp:reward.exp,coins:reward.coins,tickets:reward.tickets});if(state.userData.timerData.history.length>100)state.userData.timerData.history=state.userData.timerData.history.slice(-100);const newLevel=getCharInfo().level,msg=[`📚 공부 세션 기록 완료!`,`집중 공부: ${formatStudyTime(seconds)}`,`보상: +${reward.exp} EXP / +${reward.coins} 코인${reward.tickets?` / +${reward.tickets} 응원 티켓`:''}`];if(newLevel>oldLevel)msg.push(`🎉 Lv.${newLevel} ${STAGE_TITLES[newLevel-1]} 승격!`);const sm=t.studyMinutes,rm=t.restMinutes;state.studyTimer={...getDefaultTimerRuntime(),studyMinutes:sm,restMinutes:rm,remainingSec:sm*60};saveTimerRuntime();saveUserData();alert(msg.join('\n'));render()}
+    function getTodayTimerSeconds(){const today=new Date().toISOString().split('T')[0];return (state.userData.timerData?.history||[]).filter(h=>String(h.date||'').slice(0,10)===today).reduce((s,h)=>s+Number(h.seconds||0),0)}
+
     let state = {
       user: null, // 'jiyeon' | 'gyungmin'
       lang: null,
@@ -1149,6 +1249,7 @@
       shopPreviewItemId: null,
       shopPreviewTransforms: {},
       lastTicketGain: 0,
+      studyTimer: getDefaultTimerRuntime(),
       fcIdx: 0,
       fcShowMeaning: false,
       quizIdx: 0,
@@ -1169,7 +1270,7 @@
       userData: {
         exp: 0, coins: 200, satisfaction: 3, stamina: 3,
         myVocabIds: [], attendanceDates: [], studyHistory: [],
-        spacedRepData: {}, customWords: [], shop: getShopDefaultData()
+        spacedRepData: {}, customWords: [], shop: getShopDefaultData(), timerData: getDefaultTimerData()
       }
     };
 
@@ -1213,7 +1314,8 @@
         studyHistory: [],
         spacedRepData: {},
         customWords: [],
-        shop: getShopDefaultData()
+        shop: getShopDefaultData(),
+        timerData: getDefaultTimerData()
       };
     }
 
@@ -1228,9 +1330,10 @@
         myVocabIds: Array.isArray(src.myVocabIds ?? src.my_vocab_ids) ? (src.myVocabIds ?? src.my_vocab_ids) : [],
         attendanceDates: Array.isArray(src.attendanceDates ?? src.attendance_dates) ? (src.attendanceDates ?? src.attendance_dates) : [],
         studyHistory: Array.isArray(src.studyHistory ?? src.study_history) ? (src.studyHistory ?? src.study_history) : [],
-        spacedRepData: (() => { const raw=(src.spacedRepData ?? src.spaced_rep_data)&&typeof (src.spacedRepData ?? src.spaced_rep_data)==='object'?{...(src.spacedRepData ?? src.spaced_rep_data)}:{}; delete raw.__shop; return raw; })(),
+        spacedRepData: (() => { const raw=(src.spacedRepData ?? src.spaced_rep_data)&&typeof (src.spacedRepData ?? src.spaced_rep_data)==='object'?{...(src.spacedRepData ?? src.spaced_rep_data)}:{}; delete raw.__shop; delete raw.__timer; return raw; })(),
         customWords: Array.isArray(src.customWords ?? src.custom_words) ? (src.customWords ?? src.custom_words) : [],
-        shop: normalizeShopData(src.shop || (((src.spacedRepData ?? src.spaced_rep_data)||{}).__shop) || null)
+        shop: normalizeShopData(src.shop || (((src.spacedRepData ?? src.spaced_rep_data)||{}).__shop) || null),
+        timerData: normalizeTimerData(src.timerData || (((src.spacedRepData ?? src.spaced_rep_data)||{}).__timer) || null)
       };
     }
 
@@ -1318,7 +1421,7 @@
         my_vocab_ids: Array.isArray(data.myVocabIds) ? data.myVocabIds : [],
         attendance_dates: Array.isArray(data.attendanceDates) ? data.attendanceDates : [],
         study_history: Array.isArray(data.studyHistory) ? data.studyHistory : [],
-        spaced_rep_data: { ...(data.spacedRepData && typeof data.spacedRepData === 'object' ? data.spacedRepData : {}), __shop: normalizeShopData(data.shop) },
+        spaced_rep_data: { ...(data.spacedRepData && typeof data.spacedRepData === 'object' ? data.spacedRepData : {}), __shop: normalizeShopData(data.shop), __timer: normalizeTimerData(data.timerData) },
         custom_words: Array.isArray(data.customWords) ? data.customWords : [],
         updated_at: new Date().toISOString()
       };
@@ -1420,7 +1523,7 @@
       bgmAudio.pause();
       bgmAudio.src = track.file;
       bgmAudio.loop = true;
-      bgmAudio.volume = bgmVolume;
+      bgmAudio.volume = BGM_FIXED_VOLUME;
       bgmAudio.load();
 
       if (wasPlaying) {
@@ -1453,15 +1556,6 @@
       selectBgm(BGM_TRACKS[next].id);
     }
 
-    function setBgmVolume(value) {
-      const parsed = Number(value);
-      bgmVolume = Math.min(1, Math.max(0, Number.isFinite(parsed) ? parsed : 0.35));
-      bgmAudio.volume = bgmVolume;
-      localStorage.setItem('haikyu_bgm_volume', String(bgmVolume));
-
-      const label = document.getElementById('bgm-volume-value');
-      if (label) label.textContent = `${Math.round(bgmVolume * 100)}%`;
-    }
 
     function toggleBgm() {
       if (isBgmPlaying) {
@@ -1479,7 +1573,7 @@
       if (!currentSrc.includes(wantedFile)) {
         bgmAudio.src = wantedFile;
         bgmAudio.loop = true;
-        bgmAudio.volume = bgmVolume;
+        bgmAudio.volume = BGM_FIXED_VOLUME;
         bgmAudio.load();
       }
 
@@ -1895,21 +1989,6 @@
                   <button class="btn-pixel-black bgm-play-btn" onclick="toggleBgm()">${isBgmPlaying ? '⏸ 정지' : '▶ 재생'}</button>
                   <button class="btn-pixel-white bgm-mini-btn" onclick="changeBgmBy(1)" title="다음 곡">▶</button>
                 </div>
-
-                <div class="bgm-controls-row">
-                  <span style="font-size:10px;font-weight:900;color:#64748B;">🔊</span>
-                  <input
-                    class="bgm-volume"
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value="${bgmVolume}"
-                    oninput="setBgmVolume(this.value)"
-                    aria-label="BGM 볼륨"
-                  />
-                  <span id="bgm-volume-value" class="bgm-volume-label">${Math.round(bgmVolume * 100)}%</span>
-                </div>
               </div>
               <div class="stat-counter-bar">
                 <span style="color: #EA580C;">TODAY ${totC}</span>
@@ -1968,6 +2047,7 @@
               <button class="btn-tab-menu ${state.tab === 'shop' ? 'active' : ''}" onclick="switchTab('shop')">상점</button>
               <button class="btn-tab-menu ${state.tab === 'inventory' ? 'active' : ''}" onclick="switchTab('inventory')">인벤토리</button>
               <button class="btn-tab-menu ${state.tab === 'history' ? 'active' : ''}" onclick="switchTab('history')">기록</button>
+              <button class="btn-tab-menu ${state.tab === 'timer' ? 'active' : ''}" onclick="switchTab('timer')">공부<br>타이머</button>
             </div>
 
             <div class="hompy-main-content">
@@ -2227,32 +2307,60 @@
 
       if (state.tab === 'inventory') {
         const charShop=getCharacterShopData();
+        const variantShop=getCharacterVariantData();
         const owned=charShop.ownedItems.map(getShopItem).filter(Boolean);
         const previewItem=getShopItem(state.shopPreviewItemId);
         return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-          <div><h4 style="font-weight:900;margin:0">🎒 ${CHAR_META[state.char].name} 인벤토리</h4><div style="font-size:10.5px;color:#64748B;margin-top:3px">이 캐릭터가 구입한 아이템만 보여요.</div></div>
+          <div><h4 style="font-weight:900;margin:0">🎒 ${CHAR_META[state.char].name} 인벤토리</h4><div style="font-size:10.5px;color:#64748B;margin-top:3px">아이템 보유는 캐릭터 공통 · 장착/위치/캐릭터 크기는 <b>${getSelectedVariant().name}</b> 버전별 저장</div></div>
           <div style="font-weight:900;color:#7C3AED">🎟️ ${state.userData.shop.tickets}장</div>
+        </div>
+        <div style="margin-top:10px;padding:9px 10px;border:1.5px solid #C4B5FD;border-radius:10px;background:#FAF5FF;font-size:10.5px;color:#6D28D9;font-weight:800;">
+          🖼️ 현재 버전: ${getSelectedVariant().name}<br>
+          이 버전의 장착 상태·아이템 위치·캐릭터 크기/위치는 다른 버전과 독립적으로 저장됩니다.
         </div>
         ${renderCharacterAdjustControls()}
         ${previewItem?renderShopItemPreview(previewItem):''}
-        ${owned.length?`<div class="shop-grid">${owned.map(item=>{const slot=item.type==='accessory'?item.slot:item.type,equipped=charShop.equipped[slot]===item.id;return `<div class="shop-card ${equipped?'equipped':''}"><div class="shop-preview ${item.type==='background'?'bg':item.type==='frame'?'frame':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}</div><div class="shop-item-meta">${equipped?'장착 중':'보유 중'}</div>${(item.type==='accessory'||item.type==='slogan')?`<button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">🎛️ 위치 조정</button>`:`<button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">👀 미리보기</button>`}<button class="${equipped?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;padding:7px 4px;font-size:11px" onclick="${equipped?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${equipped?'장착 해제':'장착하기'}</button></div>`}).join('')}</div>`:`<div style="padding:30px;text-align:center;color:#94A3B8;font-weight:800">아직 구입한 아이템이 없어요.</div>`}`;
+        ${owned.length?`<div class="shop-grid">${owned.map(item=>{const slot=item.type==='accessory'?item.slot:item.type,equipped=variantShop.equipped[slot]===item.id;return `<div class="shop-card ${equipped?'equipped':''}"><div class="shop-preview ${item.type==='background'?'bg':item.type==='frame'?'frame':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}</div><div class="shop-item-meta">${equipped?'장착 중':'보유 중'}</div>${(item.type==='accessory'||item.type==='slogan')?`<button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">🎛️ 위치 조정</button>`:`<button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">👀 미리보기</button>`}<button class="${equipped?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;padding:7px 4px;font-size:11px" onclick="${equipped?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${equipped?'장착 해제':'장착하기'}</button></div>`}).join('')}</div>`:`<div style="padding:30px;text-align:center;color:#94A3B8;font-weight:800">아직 구입한 아이템이 없어요.</div>`}`;
       }
 
       if (state.tab === 'shop') {
-        const schoolId=getCharSchoolId(),charShop=getCharacterShopData(),visibleItems=SHOP_ITEMS.filter(item=>item.type===state.shopCategory&&(item.school==='all'||item.school===schoolId));
+        const schoolId=getCharSchoolId(),charShop=getCharacterShopData(),variantShop=getCharacterVariantData(),visibleItems=SHOP_ITEMS.filter(item=>item.type===state.shopCategory&&(item.school==='all'||item.school===schoolId));
         const labels={accessory:'🎀 액세서리',background:'🖼️ 배경',slogan:'🏳️ 슬로건',frame:'🖼️ 프레임'};
         const previewItem=getShopItem(state.shopPreviewItemId);
         return `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h4 style="font-weight:900;margin:0 0 4px">🛍️ 꾸미기 상점</h4><div style="font-size:11.5px;color:#64748B;font-weight:700">${CHAR_META[state.char].name} · ${SCHOOL_LABELS[schoolId]||CHAR_META[state.char].school}</div></div><div style="font-weight:900;color:#7C3AED;background:#F5F3FF;border:1.5px solid #C4B5FD;border-radius:9px;padding:7px 10px">🎟️ ${state.userData.shop.tickets}장</div></div>
         <div class="shop-category-tabs" style="margin-top:12px">${Object.keys(labels).map(cat=>`<button class="shop-category-btn ${state.shopCategory===cat?'active':''}" onclick="setShopCategory('${cat}')">${labels[cat]}</button>`).join('')}</div>
         <div style="font-size:10.5px;color:#94A3B8;margin-top:8px">모든 아이템은 구매 전에 미리보기할 수 있습니다. 액세서리와 슬로건은 위치·크기·투명도·각도를 조정할 수 있고, 프레임은 프로필 테두리에 자동으로 맞춰집니다.</div><div style="margin-top:10px;padding:10px;border:1.5px solid #FCD34D;border-radius:10px;background:#FFFBEB"><div style="font-size:11px;font-weight:900;color:#92400E;margin-bottom:6px">🪙 코인으로 응원 티켓 구매 · 보유 ${state.userData.coins}🪙</div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn-pixel-white" onclick="buyCheerTickets(1)">20🪙 → 🎟️1</button><button class="btn-pixel-white" onclick="buyCheerTickets(3)">50🪙 → 🎟️3</button><button class="btn-pixel-black" onclick="buyCheerTickets(5)">75🪙 → 🎟️5</button></div></div>
         ${previewItem?renderShopItemPreview(previewItem):''}
-        <div class="shop-grid">${visibleItems.map(item=>{const owned=charShop.ownedItems.includes(item.id),slot=item.type==='accessory'?item.slot:item.type,equipped=charShop.equipped[slot]===item.id,canBuy=state.userData.shop.tickets>=item.price,previewing=state.shopPreviewItemId===item.id;return `<div class="shop-card ${equipped?'equipped':''} ${previewing?'previewing':''}"><div class="shop-preview ${item.type==='background'?'bg':item.type==='frame'?'frame':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}</div><div class="shop-item-meta">${item.school==='all'?'전 캐릭터 공용':`${SCHOOL_LABELS[item.school]} 전용`}${item.type==='accessory'?` · ${item.slot==='head'?'머리':item.slot==='face'?'얼굴':item.slot==='effect'?'효과':'주변 소품'}`:item.type==='frame'?' · 프로필 프레임':''}</div><button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">${previewing?'미리보기 닫기':'👀 미리보기'}</button>${owned?`<button class="${equipped?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;padding:7px 4px;font-size:11px" onclick="${equipped?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${equipped?'장착 해제':'장착하기'}</button>`:`<button class="btn-pixel-white" style="width:100%;padding:7px 4px;font-size:11px;${canBuy?'border-color:#7C3AED;color:#6D28D9;':'opacity:.55;'}" onclick="buyShopItem('${item.id}')" ${canBuy?'':'disabled'}>🎟️ ${item.price} · 구매</button>`}</div>`}).join('')}</div>`;
+        <div class="shop-grid">${visibleItems.map(item=>{const owned=charShop.ownedItems.includes(item.id),slot=item.type==='accessory'?item.slot:item.type,equipped=variantShop.equipped[slot]===item.id,canBuy=state.userData.shop.tickets>=item.price,previewing=state.shopPreviewItemId===item.id;return `<div class="shop-card ${equipped?'equipped':''} ${previewing?'previewing':''}"><div class="shop-preview ${item.type==='background'?'bg':item.type==='frame'?'frame':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}</div><div class="shop-item-meta">${item.school==='all'?'전 캐릭터 공용':`${SCHOOL_LABELS[item.school]} 전용`}${item.type==='accessory'?` · ${item.slot==='head'?'머리':item.slot==='face'?'얼굴':item.slot==='effect'?'효과':'주변 소품'}`:item.type==='frame'?' · 프로필 프레임':''}</div><button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">${previewing?'미리보기 닫기':'👀 미리보기'}</button>${owned?`<button class="${equipped?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;padding:7px 4px;font-size:11px" onclick="${equipped?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${equipped?'장착 해제':'장착하기'}</button>`:`<button class="btn-pixel-white" style="width:100%;padding:7px 4px;font-size:11px;${canBuy?'border-color:#7C3AED;color:#6D28D9;':'opacity:.55;'}" onclick="buyShopItem('${item.id}')" ${canBuy?'':'disabled'}>🎟️ ${item.price} · 구매</button>`}</div>`}).join('')}</div>`;
+      }
+
+      if (state.tab === 'timer') {
+        const t=state.studyTimer||getDefaultTimerRuntime(),timerData=state.userData.timerData||getDefaultTimerData(),reward=getStudyTimerReward(t.sessionFocusSec),todaySec=getTodayTimerSeconds(),phaseLen=Math.max(1,getTimerPhaseLengthSec()),progressPct=Math.min(100,Math.max(0,((phaseLen-t.remainingSec)/phaseLen)*100)),history=[...(timerData.history||[])].reverse().slice(0,10);
+        return `<div class="study-timer-wrap">
+          <div><h4 style="font-weight:900;margin:0 0 4px;">⏱️ 공부 타이머 · 뽀모도로</h4><div style="font-size:11px;color:#64748B;font-weight:700;">집중 시간만 최종 공부 시간으로 기록됩니다. 휴식 시간은 보상 계산에서 제외됩니다.</div></div>
+          <div class="study-timer-settings">
+            <div class="study-timer-setting-card"><label>📚 공부 시간 (분)</label><input type="number" min="1" max="180" value="${t.studyMinutes}" ${t.running?'disabled':''} onchange="setStudyTimerSetting('studyMinutes',this.value)"></div>
+            <div class="study-timer-setting-card"><label>☕ 휴식 시간 (분)</label><input type="number" min="1" max="60" value="${t.restMinutes}" ${t.running?'disabled':''} onchange="setStudyTimerSetting('restMinutes',this.value)"></div>
+          </div>
+          <div class="study-timer-card">
+            <div id="study-timer-phase" class="study-timer-phase">${t.phase==='focus'?'📚 집중 공부':'☕ 휴식'}</div>
+            <div id="study-timer-clock" class="study-timer-clock">${formatTimerClock(t.remainingSec)}</div>
+            <div class="study-timer-progress"><div id="study-timer-progress-fill" style="width:${progressPct}%"></div></div>
+            <div style="font-size:11px;color:#64748B;font-weight:800;">이번 세션 집중 공부 <b id="study-timer-session" style="color:#EA580C;">${formatStudyTime(t.sessionFocusSec)}</b> · 완료 뽀모도로 ${t.completedFocusBlocks}회</div>
+            <div class="study-timer-buttons"><button id="study-timer-start-btn" class="btn-pixel-black" onclick="${t.running?'pauseStudyTimer()':'startStudyTimer()'}">${t.running?'⏸ 일시정지':'▶ 시작'}</button><button class="btn-pixel-white" onclick="resetStudyTimer()">↺ 세션 초기화</button><button class="btn-pixel-white" style="border-color:#10B981;color:#047857;" onclick="finishStudySession()">✓ 종료하고 보상받기</button></div>
+          </div>
+          <div class="study-timer-stats"><div class="study-timer-stat"><div class="value">${formatStudyTime(todaySec)}</div><div class="label">오늘 기록</div></div><div class="study-timer-stat"><div class="value">${formatStudyTime(timerData.totalStudySeconds)}</div><div class="label">누적 공부 시간</div></div><div class="study-timer-stat"><div class="value">${timerData.completedPomodoros}회</div><div class="label">완료 뽀모도로</div></div></div>
+          <div class="study-timer-reward-box"><b>🎁 공부 시간 보상</b><br>10분 이상 → 2 EXP + 2코인<br>25분 이상 → 6 EXP + 5코인<br>50분 이상 → 15 EXP + 12코인 + 응원 티켓 1장<br>100분 이상 → 35 EXP + 30코인 + 응원 티켓 2장<br><span style="color:#92400E;font-weight:900;">현재 세션 예상 보상: +${reward.exp} EXP / +${reward.coins}코인${reward.tickets?` / +${reward.tickets}티켓`:''}</span></div>
+          <div><div style="font-size:11.5px;font-weight:900;margin-bottom:6px;">📒 최근 공부 타이머 기록</div><div class="study-timer-history">${history.length?history.map(h=>`<div class="study-timer-history-row"><span>${new Date(h.date).toLocaleDateString('ko-KR')}</span><b>${formatStudyTime(h.seconds)}</b><span style="color:#64748B;">+${h.exp||0}EXP · +${h.coins||0}🪙${h.tickets?` · +${h.tickets}🎟️`:''}</span></div>`).join(''):`<div style="padding:24px;text-align:center;color:#94A3B8;font-size:11px;font-weight:800;">아직 공부 타이머 기록이 없습니다.</div>`}</div></div>
+        </div>`;
       }
 
       if (state.tab === 'history') {
         const hList = [...state.userData.studyHistory].reverse();
+        const timerData = state.userData.timerData || getDefaultTimerData();
         return `
           <h4 style="font-weight: 900; margin-top: 0;">📊 나의 훈련 통계</h4>
+          <div class="study-timer-stats" style="margin-bottom:12px;"><div class="study-timer-stat"><div class="value">${formatStudyTime(getTodayTimerSeconds())}</div><div class="label">오늘 공부</div></div><div class="study-timer-stat"><div class="value">${formatStudyTime(timerData.totalStudySeconds)}</div><div class="label">누적 공부</div></div><div class="study-timer-stat"><div class="value">${timerData.completedPomodoros}회</div><div class="label">뽀모도로</div></div></div>
           ${hList.length === 0 ? '<p style="color: #94A3B8; text-align: center; padding: 40px;">기록이 없습니다.</p>' : `
             <table class="history-table">
               <thead>
@@ -2288,11 +2396,12 @@
       if(slot==='side') return {x:72,y:36,scale:36,opacity:100,rotate:0};
       return {x:0,y:0,scale:92,opacity:95,rotate:0};
     }
-    function getPreviewTransform(item, charKey=state.char){
+    function getPreviewTransform(item, charKey=state.char, variantId=null){
       if(!item) return {x:0,y:0,scale:100,opacity:100,rotate:0};
-      const charShop=getCharacterShopData(charKey);
-      const key=`${charKey}:${item.id}`;
-      const saved=charShop.transforms?.[item.id];
+      const resolvedVariant=variantId || (charKey===state.char ? (state.charVariant||'default') : 'default');
+      const variantShop=getCharacterVariantData(charKey,resolvedVariant);
+      const key=`${charKey}:${resolvedVariant}:${item.id}`;
+      const saved=variantShop.transforms?.[item.id];
       if(saved&&!state.shopPreviewTransforms[key]) state.shopPreviewTransforms[key]={rotate:0,...saved};
       if(!state.shopPreviewTransforms[key]) state.shopPreviewTransforms[key]=getDefaultPreviewTransform(item);
       return state.shopPreviewTransforms[key];
@@ -2308,8 +2417,8 @@
       const t=getPreviewTransform(item);
       t[key]=Number(value);
       if(state.userData?.shop){
-        const charShop=getCharacterShopData();
-        charShop.transforms[id]={...t};
+        const variantShop=getCharacterVariantData();
+        variantShop.transforms[id]={...t};
       }
       const el=document.getElementById('shop-preview-moving-layer');
       if(el){
@@ -2328,17 +2437,18 @@
     }
     function resetShopPreviewTransform(id){
       const item=getShopItem(id); if(!item) return;
-      const key=`${state.char}:${id}`;
+      const key=`${state.char}:${state.charVariant||'default'}:${id}`;
       state.shopPreviewTransforms[key]=getDefaultPreviewTransform(item);
-      const charShop=getCharacterShopData();
-      charShop.transforms[id]={...state.shopPreviewTransforms[key]};
+      const variantShop=getCharacterVariantData();
+      variantShop.transforms[id]={...state.shopPreviewTransforms[key]};
       render();
     }
     function renderShopItemPreview(item){
       if(!item) return '';
       const meta=getActiveCharacterMeta(state.char);
       const charShop=getCharacterShopData();
-      const eq=charShop.equipped||{};
+      const variantShop=getCharacterVariantData();
+      const eq=variantShop.equipped||{};
       const equippedBg=getShopItem(eq.background);
       const equippedFrame=getShopItem(eq.frame);
       const t=getPreviewTransform(item);
@@ -2394,8 +2504,8 @@
     }
     function savePreviewPosition(id){
       const item=getShopItem(id); if(!item) return;
-      const charShop=getCharacterShopData();
-      charShop.transforms[id]={...getPreviewTransform(item)};
+      const variantShop=getCharacterVariantData();
+      variantShop.transforms[id]={...getPreviewTransform(item)};
       saveUserData();
       alert('이 위치를 저장했습니다.');
     }
@@ -2403,14 +2513,24 @@
 
     function buyCheerTickets(bundle){const packs={1:{coins:20,tickets:1},3:{coins:50,tickets:3},5:{coins:75,tickets:5}},p=packs[bundle];if(!p)return;if(state.userData.coins<p.coins)return alert(`${p.coins} 코인이 필요합니다.`);state.userData.coins-=p.coins;state.userData.shop.tickets+=p.tickets;saveUserData();alert(`응원 티켓 ${p.tickets}장을 구매했습니다!`);render()}
     function buyShopItem(id){const item=getShopItem(id);if(!item)return;const s=getCharSchoolId(),charShop=getCharacterShopData();if(item.school!=='all'&&item.school!==s)return alert('이 아이템은 현재 캐릭터의 학교에서는 사용할 수 없습니다.');if(charShop.ownedItems.includes(id))return;if(state.userData.shop.tickets<item.price)return alert(`응원 티켓이 부족합니다. ${item.price}장이 필요합니다.`);state.userData.shop.tickets-=item.price;charShop.ownedItems.push(id);charShop.ownedItems=Array.from(new Set(charShop.ownedItems));saveUserData();render()}
-    function equipShopItem(id){const item=getShopItem(id),charShop=getCharacterShopData();if(!item||!charShop.ownedItems.includes(id))return;const s=getCharSchoolId();if(item.school!=='all'&&item.school!==s)return alert('현재 캐릭터에게 장착할 수 없는 학교 전용 아이템입니다.');const slot=item.type==='accessory'?item.slot:item.type;charShop.equipped[slot]=id;charShop.transforms[id]={...getPreviewTransform(item)};saveUserData();render()}
+    function equipShopItem(id){
+      const item=getShopItem(id),charShop=getCharacterShopData(),variantShop=getCharacterVariantData();
+      if(!item||!charShop.ownedItems.includes(id))return;
+      const s=getCharSchoolId();
+      if(item.school!=='all'&&item.school!==s)return alert('현재 캐릭터에게 장착할 수 없는 학교 전용 아이템입니다.');
+      const slot=item.type==='accessory'?item.slot:item.type;
+      variantShop.equipped[slot]=id;
+      variantShop.transforms[id]={...getPreviewTransform(item)};
+      saveUserData();
+      render();
+    }
     function unequipShopItem(id){
       const item=getShopItem(id);
       if(!item)return;
-      const charShop=getCharacterShopData();
+      const variantShop=getCharacterVariantData();
       const slot=item.type==='accessory'?item.slot:item.type;
-      if(charShop.equipped[slot]===id){
-        charShop.equipped[slot]=null;
+      if(variantShop.equipped[slot]===id){
+        variantShop.equipped[slot]=null;
         saveUserData();
       }
       render();
@@ -2439,6 +2559,7 @@
       state.variantSelecting = false;
       state.entered = true;
       await loadUserData();
+      loadTimerRuntime();
       const lName = state.lang === 'ja' ? '일본어' : '영어';
       state.speech = getCharSpeech('enter', lName);
 
@@ -2680,6 +2801,8 @@
       state.userData.spacedRepData[id] = { stage: nextStage, nextDate: d.toISOString().split('T')[0] };
       saveUserData(); render();
     }
+
+    window.addEventListener('beforeunload',()=>{if(state.studyTimer?.running)tickStudyTimer();saveTimerRuntime();});
 
     // 앱 초기화 및 CSV 데이터 자동 로딩
     (async function initApp() {
