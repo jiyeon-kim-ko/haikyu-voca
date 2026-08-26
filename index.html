@@ -399,6 +399,85 @@
     const EXP_THRESHOLDS = [0, 100, 250, 450, 700, 1000, 1400, 1850, 2350, 3000];
     const STAGE_TITLES = ["주니어 유소년", "고교 주전 선수", "인터하이 예선", "합숙 원정훈련", "도 대표 결정전", "봄철 전국대회", "유스 강화합숙", "전국대회 8강", "V리그 프로리그", "올림픽 국가대표"];
 
+    const REWARD_RULES = {
+      quiz:  { expPerCorrect: 4, coinPerCorrect: 5, label: '객관식' },
+      hard:  { expPerCorrect: 7, coinPerCorrect: 10, label: '주관식' },
+      spell: { expPerCorrect: 6, coinPerCorrect: 8, label: '스펠링' }
+    };
+
+    const CARE_COSTS = { food: 15, train: 25 };
+
+    const CHAR_SPEECH = {
+      kageyama: {
+        enter: s => `${s} 훈련 시작한다. 멍하니 있지 말고 한 단어씩 정확하게 넣어.`,
+        shuffle:'순서 바꿨다. 위치로 외우지 말고 단어 자체를 봐.',
+        quizCorrect:'정확해. 방금 건 제대로 들어갔다. 다음.', quizWrong:'아니, 거기 아니다. 틀린 건 바로 다시 확인해.',
+        hardCorrect:'직접 써서 맞혔네. 그 정도 정확도면 됐다.', hardWrong:'뜻이 바로 안 나오면 아직 네 공이 아니다. 다시 외워.',
+        spellCorrect:'철자까지 정확하다. 좋아, 계속 간다.', spellWrong:'한 글자라도 틀리면 다른 단어다. 다시.',
+        food:'먹었으니까 됐다. 다음 훈련 준비해.', train:'몸 풀렸다. 이제 집중해서 시험 보자.', saved:'모르는 단어면 따로 빼둬. 다시 보면 된다.'
+      },
+      oikawa: {
+        enter: s => `자, ${s}도 센스 있게 해보자구~ 대충 하면 오이카와 씨가 바로 알아챈다?`,
+        shuffle:'후후, 순서가 바뀌어도 당황하면 안 되지. 실력은 이런 데서 보이는 거야.',
+        quizCorrect:'오~ 정답! 제법인데? 이 페이스 그대로 가자.', quizWrong:'아깝네~ 하지만 틀린 단어를 그냥 넘기는 건 센스 없지. 다시 체크!',
+        hardCorrect:'주관식까지 맞혔어? 꽤 멋진데~', hardWrong:'음~ 느낌으로 쓰면 안 되지. 정확하게 기억해두자.',
+        spellCorrect:'철자까지 깔끔! 아주 좋은 플레이였어.', spellWrong:'앗, 한 끗 차이네. 다음엔 오이카와 씨처럼 완벽하게~',
+        food:'역시 간식은 중요하지~ 기분 좋아졌어.', train:'좋아, 감각 올라왔다. 이제 시험에서 보여줘.', saved:'이건 다시 볼 가치가 있겠네. 단어장에 예쁘게 저장~'
+      },
+      miya: {
+        enter: s => `${s} 할 거면 제대로 해라. 어중간하게 외운 건 토스 받을 자격도 없다.`,
+        shuffle:'순서 바뀌었다고 흔들리면 우짜노. 진짜 외웠는지 보자.',
+        quizCorrect:'오, 맞혔네. 그 정도는 해줘야지.', quizWrong:'그걸 틀리나? 다시 보고 이번엔 머리에 확 넣어라.',
+        hardCorrect:'직접 써서 맞혔네. 꽤 치네.', hardWrong:'손이 멈췄으면 아직 덜 외운 기다. 다시.',
+        spellCorrect:'철자 딱 맞네. 그래, 이런 게 깔끔한 플레이다.', spellWrong:'철자 삐끗했데이. 작은 실수가 제일 아깝다.',
+        food:'좋다. 먹었으니 컨디션 올라왔다.', train:'훈련비 냈으니 제대로 굴러보자. 시험으로 증명해라.', saved:'모르면 저장해라. 모르는 척 넘기는 게 더 별로다.'
+      },
+      osamu: {
+        enter: s => `${s}도 밥 먹듯 꾸준히 하면 된다. 급하게 삼키지 말고 하나씩.`,
+        shuffle:'순서 섞였네. 뭐, 맛있는 건 순서 바뀌어도 맛있다.',
+        quizCorrect:'맞았네. 깔끔하다.', quizWrong:'틀렸네. 덜 익은 단어였나 보다. 다시 익혀.',
+        hardCorrect:'직접 써서 맞히면 확실히 외운 거지.', hardWrong:'머릿속에서 안 나오면 아직 덜 익었다. 한 번 더.',
+        spellCorrect:'철자까지 맞네. 잘했어.', spellWrong:'한 글자 빠졌네. 간이 하나 빠진 느낌이다.',
+        food:'역시 먹는 게 제일 확실하다.', train:'몸 좀 풀었으니 이제 문제 풀자.', saved:'이건 따로 챙겨둬. 나중에 다시 보면 된다.'
+      },
+      kenma: {
+        enter: s => `${s}도 게임처럼 패턴이 있어. 한 번에 다 하려고 하지 말고 하나씩 깨자.`,
+        shuffle:'랜덤 맵이네. 외운 위치 말고 단어 자체를 기억해야 해.',
+        quizCorrect:'정답. 패턴 읽은 것 같네.', quizWrong:'틀렸어. 이건 공략 정보에 추가해두는 게 좋겠다.',
+        hardCorrect:'직접 입력해서 맞혔네. 기억이 제대로 저장됐어.', hardWrong:'입력에서 막혔네. 아직 장기 기억에는 안 들어간 것 같아.',
+        spellCorrect:'철자 정확해. 저장 완료.', spellWrong:'오타 하나. 게임이면 입력 미스네. 다시 보면 돼.',
+        food:'에너지 조금 찼다. 이제 덜 귀찮아.', train:'훈련은 피곤하지만… 효율은 올라갔겠지.', saved:'이건 즐겨찾기 해두자. 나중에 다시 공략하면 돼.'
+      },
+      kita: {
+        enter: s => `${s}도 매일 할 것을 제대로 하면 된다. 오늘 분량부터 차근차근 하자.`,
+        shuffle:'순서가 달라도 할 일은 같다. 하나씩 정확히 확인하면 된다.',
+        quizCorrect:'좋다. 제대로 기억했네. 다음 것도 같은 방식으로 하자.', quizWrong:'틀린 건 부끄러운 게 아니다. 확인하지 않고 넘기는 게 문제지.',
+        hardCorrect:'직접 써서 맞혔으면 확실히 익힌 거다.', hardWrong:'기억이 흐리면 다시 반복하면 된다. 특별한 방법은 필요 없다.',
+        spellCorrect:'철자까지 정확하네. 기본이 잘 되어 있다.', spellWrong:'작은 실수도 반복되면 습관이 된다. 지금 바로 고치자.',
+        food:'잘 먹는 것도 관리다. 이제 할 일을 하자.', train:'기본기 한 번 했으니 시험에서 확인해보자.', saved:'모르는 단어를 따로 모아두는 것도 좋은 습관이다.'
+      },
+      goshiki: {
+        enter: s => `${s}도 완벽하게 해낼 거야! 에이스라면 단어 정도는 확실하게 외워야지!`,
+        shuffle:'좋아! 순서가 바뀌어도 전부 맞히면 더 멋있잖아!',
+        quizCorrect:'봤지?! 정답! 이 정도는 당연하다고!', quizWrong:'으악, 이건 실수야! 다음엔 반드시 맞힌다!',
+        hardCorrect:'주관식도 맞혔다! 역시 에이스 후보답지!', hardWrong:'아직 부족해! 이 단어는 다시 외우고 꼭 되갚아준다!',
+        spellCorrect:'철자까지 완벽! 지금 플레이 엄청 좋았어!', spellWrong:'한 글자 때문에 틀리다니…! 다음엔 절대 안 틀려!',
+        food:'좋아! 에너지 충전 완료!', train:'스파이크 훈련 끝! 이제 시험도 전력으로 간다!', saved:'이건 단어장에 넣고 완벽하게 외워버리자!'
+      }
+    };
+
+    function getCharSpeech(type, subject='') {
+      const set = CHAR_SPEECH[state.char] || CHAR_SPEECH.kageyama;
+      const value = set[type];
+      return typeof value === 'function' ? value(subject) : (value || '');
+    }
+
+    function calculateTestReward(testType, correctCount) {
+      const rule = REWARD_RULES[testType];
+      if (!rule) return { exp:0, coins:0 };
+      return { exp:correctCount*rule.expPerCorrect, coins:correctCount*rule.coinPerCorrect };
+    }
+
     let BUILTIN_EN = [];
     let BUILTIN_JA = [];
 
@@ -538,7 +617,7 @@
       selectedDay: 'all',
       selectedAccent: 'US', // US, UK
       blindMode: localStorage.getItem('haikyu_blind_mode') === 'true',
-      blindOpacity: Math.min(1, Math.max(0, Number(localStorage.getItem('haikyu_blind_opacity') || 0.12))),
+      blindOpacity: Math.min(1, Math.max(0.03, Number(localStorage.getItem('haikyu_blind_opacity') || 0.12))),
       fcIdx: 0,
       fcShowMeaning: false,
       quizIdx: 0,
@@ -787,6 +866,7 @@
       };
     }
 
+    // 시험 종료 시에만 호출하는 보상 함수
     function addRewards(expPts, coinPts) {
       const oldLvl = getCharInfo().level;
       state.userData.exp += expPts;
@@ -822,7 +902,7 @@
 
     function setBlindOpacity(value) {
       const parsed = Number(value);
-      state.blindOpacity = Math.min(1, Math.max(0, Number.isFinite(parsed) ? parsed : 0.12));
+      state.blindOpacity = Math.min(1, Math.max(0.03, Number.isFinite(parsed) ? parsed : 0.12));
       localStorage.setItem('haikyu_blind_opacity', String(state.blindOpacity));
 
       const target = document.querySelector('.character-privacy-target');
@@ -1144,7 +1224,7 @@
                   <input
                     class="blind-slider"
                     type="range"
-                    min="0"
+                    min="0.03"
                     max="1"
                     step="0.01"
                     value="${state.blindOpacity}"
@@ -1192,9 +1272,12 @@
                 </div>
                 <div class="stamina-progress-bg"><div class="stamina-progress-fill" style="width: ${expPct}%; background: #3B82F6;"></div></div>
               </div>
-              <div style="display: flex; gap: 4px; margin-top: 4px;">
-                <button class="btn-pixel-white" style="flex: 1; padding: 6px; font-size: 11px;" onclick="feedPartner()">🍙 ${charInfo.food}</button>
-                <button class="btn-pixel-white" style="flex: 1; padding: 6px; font-size: 11px; display:flex; align-items:center; justify-content:center; gap:4px;" onclick="actionPartner()">${renderMikasaBall(14)} ${charInfo.act}</button>
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:10.5px; font-weight:900; color:#475569; margin-top:2px;">
+                <span>보유 코인</span><span style="color:#EA580C;">${state.userData.coins} 🪙</span>
+              </div>
+              <div style="display:flex; gap:4px; margin-top:4px;">
+                <button class="btn-pixel-white" style="flex:1; padding:6px 3px; font-size:10.5px;" onclick="feedPartner()">🍙 ${charInfo.food} · ${CARE_COSTS.food}🪙</button>
+                <button class="btn-pixel-white" style="flex:1; padding:6px 3px; font-size:10.5px; display:flex; align-items:center; justify-content:center; gap:3px;" onclick="actionPartner()">${renderMikasaBall(13)} ${charInfo.act} · ${CARE_COSTS.train}🪙</button>
               </div>
               <div style="margin-top: 2px; display: flex; gap: 4px;">
                 <button class="btn-pixel-white" style="flex: 1; padding: 6px; font-size: 11px;" onclick="state.entered=false; render();">🔄 선수 교체</button>
@@ -1250,9 +1333,12 @@
         const item = list[state.fcIdx] || list[0];
         
         return `
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
             ${renderDaySelect('onDayChange')}
-            <button class="btn-pixel-white" onclick="shuffleFlashcards()">🔀 셔플</button>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:12.5px; font-weight:900; color:#475569; white-space:nowrap;">단어 ${state.fcIdx + 1} / ${list.length}</span>
+              <button class="btn-pixel-white" onclick="shuffleFlashcards()">🔀 셔플</button>
+            </div>
           </div>
           <div class="flashcard-box" onclick="toggleFlashcardMeaning()">
             <div style="font-size: 32px; font-weight: 900; color: #1E293B;">${item.word}</div>
@@ -1272,9 +1358,10 @@
               ? `<div style="font-size: 20px; font-weight: 800; color: #EA580C; margin-top: 10px;">${item.meaning}</div>`
               : `<div style="font-size: 13px; color: #94A3B8; margin-top: 10px;">[카드를 탭하여 뜻 확인]</div>`}
           </div>
-          <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+          <div style="display:flex; justify-content:center; gap:8px; margin-top:15px; flex-wrap:wrap;">
             <button class="btn-pixel-white" ${state.fcIdx === 0 ? 'disabled' : ''} onclick="prevFlashcard()">◀ 이전</button>
             <button class="btn-pixel-black" onclick="toggleFlashcardMeaning()">${state.fcShowMeaning ? '단어만 보기' : '뜻 보기'}</button>
+            <button class="btn-pixel-white" style="${state.userData.myVocabIds.includes(item.id) ? 'border-color:#10B981; color:#059669;' : 'border-color:#EA580C; color:#EA580C;'}" onclick="addCurrentPracticeWord('${item.id}')" ${state.userData.myVocabIds.includes(item.id) ? 'disabled' : ''}>${state.userData.myVocabIds.includes(item.id) ? '✓ 단어장 저장됨' : '＋ 단어장 추가하기'}</button>
             <button class="btn-pixel-white" ${state.fcIdx >= list.length - 1 ? 'disabled' : ''} onclick="nextFlashcard()">다음 ▶</button>
           </div>
         `;
@@ -1288,7 +1375,7 @@
             <div style="text-align: center; padding: 40px 20px;">
               <h3 style="font-weight: 900; display:flex; justify-content:center; align-items:center; gap:7px;">${renderMikasaBall(22)} 1세트 객관식 결과</h3>
               <p style="font-size: 16px; color: #4B5563;">성공률: ${rate}% (${sc.correct}/${sc.total})</p>
-              <h4 style="color: #EA580C; font-weight: 900;">+${sc.correct * 4} EXP | +${sc.correct * 5} 🪙 획득!</h4>
+              <h4 style="color: #EA580C; font-weight: 900;">+${calculateTestReward('quiz', sc.correct).exp} EXP | +${calculateTestReward('quiz', sc.correct).coins} 🪙 획득!</h4>
               <button class="btn-pixel-black" style="margin-top: 15px;" onclick="generateQuiz(); render();">다시 시작하기 ➔</button>
             </div>
           `;
@@ -1330,7 +1417,7 @@
             <div style="text-align: center; padding: 40px 20px;">
               <h3 style="font-weight: 900;">🔥 주관식 Hard 세트 완료!</h3>
               <p style="font-size: 16px; color: #4B5563;">적중: ${sc.correct} / ${sc.total}</p>
-              <h4 style="color: #EA580C; font-weight: 900;">+${sc.correct * 7} EXP | +${sc.correct * 10} 🪙 획득!</h4>
+              <h4 style="color: #EA580C; font-weight: 900;">+${calculateTestReward('hard', sc.correct).exp} EXP | +${calculateTestReward('hard', sc.correct).coins} 🪙 획득!</h4>
               <button class="btn-pixel-black" style="margin-top: 15px;" onclick="generateHardQuiz(); render();">다시 시작하기 ➔</button>
             </div>
           `;
@@ -1371,7 +1458,7 @@
             <div style="text-align: center; padding: 40px 20px;">
               <h3 style="font-weight: 900;">🔤 스펠링 게임 완료!</h3>
               <p style="font-size: 16px; color: #4B5563;">적중: ${sc.correct} / ${sc.total}</p>
-              <h4 style="color: #EA580C; font-weight: 900;">+${sc.correct * 6} EXP | +${sc.correct * 8} 🪙 획득!</h4>
+              <h4 style="color: #EA580C; font-weight: 900;">+${calculateTestReward('spell', sc.correct).exp} EXP | +${calculateTestReward('spell', sc.correct).coins} 🪙 획득!</h4>
               <button class="btn-pixel-black" style="margin-top: 15px;" onclick="generateSpellQuiz(); render();">다시 시작하기 ➔</button>
             </div>
           `;
@@ -1454,7 +1541,7 @@
                   <span style="font-weight: 800; color: #1E293B;">${r.word}</span>
                   <span style="color: #64748B; margin-left: 10px;">${r.meaning}</span>
                 </div>
-                <button class="btn-pixel-black" onclick="passSpacedRep('${r.id}')">복습완료 (+5 EXP)</button>
+                <button class="btn-pixel-black" onclick="passSpacedRep('${r.id}')">복습완료</button>
               </div>
             `).join('')}
           </div>
@@ -1503,14 +1590,8 @@
     async function enterGym() {
       state.entered = true;
       await loadUserData();
-      const lName = state.lang === 'ja' ? '일본어' : '토익';
-      if (state.char === 'kenma') state.speech = `${lName} 단어도 게임처럼 패턴을 찾으면 돼. 천천히 하나씩 하자.`;
-      else if (state.char === 'kita') state.speech = `${lName}도 매일 제대로 반복하는 게 중요하다. 오늘 할 것부터 하자.`;
-      else if (state.char === 'goshiki') state.speech = `${lName} 단어 정도는 완벽하게 외워야 에이스라고 할 수 있지!`;
-      else if (state.char === 'osamu') state.speech = `츠무 녀석보다 ${lName} 잘 외우면 갓 지은 주먹밥 만들어줄게.`;
-      else if (state.char === 'miya') state.speech = `내 토스 치고 싶으면 ${lName} 단어 억수로 퍼펙트하게 외워와라!`;
-      else if (state.char === 'oikawa') state.speech = `재능은 꽃피우는 것, 센스는 갈고닦는 것! ${lName} 힘내보자구~`;
-      else state.speech = `내가 있으면 넌 최강이다! 오늘 ${lName} 단어 훈련 시작이다.`;
+      const lName = state.lang === 'ja' ? '일본어' : '영어';
+      state.speech = getCharSpeech('enter', lName);
 
       initFlashcards();
       generateQuiz();
@@ -1538,34 +1619,38 @@
     }
 
     function feedPartner() {
-      if (state.userData.coins < 10) return alert('코인이 부족합니다!');
-      state.userData.coins -= 10;
+      if (state.userData.coins < CARE_COSTS.food) return alert(`${(CHAR_META[state.char] || CHAR_META.kageyama).name}에게 ${CHAR_META[state.char].food}을(를) 주려면 ${CARE_COSTS.food}코인이 필요합니다.`);
+      state.userData.coins -= CARE_COSTS.food;
       state.userData.satisfaction = Math.min(4, state.userData.satisfaction + 1);
-      state.mood = 'happy';
-      state.speech = '우물우물... 기운이 펄펄 난다! (만족도 상승) ✨';
-      addRewards(5, 0);
+      state.mood = 'happy'; state.speech = getCharSpeech('food'); saveUserData(); render();
     }
 
     function actionPartner() {
+      if (state.userData.coins < CARE_COSTS.train) return alert(`${CHAR_META[state.char].act}에는 ${CARE_COSTS.train}코인이 필요합니다.`);
+      state.userData.coins -= CARE_COSTS.train;
       state.userData.stamina = Math.min(4, state.userData.stamina + 1);
-      state.mood = 'happy';
-      state.speech = '몸 제대로 풀렸다! 단어도 스파이크 때리듯 꽂자! 🏐';
-      addRewards(3, 0);
+      state.mood = 'happy'; state.speech = getCharSpeech('train'); saveUserData(); render();
     }
 
     function toggleFlashcardMeaning() { state.fcShowMeaning = !state.fcShowMeaning; render(); }
     function prevFlashcard() { if (state.fcIdx > 0) { state.fcIdx--; state.fcShowMeaning = false; render(); } }
     function nextFlashcard() {
       const list = getFilteredVocab();
-      if (state.fcIdx < list.length - 1) {
-        state.fcIdx++;
-        state.fcShowMeaning = false;
-        addRewards(1, 0);
-      }
+      if (state.fcIdx < list.length - 1) { state.fcIdx++; state.fcShowMeaning = false; render(); }
     }
     function shuffleFlashcards() {
       initFlashcards();
-      state.speech = '순서 바꿨다. 순서만 외워서 맞히는 꼼수는 코트에서 안 통해.';
+      state.speech = getCharSpeech('shuffle');
+      render();
+    }
+
+    function addCurrentPracticeWord(id) {
+      if (!id) return;
+      if (!state.userData.myVocabIds.includes(id)) {
+        state.userData.myVocabIds.push(id);
+        state.userData.myVocabIds = Array.from(new Set(state.userData.myVocabIds));
+        state.speech = getCharSpeech('saved'); saveUserData();
+      }
       render();
     }
 
@@ -1578,11 +1663,11 @@
       if (isCorr) {
         state.quizScore.correct++;
         state.mood = 'happy';
-        state.speech = '나이스 샷! 코트에 남는 건 이긴 녀석뿐이다! 🔥';
+        state.speech = getCharSpeech('quizCorrect');
       } else {
         if (!state.quizScore.wrongIds.includes(q.id)) state.quizScore.wrongIds.push(q.id);
         state.mood = 'angry';
-        state.speech = '보게에에에! 집중 안 하냐?! 오답노트 봐라! 💢';
+        state.speech = getCharSpeech('quizWrong');
       }
       render();
     }
@@ -1594,7 +1679,8 @@
         state.quizSelectedOpt = null;
       } else {
         state.quizScore.finished = true;
-        addRewards(state.quizScore.correct * 4, state.quizScore.correct * 5);
+        const reward = calculateTestReward('quiz', state.quizScore.correct);
+        addRewards(reward.exp, reward.coins);
         if (state.quizScore.wrongIds.length > 0) {
           state.userData.myVocabIds = Array.from(new Set([...state.userData.myVocabIds, ...state.quizScore.wrongIds]));
           const tmr = new Date(); tmr.setDate(tmr.getDate() + 1);
@@ -1625,11 +1711,11 @@
       if (isCorr) {
         state.hardScore.correct++;
         state.mood = 'happy';
-        state.speech = '주관식을 이렇게 딱 맞히네! 완벽하다! 🏐';
+        state.speech = getCharSpeech('hardCorrect');
       } else {
         if (!state.hardScore.wrongIds.includes(q.id)) state.hardScore.wrongIds.push(q.id);
         state.mood = 'angry';
-        state.speech = '직접 쓰려니까 손이 굳었나?! 오답노트 봐라! 💢';
+        state.speech = getCharSpeech('hardWrong');
       }
       render();
     }
@@ -1641,7 +1727,8 @@
         state.hardIsCorrect = false;
       } else {
         state.hardScore.finished = true;
-        addRewards(state.hardScore.correct * 7, state.hardScore.correct * 10);
+        const reward = calculateTestReward('hard', state.hardScore.correct);
+        addRewards(reward.exp, reward.coins);
         if (state.hardScore.wrongIds.length > 0) {
           state.userData.myVocabIds = Array.from(new Set([...state.userData.myVocabIds, ...state.hardScore.wrongIds]));
         }
@@ -1662,11 +1749,11 @@
       if (isCorr) {
         state.spellScore.correct++;
         state.mood = 'happy';
-        state.speech = '철자 하나도 안 틀리고 정확하게 꽂았다! 🔥';
+        state.speech = getCharSpeech('spellCorrect');
       } else {
         if (!state.spellScore.wrongIds.includes(q.id)) state.spellScore.wrongIds.push(q.id);
         state.mood = 'angry';
-        state.speech = '스펠링 삐끗했다! 철자가 생명이다! 💢';
+        state.speech = getCharSpeech('spellWrong');
       }
       render();
     }
@@ -1678,7 +1765,8 @@
         state.spellIsCorrect = false;
       } else {
         state.spellScore.finished = true;
-        addRewards(state.spellScore.correct * 6, state.spellScore.correct * 8);
+        const reward = calculateTestReward('spell', state.spellScore.correct);
+        addRewards(reward.exp, reward.coins);
         if (state.spellScore.wrongIds.length > 0) {
           state.userData.myVocabIds = Array.from(new Set([...state.userData.myVocabIds, ...state.spellScore.wrongIds]));
         }
@@ -1701,7 +1789,7 @@
 
     function removeMyVocab(id) {
       state.userData.myVocabIds = state.userData.myVocabIds.filter(v => v !== id);
-      addRewards(2, 2);
+      saveUserData(); render();
     }
 
     function passSpacedRep(id) {
@@ -1711,7 +1799,7 @@
       const d = new Date();
       d.setDate(d.getDate() + (intervals[nextStage] || 30));
       state.userData.spacedRepData[id] = { stage: nextStage, nextDate: d.toISOString().split('T')[0] };
-      addRewards(5, 5);
+      saveUserData(); render();
     }
 
     // 앱 초기화 및 CSV 데이터 자동 로딩
