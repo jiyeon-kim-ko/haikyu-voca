@@ -50,7 +50,7 @@
     .char-radio-card.active { border-color: #EA580C; background: #FFF7ED; box-shadow: 2px 2px 0px #EA580C; }
     .mini-avatar-circle {
       width: 46px; height: 46px; border-radius: 50%; border: 2px solid #1E293B;
-      background: #FDE047; margin: 0 auto 4px auto; overflow: hidden; display: flex;
+      background: #FFFFFF; margin: 0 auto 4px auto; overflow: hidden; display: flex;
       align-items: center; justify-content: center;
     }
     .mini-avatar-circle svg, .mini-avatar-circle img {
@@ -115,6 +115,60 @@
     }
     .character-privacy-target { transition: opacity 0.18s ease; }
     .bgm-title { font-size: 11px; font-weight: 800; color: #1E293B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 145px; }
+    .bgm-widget-box.multi-bgm {
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+      gap:6px;
+      padding:8px 9px;
+    }
+    .bgm-top-row {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+    }
+    .bgm-select {
+      width:100%;
+      height:30px;
+      border:1.5px solid #CBD5E1;
+      border-radius:7px;
+      background:#FFFFFF;
+      color:#1E293B;
+      font-size:10.5px;
+      font-weight:800;
+      padding:3px 6px;
+      outline:none;
+    }
+    .bgm-controls-row {
+      display:flex;
+      align-items:center;
+      gap:5px;
+    }
+    .bgm-mini-btn {
+      flex:0 0 auto;
+      min-width:34px;
+      padding:4px 6px !important;
+      font-size:10px !important;
+    }
+    .bgm-play-btn {
+      flex:1;
+      padding:4px 7px !important;
+      font-size:10px !important;
+    }
+    .bgm-volume {
+      width:72px;
+      min-width:0;
+      accent-color:#EA580C;
+      cursor:pointer;
+    }
+    .bgm-volume-label {
+      width:30px;
+      text-align:right;
+      font-size:9.5px;
+      font-weight:800;
+      color:#64748B;
+    }
     .stat-counter-bar {
       display: flex; justify-content: space-around; font-size: 11.5px; font-weight: 800;
       padding-bottom: 6px; border-bottom: 1.5px dashed #CBD5E1;
@@ -132,6 +186,47 @@
     .large-mii-frame svg, .large-mii-frame img {
       width: 100%; height: 100%; object-fit: cover;
     }
+    .character-stage{width:100%;display:flex;align-items:center;justify-content:center;position:relative;margin:0 auto}
+    .character-profile-viewport{width:170px;height:170px;position:relative;overflow:hidden;border:3px solid #1E293B;border-radius:14px;background:#E5E7EB;box-shadow:2px 2px 0 rgba(0,0,0,.15)}
+    .character-frame-stack{width:230px;height:230px;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.7391304348);transform-origin:center center;overflow:hidden;background:#E5E7EB}
+    .character-frame-clip{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;border-radius:0}
+    .character-bg-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+    .character-base-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2}
+    .character-accessory-layer{position:absolute;z-index:6;pointer-events:none;object-fit:contain}
+    .character-slogan-layer{position:absolute;z-index:7;object-fit:contain;pointer-events:none}.shop-summary-box{display:flex;justify-content:space-between;align-items:center;background:#FFF7ED;border:1.5px solid #FDBA74;border-radius:10px;padding:7px 9px;font-size:11px;font-weight:900}.shop-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.shop-card{border:2px solid #E2E8F0;border-radius:12px;padding:9px;background:#FFF;display:flex;flex-direction:column;gap:7px;min-width:0}.shop-card.equipped{border-color:#EA580C;background:#FFF7ED}.shop-preview{width:100%;aspect-ratio:1.45/1;border-radius:9px;overflow:hidden;background:#F1F5F9;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center}.shop-preview img{width:100%;height:100%;object-fit:contain}.shop-preview.bg img{object-fit:cover}.shop-item-name{font-size:12px;font-weight:900;line-height:1.25}.shop-item-meta{font-size:10.5px;color:#64748B;font-weight:700;line-height:1.3}.shop-category-tabs{display:flex;gap:6px;flex-wrap:wrap}.shop-category-btn{border:2px solid #CBD5E1;background:#FFF;color:#334155;border-radius:8px;padding:7px 10px;font-size:11.5px;font-weight:900;cursor:pointer}.shop-category-btn.active{background:#1E293B;color:#FFF;border-color:#1E293B}.ticket-result{margin-top:8px;font-size:13px;font-weight:900;color:#7C3AED}
+    .shop-card.previewing{border-color:#7C3AED;background:#F5F3FF}
+    .shop-preview-btn{width:100%;padding:7px 4px;font-size:11px;border-color:#7C3AED;color:#6D28D9}
+    .shop-preview-panel{margin-top:14px;border:2px solid #C4B5FD;background:#FAF5FF;border-radius:14px;padding:12px}
+    .shop-preview-stage{width:230px;height:230px;max-width:100%;margin:10px auto;position:relative;overflow:hidden;border:3px solid #1E293B;border-radius:16px;background:#E5E7EB}
+    .shop-preview-stage .preview-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+    .shop-preview-stage .preview-char{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2}
+    .shop-preview-stage.cutout-stage{background:
+      linear-gradient(45deg,#eef2f7 25%,transparent 25%),
+      linear-gradient(-45deg,#eef2f7 25%,transparent 25%),
+      linear-gradient(45deg,transparent 75%,#eef2f7 75%),
+      linear-gradient(-45deg,transparent 75%,#eef2f7 75%);
+      background-size:18px 18px;background-position:0 0,0 9px,9px -9px,-9px 0}
+    .shop-preview-stage .preview-char-cutout,
+    .character-frame-stack .character-base-cutout{
+      position:absolute;z-index:2;pointer-events:none;
+      object-fit:contain;object-position:center bottom;
+      left:50%;bottom:0;transform:translateX(-50%);
+      width:100%;height:100%;
+    }
+    .character-frame-stack{overflow:hidden}
+    .character-frame-clip{position:absolute;inset:0;border-radius:0;overflow:hidden}
+    .character-frame-clip .character-bg-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+    .character-frame-clip .character-base-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2}
+    .character-frame-stack .character-accessory-layer{z-index:6}
+    .character-slogan-layer{position:absolute;z-index:7;object-fit:contain;pointer-events:none}
+
+    .shop-preview-stage .preview-slogan{position:absolute;z-index:5;object-fit:contain;pointer-events:none}
+    .shop-preview-stage .preview-accessory{position:absolute;z-index:6;object-fit:contain;pointer-events:none}
+    .preview-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+    .preview-control{background:#FFF;border:1.5px solid #E2E8F0;border-radius:9px;padding:7px}
+    .preview-control label{display:flex;justify-content:space-between;font-size:10.5px;font-weight:900;color:#475569;margin-bottom:4px}
+    .preview-control input{width:100%}
+
     .left-emotion-badge {
       position: absolute; top: 18px; right: 40px;
       width: 32px; height: 32px; background: #FFFFFF; border: 2px solid #1E293B;
@@ -229,6 +324,7 @@
       .hompy-left-side { width: 100%; padding: 10px; }
       .mini-room-box { display: flex; align-items: center; gap: 12px; text-align: left; padding: 8px; }
       .large-mii-frame { width: 70px; height: 70px; margin: 0; flex-shrink: 0; }
+      .character-stage{margin:0;flex-shrink:0;width:auto}.character-profile-viewport{width:110px;height:110px}.character-frame-stack{width:230px;height:230px;transform:translate(-50%,-50%) scale(.4782608696)}.shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
       .left-emotion-badge { top: 2px; right: 2px; width: 24px; height: 24px; font-size: 13px; }
       .hompy-nav-tabs { width: 100%; flex-direction: row; overflow-x: auto; gap: 4px; padding-bottom: 2px; }
       .btn-tab-menu { flex: 1 0 auto; min-width: 60px; padding: 8px 6px; font-size: 11.5px; }
@@ -265,19 +361,19 @@
 
     const CHAR_META = {
       kageyama: {
-        name: "카게야마 토비오", imgFile: "kageyama.jpg",
+        name: "카게야마 토비오", imgFile: "kageyama.png",
         num: "9", school: "카라스노 고교", pos: "Setter (세터)", food: "군군 우유", act: "토스 훈련", motto: "볼은 반드시 내가 올린다."
       },
       oikawa: {
-        name: "오이카와 토오루", imgFile: "oikawa.jpg",
+        name: "오이카와 토오루", imgFile: "oikawa.png",
         num: "1", school: "아오바죠사이", pos: "Setter (주장)", food: "우유빵", act: "살인 서브", motto: "재능은 꽃피우는 것, 센스는 갈고닦는 것!"
       },
       miya: {
-        name: "츠무", imgFile: "miya.jpg",
+        name: "츠무", imgFile: "miya.png",
         num: "7", school: "이나리자키", pos: "Setter (세터)", food: "참치 뱃살", act: "2도류 서브", motto: "내 토스 칠 자격 있나? 증명해봐라."
       },
       osamu: {
-        name: "사무", imgFile: "osamu.jpg",
+        name: "사무", imgFile: "osamu.png",
         num: "11", school: "이나리자키", pos: "Wing Spiker (WS)", food: "오니기리", act: "스파이크", motto: "밥심으로 단어 끝까지 씹어묵자."
       },
       kenma: {
@@ -293,6 +389,47 @@
         num: "8", school: "시라토리자와", pos: "Wing Spiker (WS)", food: "밥", act: "직선 스파이크", motto: "에이스가 될 거니까 이 정도는 당연하지!"
       }
     };
+
+    const SCHOOL_IDS = {
+      "카라스노 고교":"karasuno", "아오바죠사이":"aobajohsai", "이나리자키":"inarizaki", "네코마 고교":"nekoma", "시라토리자와":"shiratorizawa"
+    };
+    const SCHOOL_LABELS = {karasuno:"카라스노",aobajohsai:"아오바죠사이",inarizaki:"이나리자키",nekoma:"네코마",shiratorizawa:"시라토리자와",all:"전 학교 공용"};
+    const SHOP_ITEMS = [
+      {id:"acc_crown",type:"accessory",slot:"head",name:"왕관",price:15,school:"all",file:"assets/shop/accessories/crown.png"},
+      {id:"acc_sunglasses",type:"accessory",slot:"face",name:"선글라스",price:12,school:"all",file:"assets/shop/accessories/sunglasses.png"},
+      {id:"acc_glasses",type:"accessory",slot:"face",name:"안경",price:10,school:"all",file:"assets/shop/accessories/glasses.png"},
+      {id:"acc_headset",type:"accessory",slot:"head",name:"헤드셋",price:15,school:"all",file:"assets/shop/accessories/headset.png"},
+      {id:"acc_volleyball",type:"accessory",slot:"side",name:"배구공",price:10,school:"all",file:"assets/shop/accessories/volleyball.png"},
+      {id:"acc_spike",type:"accessory",slot:"side",name:"스파이크",price:12,school:"all",file:"assets/shop/accessories/spike.png"},
+      {id:"acc_milk",type:"accessory",slot:"side",name:"우유",price:8,school:"all",file:"assets/shop/accessories/milk.png"},
+      {id:"acc_onigiri",type:"accessory",slot:"side",name:"주먹밥",price:8,school:"all",file:"assets/shop/accessories/onigiri.png"},
+      {id:"acc_game",type:"accessory",slot:"side",name:"게임기",price:15,school:"all",file:"assets/shop/accessories/game.png"},
+      {id:"acc_rice",type:"accessory",slot:"side",name:"벼",price:10,school:"all",file:"assets/shop/accessories/rice.png"},
+      {id:"acc_stars",type:"accessory",slot:"effect",name:"반짝이",price:20,school:"all",file:"assets/shop/accessories/stars.png"},
+      {id:"bg_hill",type:"background",name:"언덕",price:12,school:"all",file:"assets/shop/backgrounds/hill.png"},
+      {id:"bg_gym",type:"background",name:"체육관",price:12,school:"all",file:"assets/shop/backgrounds/gym.png"},
+      {id:"bg_gym2",type:"background",name:"체육관 2",price:15,school:"all",file:"assets/shop/backgrounds/gym2.png"},
+      {id:"bg_karasuno",type:"background",name:"카라스노",price:18,school:"karasuno",file:"assets/shop/backgrounds/karasuno.png"},
+      {id:"bg_karasuno_gym",type:"background",name:"카라스노 체육관",price:22,school:"karasuno",file:"assets/shop/backgrounds/karasuno_gym.png"},
+      {id:"bg_karasuno_road",type:"background",name:"카라스노 체육관 가는 길",price:20,school:"karasuno",file:"assets/shop/backgrounds/karasuno_road.png"},
+      {id:"bg_aobajohsai",type:"background",name:"아오바죠사이",price:18,school:"aobajohsai",file:"assets/shop/backgrounds/aobajohsai.png"},
+      {id:"bg_aobajohsai_gym",type:"background",name:"아오바죠사이 체육관",price:22,school:"aobajohsai",file:"assets/shop/backgrounds/aobajohsai_gym.png"},
+      {id:"bg_nekoma",type:"background",name:"네코마",price:18,school:"nekoma",file:"assets/shop/backgrounds/nekoma.png"},
+      {id:"bg_nekoma_gym",type:"background",name:"네코마 체육관",price:22,school:"nekoma",file:"assets/shop/backgrounds/nekoma_gym.png"},
+      {id:"bg_shiratorizawa",type:"background",name:"시라토리자와",price:18,school:"shiratorizawa",file:"assets/shop/backgrounds/shiratorizawa.png"},
+      {id:"bg_shiratorizawa_gym",type:"background",name:"시라토리자와 체육관",price:22,school:"shiratorizawa",file:"assets/shop/backgrounds/shiratorizawa_gym.png"},
+      {id:"slogan_karasuno",type:"slogan",name:"飛べ · 날아라",price:25,school:"karasuno",file:"assets/shop/slogans/karasuno.png"},
+      {id:"slogan_aobajohsai",type:"slogan",name:"코트를 제패하라",price:25,school:"aobajohsai",file:"assets/shop/slogans/aobajohsai.png"},
+      {id:"slogan_nekoma",type:"slogan",name:"이어라",price:25,school:"nekoma",file:"assets/shop/slogans/nekoma.png"},
+      {id:"slogan_inarizaki",type:"slogan",name:"추억 따위 필요 없어",price:25,school:"inarizaki",file:"assets/shop/slogans/inarizaki.png"},
+      {id:"slogan_shiratorizawa",type:"slogan",name:"강자로 있어라",price:25,school:"shiratorizawa",file:"assets/shop/slogans/shiratorizawa.png"}
+    ];
+    function getCharSchoolId(charKey=state.char){const meta=CHAR_META[charKey]||CHAR_META.kageyama;return SCHOOL_IDS[meta.school]||"all"}
+    function getShopItem(id){return SHOP_ITEMS.find(x=>x.id===id)||null}
+    function getShopDefaultData(){return {tickets:50,ownedItems:[],equipped:{background:null,slogan:null,head:null,face:null,side:null,effect:null},ticketClaims:{},transforms:{}}}
+    function normalizeShopData(v){const b=getShopDefaultData(),s=v&&typeof v==='object'?v:{};return {tickets:Number(s.tickets||0),ownedItems:Array.isArray(s.ownedItems)?Array.from(new Set(s.ownedItems)):[],equipped:{...b.equipped,...(s.equipped&&typeof s.equipped==='object'?s.equipped:{})},ticketClaims:s.ticketClaims&&typeof s.ticketClaims==='object'?s.ticketClaims:{},transforms:s.transforms&&typeof s.transforms==='object'?s.transforms:{}}}
+    function getTicketTier(correct,total){if(!total)return 0;const p=correct/total*100;if(p>=99.999)return 3;if(p>=80)return 2;if(p>=60)return 1;return 0}
+    function awardCheerTickets(testType,correct,total){const tier=getTicketTier(correct,total),key=`${testType}:${String(state.selectedDay||'all')}`,prev=Number(state.userData.shop.ticketClaims[key]||0),delta=Math.max(0,tier-prev);if(tier>prev)state.userData.shop.ticketClaims[key]=tier;if(delta>0)state.userData.shop.tickets+=delta;return delta}
 
     function renderCharacterAvatar(charKey) {
       const meta = CHAR_META[charKey];
@@ -313,6 +450,115 @@
         <img src="${meta.imgFile}" alt="${meta.name}" 
              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
         <div style="display:none; width:100%; height:100%;">${fallbackAvatar}</div>
+      `;
+    }
+
+
+    const CUTOUT_CACHE = new Map();
+
+    function getCutoutDataUrl(src) {
+      if (CUTOUT_CACHE.has(src)) return CUTOUT_CACHE.get(src);
+      return null;
+    }
+
+    function makeWhiteTransparent(imgEl, threshold = 242) {
+      try {
+        if (!imgEl || !imgEl.naturalWidth || !imgEl.naturalHeight) return;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        canvas.width = imgEl.naturalWidth;
+        canvas.height = imgEl.naturalHeight;
+        ctx.drawImage(imgEl, 0, 0);
+        const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const d = image.data;
+
+        // Remove only near-white pixels that are visually background-like.
+        // Soft alpha around the threshold keeps anti-aliased hair edges cleaner.
+        for (let i = 0; i < d.length; i += 4) {
+          const r = d[i], g = d[i+1], b = d[i+2];
+          const min = Math.min(r,g,b), max = Math.max(r,g,b);
+          const isNeutral = (max - min) < 18;
+          if (isNeutral && min >= threshold) {
+            const fade = Math.max(0, Math.min(1, (255 - min) / (255 - threshold)));
+            d[i+3] = Math.round(255 * fade);
+          }
+        }
+        ctx.putImageData(image, 0, 0);
+        const url = canvas.toDataURL('image/png');
+        CUTOUT_CACHE.set(imgEl.getAttribute('src'), url);
+        imgEl.src = url;
+      } catch (e) {
+        console.warn('캐릭터 배경 제거 실패:', e);
+      }
+    }
+
+    function characterCutoutImg(meta, className='preview-char-cutout') {
+      const cached = getCutoutDataUrl(meta.imgFile);
+      return `<img class="${className}" src="${cached || meta.imgFile}" alt="${meta.name}"
+        ${cached ? '' : `onload="makeWhiteTransparent(this)"`}
+        onerror="this.style.display='none';">`;
+    }
+
+    function renderDecoratedCharacter(charKey) {
+      const meta = CHAR_META[charKey] || CHAR_META.kageyama;
+      const shop = state.userData?.shop || getShopDefaultData();
+      const eq = shop.equipped || {};
+      const bg = getShopItem(eq.background);
+      const slogan = getShopItem(eq.slogan);
+
+      const layers = ["head", "face", "side", "effect"]
+        .map(slot => ({ slot, item: getShopItem(eq[slot]) }))
+        .filter(x => x.item);
+
+      const sloganT = slogan ? getPreviewTransform(slogan) : null;
+
+      return `
+        <div class="character-stage">
+          <div class="character-profile-viewport">
+            <div class="character-frame-stack">
+              <div class="character-frame-clip">
+                ${bg ? `
+                  <img class="character-bg-layer"
+                       src="${bg.file}"
+                       alt="${bg.name}"
+                       onerror="this.style.display='none';">
+                ` : ''}
+                ${characterCutoutImg(meta, 'character-base-cutout')}
+              </div>
+
+              ${slogan ? `
+                <img class="character-slogan-layer"
+                     src="${slogan.file}"
+                     alt="${slogan.name}"
+                     style="
+                       left:calc(50% + ${sloganT.x}px);
+                       top:calc(50% + ${sloganT.y}px);
+                       width:${sloganT.scale}%;
+                       opacity:${sloganT.opacity / 100};
+                       transform:translate(-50%,-50%) rotate(${sloganT.rotate || 0}deg);
+                     "
+                     onerror="this.style.display='none';">
+              ` : ''}
+
+              ${layers.map(({ item }) => {
+                const t = getPreviewTransform(item);
+                return `
+                  <img class="character-accessory-layer"
+                       src="${item.file}"
+                       alt="${item.name}"
+                       style="
+                         left:calc(50% + ${t.x}px);
+                         top:calc(50% + ${t.y}px);
+                         width:${t.scale}%;
+                         opacity:${t.opacity / 100};
+                         transform:translate(-50%,-50%) rotate(${t.rotate || 0}deg);
+                       "
+                       onerror="this.style.display='none';">
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
       `;
     }
 
@@ -568,9 +814,25 @@
       }
     }
 
-    let bgmAudio = new Audio('bgm.mp3');
-    bgmAudio.loop = true;
+    const BGM_TRACKS = [
+      { id: 'haikyuu', title: 'Haikyuu', file: 'bgm/Haikyuu.mp3' },
+      { id: 'hatsunetsu', title: 'Hatsunetsu (lyrics)', file: 'bgm/Hatsunetsu(lyrics).mp3' },
+      { id: 'inarizaki', title: 'Inarizaki', file: 'bgm/Inarizaki.mp3' },
+      { id: 'orange', title: 'Orange', file: 'bgm/Orange.mp3' },
+      { id: 'to_reach_you', title: 'To reach you (lyrics)', file: 'bgm/To reach you(lyrics).mp3' }
+    ];
+
+    let selectedBgmId = localStorage.getItem('haikyu_bgm_track') || BGM_TRACKS[0].id;
+    let bgmVolume = Math.min(1, Math.max(0, Number(localStorage.getItem('haikyu_bgm_volume') ?? 0.35)));
     let isBgmPlaying = false;
+
+    function getSelectedBgmTrack() {
+      return BGM_TRACKS.find(t => t.id === selectedBgmId) || BGM_TRACKS[0];
+    }
+
+    let bgmAudio = new Audio(getSelectedBgmTrack().file);
+    bgmAudio.loop = true;
+    bgmAudio.volume = bgmVolume;
 
     let availableVoices = [];
     let pronunciationAudio = new Audio();
@@ -607,7 +869,7 @@
     }
 
     let state = {
-      user: null, // 'jiyeon' | 'kyungmin'
+      user: null, // 'jiyeon' | 'gyungmin'
       lang: null,
       char: 'kageyama',
       entered: false,
@@ -617,7 +879,11 @@
       selectedDay: 'all',
       selectedAccent: 'US', // US, UK
       blindMode: localStorage.getItem('haikyu_blind_mode') === 'true',
-      blindOpacity: Math.min(1, Math.max(0.03, Number(localStorage.getItem('haikyu_blind_opacity') || 0.12))),
+      blindOpacity: Math.min(1, Math.max(0, Number(localStorage.getItem('haikyu_blind_opacity') ?? 0))),
+      shopCategory: 'accessory',
+      shopPreviewItemId: null,
+      shopPreviewTransforms: {},
+      lastTicketGain: 0,
       fcIdx: 0,
       fcShowMeaning: false,
       quizIdx: 0,
@@ -638,7 +904,7 @@
       userData: {
         exp: 0, coins: 200, satisfaction: 3, stamina: 3,
         myVocabIds: [], attendanceDates: [], studyHistory: [],
-        spacedRepData: {}, customWords: []
+        spacedRepData: {}, customWords: [], shop: getShopDefaultData()
       }
     };
 
@@ -648,7 +914,7 @@
 
     function getUserDisplayName() {
       if (state.user === 'jiyeon') return '지연';
-      if (state.user === 'kyungmin') return '경민';
+      if (state.user === 'gyungmin') return '경민';
       return '';
     }
 
@@ -679,7 +945,8 @@
         attendanceDates: [],
         studyHistory: [],
         spacedRepData: {},
-        customWords: []
+        customWords: [],
+        shop: getShopDefaultData()
       };
     }
 
@@ -694,9 +961,9 @@
         myVocabIds: Array.isArray(src.myVocabIds ?? src.my_vocab_ids) ? (src.myVocabIds ?? src.my_vocab_ids) : [],
         attendanceDates: Array.isArray(src.attendanceDates ?? src.attendance_dates) ? (src.attendanceDates ?? src.attendance_dates) : [],
         studyHistory: Array.isArray(src.studyHistory ?? src.study_history) ? (src.studyHistory ?? src.study_history) : [],
-        spacedRepData: (src.spacedRepData ?? src.spaced_rep_data) && typeof (src.spacedRepData ?? src.spaced_rep_data) === 'object'
-          ? (src.spacedRepData ?? src.spaced_rep_data) : {},
-        customWords: Array.isArray(src.customWords ?? src.custom_words) ? (src.customWords ?? src.custom_words) : []
+        spacedRepData: (() => { const raw=(src.spacedRepData ?? src.spaced_rep_data)&&typeof (src.spacedRepData ?? src.spaced_rep_data)==='object'?{...(src.spacedRepData ?? src.spaced_rep_data)}:{}; delete raw.__shop; return raw; })(),
+        customWords: Array.isArray(src.customWords ?? src.custom_words) ? (src.customWords ?? src.custom_words) : [],
+        shop: normalizeShopData(src.shop || (((src.spacedRepData ?? src.spaced_rep_data)||{}).__shop) || null)
       };
     }
 
@@ -784,7 +1051,7 @@
         my_vocab_ids: Array.isArray(data.myVocabIds) ? data.myVocabIds : [],
         attendance_dates: Array.isArray(data.attendanceDates) ? data.attendanceDates : [],
         study_history: Array.isArray(data.studyHistory) ? data.studyHistory : [],
-        spaced_rep_data: data.spacedRepData && typeof data.spacedRepData === 'object' ? data.spacedRepData : {},
+        spaced_rep_data: { ...(data.spacedRepData && typeof data.spacedRepData === 'object' ? data.spacedRepData : {}), __shop: normalizeShopData(data.shop) },
         custom_words: Array.isArray(data.customWords) ? data.customWords : [],
         updated_at: new Date().toISOString()
       };
@@ -879,19 +1146,85 @@
       render();
     }
 
-    function toggleBgm() {
-      if (isBgmPlaying) {
-        bgmAudio.pause();
-        isBgmPlaying = false;
-      } else {
+    function syncBgmSource(shouldPlay = false) {
+      const track = getSelectedBgmTrack();
+      const wasPlaying = isBgmPlaying || shouldPlay;
+
+      bgmAudio.pause();
+      bgmAudio.src = track.file;
+      bgmAudio.loop = true;
+      bgmAudio.volume = bgmVolume;
+      bgmAudio.load();
+
+      if (wasPlaying) {
         bgmAudio.play().then(() => {
           isBgmPlaying = true;
           render();
         }).catch(err => {
-          alert('BGM 파일(bgm.mp3)이 폴더에 있는지 확인해주세요.');
+          isBgmPlaying = false;
+          console.warn('BGM play failed:', err);
+          alert(`BGM 파일을 재생할 수 없습니다.\n${track.file}\nGitHub의 bgm 폴더와 파일명을 확인해주세요.`);
+          render();
         });
+      } else {
+        isBgmPlaying = false;
       }
+    }
+
+    function selectBgm(trackId) {
+      if (!BGM_TRACKS.some(t => t.id === trackId)) return;
+      const shouldResume = isBgmPlaying;
+      selectedBgmId = trackId;
+      localStorage.setItem('haikyu_bgm_track', selectedBgmId);
+      syncBgmSource(shouldResume);
       render();
+    }
+
+    function changeBgmBy(step) {
+      const idx = Math.max(0, BGM_TRACKS.findIndex(t => t.id === selectedBgmId));
+      const next = (idx + step + BGM_TRACKS.length) % BGM_TRACKS.length;
+      selectBgm(BGM_TRACKS[next].id);
+    }
+
+    function setBgmVolume(value) {
+      const parsed = Number(value);
+      bgmVolume = Math.min(1, Math.max(0, Number.isFinite(parsed) ? parsed : 0.35));
+      bgmAudio.volume = bgmVolume;
+      localStorage.setItem('haikyu_bgm_volume', String(bgmVolume));
+
+      const label = document.getElementById('bgm-volume-value');
+      if (label) label.textContent = `${Math.round(bgmVolume * 100)}%`;
+    }
+
+    function toggleBgm() {
+      if (isBgmPlaying) {
+        bgmAudio.pause();
+        isBgmPlaying = false;
+        render();
+        return;
+      }
+
+      const track = getSelectedBgmTrack();
+
+      // 현재 Audio 객체가 다른 파일을 가리키고 있으면 선택 곡으로 교체
+      const currentSrc = decodeURIComponent(bgmAudio.src || '');
+      const wantedFile = track.file;
+      if (!currentSrc.includes(wantedFile)) {
+        bgmAudio.src = wantedFile;
+        bgmAudio.loop = true;
+        bgmAudio.volume = bgmVolume;
+        bgmAudio.load();
+      }
+
+      bgmAudio.play().then(() => {
+        isBgmPlaying = true;
+        render();
+      }).catch(err => {
+        isBgmPlaying = false;
+        console.warn('BGM play failed:', err);
+        alert(`BGM 파일을 재생할 수 없습니다.\n${track.file}\nGitHub의 bgm 폴더와 파일명을 확인해주세요.`);
+        render();
+      });
     }
 
     function toggleBlindMode() {
@@ -902,7 +1235,7 @@
 
     function setBlindOpacity(value) {
       const parsed = Number(value);
-      state.blindOpacity = Math.min(1, Math.max(0.03, Number.isFinite(parsed) ? parsed : 0.12));
+      state.blindOpacity = Math.min(1, Math.max(0, Number.isFinite(parsed) ? parsed : 0));
       localStorage.setItem('haikyu_blind_opacity', String(state.blindOpacity));
 
       const target = document.querySelector('.character-privacy-target');
@@ -1050,6 +1383,7 @@
       state.quizAnswered = false;
       state.quizSelectedOpt = null;
       state.quizScore = { correct: 0, total: state.quizQuestions.length, wrongIds: [], finished: false };
+      state.lastTicketGain = 0;
       state.mood = 'normal';
     }
 
@@ -1065,6 +1399,7 @@
       state.hardAnswered = false;
       state.hardIsCorrect = false;
       state.hardScore = { correct: 0, total: state.hardQuestions.length, wrongIds: [], finished: false };
+      state.lastTicketGain = 0;
       state.mood = 'normal';
     }
 
@@ -1091,6 +1426,7 @@
       state.spellAnswered = false;
       state.spellIsCorrect = false;
       state.spellScore = { correct: 0, total: state.spellQuestions.length, wrongIds: [], finished: false };
+      state.lastTicketGain = 0;
       state.mood = 'normal';
     }
 
@@ -1107,7 +1443,7 @@
               <span>지연</span>
               <span>➔</span>
             </div>
-            <div class="lang-choice-card" onclick="selectUser('kyungmin')">
+            <div class="lang-choice-card" onclick="selectUser('gyungmin')">
               <span>경민</span>
               <span>➔</span>
             </div>
@@ -1224,7 +1560,7 @@
                   <input
                     class="blind-slider"
                     type="range"
-                    min="0.03"
+                    min="0"
                     max="1"
                     step="0.01"
                     value="${state.blindOpacity}"
@@ -1235,9 +1571,37 @@
                   <span id="blind-opacity-value" class="blind-opacity-value">${Math.round(state.blindOpacity * 100)}%</span>
                 </div>
               </div>
-              <div class="bgm-widget-box">
-                <span class="bgm-title">🎵 BGM</span>
-                <button class="btn-pixel-black" style="padding: 2px 8px; font-size: 10px;" onclick="toggleBgm()">${isBgmPlaying ? '⏸ 정지' : '▶ 재생'}</button>
+              <div class="bgm-widget-box multi-bgm">
+                <div class="bgm-top-row">
+                  <span class="bgm-title">🎵 BGM · ${getSelectedBgmTrack().title}</span>
+                </div>
+
+                <select class="bgm-select" onchange="selectBgm(this.value)" aria-label="BGM 선택">
+                  ${BGM_TRACKS.map(track => `
+                    <option value="${track.id}" ${selectedBgmId === track.id ? 'selected' : ''}>${track.title}</option>
+                  `).join('')}
+                </select>
+
+                <div class="bgm-controls-row">
+                  <button class="btn-pixel-white bgm-mini-btn" onclick="changeBgmBy(-1)" title="이전 곡">◀</button>
+                  <button class="btn-pixel-black bgm-play-btn" onclick="toggleBgm()">${isBgmPlaying ? '⏸ 정지' : '▶ 재생'}</button>
+                  <button class="btn-pixel-white bgm-mini-btn" onclick="changeBgmBy(1)" title="다음 곡">▶</button>
+                </div>
+
+                <div class="bgm-controls-row">
+                  <span style="font-size:10px;font-weight:900;color:#64748B;">🔊</span>
+                  <input
+                    class="bgm-volume"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="${bgmVolume}"
+                    oninput="setBgmVolume(this.value)"
+                    aria-label="BGM 볼륨"
+                  />
+                  <span id="bgm-volume-value" class="bgm-volume-label">${Math.round(bgmVolume * 100)}%</span>
+                </div>
               </div>
               <div class="stat-counter-bar">
                 <span style="color: #EA580C;">TODAY ${totC}</span>
@@ -1247,11 +1611,8 @@
                 class="mini-room-box character-privacy-target"
                 style="opacity: ${state.blindMode ? state.blindOpacity : 1};"
               >
-                <div class="large-mii-frame">
-                  ${renderCharacterAvatar(state.char)}
-                </div>
+                ${renderDecoratedCharacter(state.char)}
                 <div style="flex-grow: 1;">
-                  <div style="font-size: 11px; font-weight: 800; color: #64748B; display:flex; align-items:center; gap:4px;">GYMNASIUM ${renderMikasaBall(13)}</div>
                   <div style="font-weight: 900; font-size: 14px; margin-top: 2px;">${charInfo.name}</div>
                 </div>
                 <div class="left-emotion-badge">${state.mood === 'happy' ? '🔥' : (state.mood === 'angry' ? '💢' : '✨')}</div>
@@ -1272,6 +1633,8 @@
                 </div>
                 <div class="stamina-progress-bg"><div class="stamina-progress-fill" style="width: ${expPct}%; background: #3B82F6;"></div></div>
               </div>
+              <div class="shop-summary-box"><span>응원 티켓 🎟️</span><span style="color:#7C3AED;">${state.userData.shop.tickets}장</span></div>
+              <button class="btn-pixel-white" style="width:100%;padding:7px;font-size:11px;border-color:#7C3AED;color:#6D28D9;" onclick="switchTab('shop')">🛍️ 꾸미기 상점</button>
               <div style="display:flex; justify-content:space-between; align-items:center; font-size:10.5px; font-weight:900; color:#475569; margin-top:2px;">
                 <span>보유 코인</span><span style="color:#EA580C;">${state.userData.coins} 🪙</span>
               </div>
@@ -1293,6 +1656,7 @@
               ${state.lang !== 'ja' ? `<button class="btn-tab-menu ${state.tab === 'spell' ? 'active' : ''}" onclick="switchTab('spell')">스펠링</button>` : ''}
               <button class="btn-tab-menu ${state.tab === 'custom' ? 'active' : ''}" onclick="switchTab('custom')">단어장</button>
               <button class="btn-tab-menu ${state.tab === 'spaced' ? 'active' : ''}" onclick="switchTab('spaced')">복습</button>
+              <button class="btn-tab-menu ${state.tab === 'shop' ? 'active' : ''}" onclick="switchTab('shop')">상점</button>
               <button class="btn-tab-menu ${state.tab === 'history' ? 'active' : ''}" onclick="switchTab('history')">기록</button>
             </div>
 
@@ -1376,6 +1740,7 @@
               <h3 style="font-weight: 900; display:flex; justify-content:center; align-items:center; gap:7px;">${renderMikasaBall(22)} 1세트 객관식 결과</h3>
               <p style="font-size: 16px; color: #4B5563;">성공률: ${rate}% (${sc.correct}/${sc.total})</p>
               <h4 style="color: #EA580C; font-weight: 900;">+${calculateTestReward('quiz', sc.correct).exp} EXP | +${calculateTestReward('quiz', sc.correct).coins} 🪙 획득!</h4>
+              <div class="ticket-result">🎟️ 응원 티켓 ${state.lastTicketGain > 0 ? `+${state.lastTicketGain}장` : '추가 획득 없음'}</div>
               <button class="btn-pixel-black" style="margin-top: 15px;" onclick="generateQuiz(); render();">다시 시작하기 ➔</button>
             </div>
           `;
@@ -1418,6 +1783,7 @@
               <h3 style="font-weight: 900;">🔥 주관식 Hard 세트 완료!</h3>
               <p style="font-size: 16px; color: #4B5563;">적중: ${sc.correct} / ${sc.total}</p>
               <h4 style="color: #EA580C; font-weight: 900;">+${calculateTestReward('hard', sc.correct).exp} EXP | +${calculateTestReward('hard', sc.correct).coins} 🪙 획득!</h4>
+              <div class="ticket-result">🎟️ 응원 티켓 ${state.lastTicketGain > 0 ? `+${state.lastTicketGain}장` : '추가 획득 없음'}</div>
               <button class="btn-pixel-black" style="margin-top: 15px;" onclick="generateHardQuiz(); render();">다시 시작하기 ➔</button>
             </div>
           `;
@@ -1459,6 +1825,7 @@
               <h3 style="font-weight: 900;">🔤 스펠링 게임 완료!</h3>
               <p style="font-size: 16px; color: #4B5563;">적중: ${sc.correct} / ${sc.total}</p>
               <h4 style="color: #EA580C; font-weight: 900;">+${calculateTestReward('spell', sc.correct).exp} EXP | +${calculateTestReward('spell', sc.correct).coins} 🪙 획득!</h4>
+              <div class="ticket-result">🎟️ 응원 티켓 ${state.lastTicketGain > 0 ? `+${state.lastTicketGain}장` : '추가 획득 없음'}</div>
               <button class="btn-pixel-black" style="margin-top: 15px;" onclick="generateSpellQuiz(); render();">다시 시작하기 ➔</button>
             </div>
           `;
@@ -1526,7 +1893,7 @@
         const sData = state.userData.spacedRepData;
         const todayStr = new Date().toISOString().split('T')[0];
         const db = getCombinedVocab();
-        const reviewIds = Object.keys(sData).filter(k => sData[k].nextDate <= todayStr);
+        const reviewIds = Object.keys(sData).filter(k => !k.startsWith('__') && sData[k] && sData[k].nextDate <= todayStr);
         const reviewList = db.filter(d => reviewIds.includes(d.id));
 
         if (reviewList.length === 0) {
@@ -1546,6 +1913,17 @@
             `).join('')}
           </div>
         `;
+      }
+
+      if (state.tab === 'shop') {
+        const schoolId=getCharSchoolId(),visibleItems=SHOP_ITEMS.filter(item=>item.type===state.shopCategory&&(item.school==='all'||item.school===schoolId));
+        const labels={accessory:'🎀 액세서리',background:'🖼️ 배경',slogan:'🏳️ 슬로건'};
+        const previewItem=getShopItem(state.shopPreviewItemId);
+        return `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h4 style="font-weight:900;margin:0 0 4px">🛍️ 꾸미기 상점</h4><div style="font-size:11.5px;color:#64748B;font-weight:700">${CHAR_META[state.char].name} · ${SCHOOL_LABELS[schoolId]||CHAR_META[state.char].school}</div></div><div style="font-weight:900;color:#7C3AED;background:#F5F3FF;border:1.5px solid #C4B5FD;border-radius:9px;padding:7px 10px">🎟️ ${state.userData.shop.tickets}장</div></div>
+        <div class="shop-category-tabs" style="margin-top:12px">${Object.keys(labels).map(cat=>`<button class="shop-category-btn ${state.shopCategory===cat?'active':''}" onclick="setShopCategory('${cat}')">${labels[cat]}</button>`).join('')}</div>
+        <div style="font-size:10.5px;color:#94A3B8;margin-top:8px">모든 아이템은 구매 전에 미리보기할 수 있습니다. 액세서리와 슬로건은 위치·크기·투명도까지 조정해볼 수 있어요.</div>
+        ${previewItem?renderShopItemPreview(previewItem):''}
+        <div class="shop-grid">${visibleItems.map(item=>{const owned=state.userData.shop.ownedItems.includes(item.id),slot=item.type==='accessory'?item.slot:item.type,equipped=state.userData.shop.equipped[slot]===item.id,canBuy=state.userData.shop.tickets>=item.price,previewing=state.shopPreviewItemId===item.id;return `<div class="shop-card ${equipped?'equipped':''} ${previewing?'previewing':''}"><div class="shop-preview ${item.type==='background'?'bg':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}</div><div class="shop-item-meta">${item.school==='all'?'전 캐릭터 공용':`${SCHOOL_LABELS[item.school]} 전용`}${item.type==='accessory'?` · ${item.slot==='head'?'머리':item.slot==='face'?'얼굴':item.slot==='effect'?'효과':'주변 소품'}`:''}</div><button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">${previewing?'미리보기 닫기':'👀 미리보기'}</button>${owned?`<button class="${equipped?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;padding:7px 4px;font-size:11px" onclick="${equipped?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${equipped?'장착 해제':'장착하기'}</button>`:`<button class="btn-pixel-white" style="width:100%;padding:7px 4px;font-size:11px;${canBuy?'border-color:#7C3AED;color:#6D28D9;':'opacity:.55;'}" onclick="buyShopItem('${item.id}')" ${canBuy?'':'disabled'}>🎟️ ${item.price} · 구매</button>`}</div>`}).join('')}</div>`;
       }
 
       if (state.tab === 'history') {
@@ -1574,6 +1952,105 @@
 
       return '';
     }
+
+
+    function getDefaultPreviewTransform(item){
+      if(!item) return {x:0,y:0,scale:100,opacity:100,rotate:0};
+      if(item.type==='slogan') return {x:0,y:-112,scale:80,opacity:100,rotate:0};
+      if(item.type==='background') return {x:0,y:0,scale:100,opacity:100,rotate:0};
+      const slot=item.slot;
+      if(slot==='head') return {x:0,y:-92,scale:42,opacity:100,rotate:0};
+      if(slot==='face') return {x:0,y:-18,scale:48,opacity:100,rotate:0};
+      if(slot==='side') return {x:72,y:36,scale:36,opacity:100,rotate:0};
+      return {x:0,y:0,scale:92,opacity:95,rotate:0};
+    }
+    function getPreviewTransform(item){
+      if(!item) return {x:0,y:0,scale:100,opacity:100};
+      const saved = state.userData?.shop?.transforms?.[item.id];
+      if(saved && !state.shopPreviewTransforms[item.id]) state.shopPreviewTransforms[item.id]={rotate:0,...saved};
+      if(!state.shopPreviewTransforms[item.id]) state.shopPreviewTransforms[item.id]=getDefaultPreviewTransform(item);
+      return state.shopPreviewTransforms[item.id];
+    }
+    function previewShopItem(id){
+      state.shopPreviewItemId = state.shopPreviewItemId===id ? null : id;
+      const item=getShopItem(id);
+      if(item) getPreviewTransform(item);
+      render();
+    }
+    function updateShopPreviewTransform(id,key,value){
+      const item=getShopItem(id); if(!item) return;
+      const t=getPreviewTransform(item);
+      t[key]=Number(value);
+      if(state.userData?.shop){
+        state.userData.shop.transforms = state.userData.shop.transforms || {};
+        state.userData.shop.transforms[id] = {...t};
+      }
+      const el=document.getElementById('shop-preview-moving-layer');
+      if(el){
+        el.style.left=`calc(50% + ${t.x}px)`;
+        el.style.top=`calc(50% + ${t.y}px)`;
+        el.style.width=`${t.scale}%`;
+        el.style.opacity=String(t.opacity/100);
+        el.style.transform=`translate(-50%,-50%) rotate(${t.rotate || 0}deg)`;
+      }
+      const label=document.getElementById(`preview-${key}-value`);
+      if(label) label.textContent =
+        key==='opacity' ? `${t[key]}%` :
+        key==='scale' ? `${t[key]}%` :
+        key==='rotate' ? `${t[key]}°` :
+        `${t[key]}px`;
+    }
+    function resetShopPreviewTransform(id){
+      const item=getShopItem(id); if(!item) return;
+      state.shopPreviewTransforms[id]=getDefaultPreviewTransform(item);
+      state.userData.shop.transforms = state.userData.shop.transforms || {};
+      state.userData.shop.transforms[id] = {...state.shopPreviewTransforms[id]};
+      render();
+    }
+    function renderShopItemPreview(item){
+      if(!item) return '';
+      const meta=CHAR_META[state.char]||CHAR_META.kageyama;
+      const t=getPreviewTransform(item);
+      const isBg=item.type==='background';
+      const movingClass=item.type==='slogan'?'preview-slogan':'preview-accessory';
+      const movingStyle=`left:calc(50% + ${t.x}px);top:calc(50% + ${t.y}px);width:${t.scale}%;opacity:${t.opacity/100};transform:translate(-50%,-50%) rotate(${t.rotate || 0}deg);`;
+      return `<div class="shop-preview-panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div><b>👀 ${item.name} 미리보기</b><div style="font-size:10.5px;color:#64748B;margin-top:2px">실제 장착 모습 기준으로 확인합니다.</div></div>
+          <button class="btn-pixel-white" onclick="previewShopItem('${item.id}')">닫기 ✕</button>
+        </div>
+
+        <div class="shop-preview-stage ${isBg?'':'cutout-stage'}">
+          ${isBg?`<img class="preview-bg" src="${item.file}" alt="${item.name}">`:''}
+          ${characterCutoutImg(meta,'preview-char-cutout')}
+          ${!isBg?`<img id="shop-preview-moving-layer" class="${movingClass}" src="${item.file}" alt="${item.name}" style="${movingStyle}">`:''}
+        </div>
+
+        ${isBg?`
+          <div style="font-size:11px;color:#64748B;text-align:center;font-weight:800">배경이 캐릭터 뒤에 표시됩니다.</div>
+        `:`
+        <div class="preview-controls">
+          <div class="preview-control"><label><span>↔ 좌우 위치</span><span id="preview-x-value">${t.x}px</span></label><input type="range" min="-180" max="180" step="1" value="${t.x}" oninput="updateShopPreviewTransform('${item.id}','x',this.value)"></div>
+          <div class="preview-control"><label><span>↕ 위아래 위치</span><span id="preview-y-value">${t.y}px</span></label><input type="range" min="-220" max="180" step="1" value="${t.y}" oninput="updateShopPreviewTransform('${item.id}','y',this.value)"></div>
+          <div class="preview-control"><label><span>🔍 크기</span><span id="preview-scale-value">${t.scale}%</span></label><input type="range" min="8" max="180" step="1" value="${t.scale}" oninput="updateShopPreviewTransform('${item.id}','scale',this.value)"></div>
+          <div class="preview-control"><label><span>◐ 투명도</span><span id="preview-opacity-value">${t.opacity}%</span></label><input type="range" min="0" max="100" step="1" value="${t.opacity}" oninput="updateShopPreviewTransform('${item.id}','opacity',this.value)"></div>
+          <div class="preview-control"><label><span>↻ 각도</span><span id="preview-rotate-value">${t.rotate || 0}°</span></label><input type="range" min="-180" max="180" step="1" value="${t.rotate || 0}" oninput="updateShopPreviewTransform('${item.id}','rotate',this.value)"></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px"><button class="btn-pixel-white" onclick="resetShopPreviewTransform('${item.id}')">↺ 위치 초기화</button><button class="btn-pixel-black" onclick="savePreviewPosition('${item.id}')">💾 이 위치 저장</button></div>`}
+      </div>`;
+    }
+    function savePreviewPosition(id){
+      const item=getShopItem(id); if(!item) return;
+      state.userData.shop.transforms = state.userData.shop.transforms || {};
+      state.userData.shop.transforms[id] = {...getPreviewTransform(item)};
+      saveUserData();
+      alert('이 위치를 저장했습니다.');
+    }
+    function setShopCategory(category){state.shopCategory=category;state.shopPreviewItemId=null;render()}
+
+    function buyShopItem(id){const item=getShopItem(id);if(!item)return;const s=getCharSchoolId();if(item.school!=='all'&&item.school!==s)return alert('이 아이템은 현재 캐릭터의 학교에서는 사용할 수 없습니다.');if(state.userData.shop.ownedItems.includes(id))return;if(state.userData.shop.tickets<item.price)return alert(`응원 티켓이 부족합니다. ${item.price}장이 필요합니다.`);state.userData.shop.tickets-=item.price;state.userData.shop.ownedItems.push(id);state.userData.shop.ownedItems=Array.from(new Set(state.userData.shop.ownedItems));saveUserData();render()}
+    function equipShopItem(id){const item=getShopItem(id);if(!item||!state.userData.shop.ownedItems.includes(id))return;const s=getCharSchoolId();if(item.school!=='all'&&item.school!==s)return alert('현재 캐릭터에게 장착할 수 없는 학교 전용 아이템입니다.');const slot=item.type==='accessory'?item.slot:item.type;state.userData.shop.equipped[slot]=id;state.userData.shop.transforms=state.userData.shop.transforms||{};state.userData.shop.transforms[id]={...getPreviewTransform(item)};saveUserData();render()}
+    function unequipShopItem(id){const item=getShopItem(id);if(!item)return;const slot=item.type==='accessory'?item.slot:item.type;if(state.userData.shop.equipped[slot]===id){state.userData.shop.equipped[slot]=null;saveUserData()}render()}
 
     function selectUser(u) {
       state.user = u;
@@ -1680,6 +2157,7 @@
       } else {
         state.quizScore.finished = true;
         const reward = calculateTestReward('quiz', state.quizScore.correct);
+        state.lastTicketGain = awardCheerTickets('quiz', state.quizScore.correct, state.quizScore.total);
         addRewards(reward.exp, reward.coins);
         if (state.quizScore.wrongIds.length > 0) {
           state.userData.myVocabIds = Array.from(new Set([...state.userData.myVocabIds, ...state.quizScore.wrongIds]));
@@ -1728,6 +2206,7 @@
       } else {
         state.hardScore.finished = true;
         const reward = calculateTestReward('hard', state.hardScore.correct);
+        state.lastTicketGain = awardCheerTickets('hard', state.hardScore.correct, state.hardScore.total);
         addRewards(reward.exp, reward.coins);
         if (state.hardScore.wrongIds.length > 0) {
           state.userData.myVocabIds = Array.from(new Set([...state.userData.myVocabIds, ...state.hardScore.wrongIds]));
@@ -1766,6 +2245,7 @@
       } else {
         state.spellScore.finished = true;
         const reward = calculateTestReward('spell', state.spellScore.correct);
+        state.lastTicketGain = awardCheerTickets('spell', state.spellScore.correct, state.spellScore.total);
         addRewards(reward.exp, reward.coins);
         if (state.spellScore.wrongIds.length > 0) {
           state.userData.myVocabIds = Array.from(new Set([...state.userData.myVocabIds, ...state.spellScore.wrongIds]));
