@@ -538,7 +538,7 @@
       selectedDay: 'all',
       selectedAccent: 'US', // US, UK
       blindMode: localStorage.getItem('haikyu_blind_mode') === 'true',
-      blindOpacity: Math.min(1, Math.max(0.03, Number(localStorage.getItem('haikyu_blind_opacity') || 0.12))),
+      blindOpacity: Math.min(1, Math.max(0, Number(localStorage.getItem('haikyu_blind_opacity') || 0.12))),
       fcIdx: 0,
       fcShowMeaning: false,
       quizIdx: 0,
@@ -822,7 +822,7 @@
 
     function setBlindOpacity(value) {
       const parsed = Number(value);
-      state.blindOpacity = Math.min(1, Math.max(0.03, Number.isFinite(parsed) ? parsed : 0.12));
+      state.blindOpacity = Math.min(1, Math.max(0, Number.isFinite(parsed) ? parsed : 0.12));
       localStorage.setItem('haikyu_blind_opacity', String(state.blindOpacity));
 
       const target = document.querySelector('.character-privacy-target');
@@ -1144,7 +1144,7 @@
                   <input
                     class="blind-slider"
                     type="range"
-                    min="0.03"
+                    min="0"
                     max="1"
                     step="0.01"
                     value="${state.blindOpacity}"
