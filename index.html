@@ -57,6 +57,48 @@
       width: 100%; height: 100%; object-fit: cover;
     }
 
+    .variant-select-grid {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+      margin:14px 0 18px;
+    }
+    .variant-card {
+      border:2px solid #D4D4D8;
+      border-radius:12px;
+      background:#FFFFFF;
+      padding:9px;
+      cursor:pointer;
+      transition:all .15s ease;
+      text-align:center;
+    }
+    .variant-card:hover {
+      border-color:#EA580C;
+      transform:translateY(-2px);
+    }
+    .variant-card.active {
+      border-color:#EA580C;
+      background:#FFF7ED;
+      box-shadow:2px 2px 0 #EA580C;
+    }
+    .variant-preview {
+      width:100%;
+      aspect-ratio:1/1;
+      border-radius:9px;
+      overflow:hidden;
+      border:1.5px solid #CBD5E1;
+      background:#F8FAFC;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-bottom:6px;
+    }
+    .variant-preview img {
+      width:100%;
+      height:100%;
+      object-fit:contain;
+    }
+
     .minihompy-window {
       width: 1180px; max-width: 98vw;
       background: #FFFFFF; border-radius: 20px;
@@ -186,18 +228,21 @@
     .large-mii-frame svg, .large-mii-frame img {
       width: 100%; height: 100%; object-fit: cover;
     }
-    .character-stage{width:100%;display:flex;align-items:center;justify-content:center;position:relative;margin:0 auto}
-    .character-profile-viewport{width:170px;height:170px;position:relative;overflow:hidden;border:3px solid #1E293B;border-radius:14px;background:#E5E7EB;box-shadow:2px 2px 0 rgba(0,0,0,.15)}
-    .character-frame-stack{width:230px;height:230px;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.7391304348);transform-origin:center center;overflow:hidden;background:#E5E7EB}
-    .character-frame-clip{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;border-radius:0}
+    .character-stage{width:100%;display:flex;align-items:center;justify-content:center;position:relative;margin:8px auto 2px}
+    .character-profile-viewport{width:200px;height:244px;position:relative;overflow:visible;border:3px solid #1E293B;border-radius:14px;background:#E5E7EB;box-shadow:2px 2px 0 rgba(0,0,0,.15)}
+    .character-frame-stack{width:230px;height:280px;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.87);transform-origin:center center;overflow:visible;background:transparent}
+    .character-frame-clip{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;border-radius:12px;background:#E5E7EB}
     .character-bg-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
-    .character-base-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2}
+    .character-base-layer{position:absolute;z-index:2;pointer-events:none;object-fit:contain}
     .character-accessory-layer{position:absolute;z-index:6;pointer-events:none;object-fit:contain}
-    .character-slogan-layer{position:absolute;z-index:7;object-fit:contain;pointer-events:none}.shop-summary-box{display:flex;justify-content:space-between;align-items:center;background:#FFF7ED;border:1.5px solid #FDBA74;border-radius:10px;padding:7px 9px;font-size:11px;font-weight:900}.shop-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.shop-card{border:2px solid #E2E8F0;border-radius:12px;padding:9px;background:#FFF;display:flex;flex-direction:column;gap:7px;min-width:0}.shop-card.equipped{border-color:#EA580C;background:#FFF7ED}.shop-preview{width:100%;aspect-ratio:1.45/1;border-radius:9px;overflow:hidden;background:#F1F5F9;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center}.shop-preview img{width:100%;height:100%;object-fit:contain}.shop-preview.bg img{object-fit:cover}.shop-item-name{font-size:12px;font-weight:900;line-height:1.25}.shop-item-meta{font-size:10.5px;color:#64748B;font-weight:700;line-height:1.3}.shop-category-tabs{display:flex;gap:6px;flex-wrap:wrap}.shop-category-btn{border:2px solid #CBD5E1;background:#FFF;color:#334155;border-radius:8px;padding:7px 10px;font-size:11.5px;font-weight:900;cursor:pointer}.shop-category-btn.active{background:#1E293B;color:#FFF;border-color:#1E293B}.ticket-result{margin-top:8px;font-size:13px;font-weight:900;color:#7C3AED}
+    .character-slogan-layer{position:absolute;z-index:7;object-fit:contain;pointer-events:none}
+    .character-frame-overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:12;pointer-events:none}
+.shop-summary-box{display:flex;justify-content:space-between;align-items:center;background:#FFF7ED;border:1.5px solid #FDBA74;border-radius:10px;padding:7px 9px;font-size:11px;font-weight:900}.shop-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.shop-card{border:2px solid #E2E8F0;border-radius:12px;padding:9px;background:#FFF;display:flex;flex-direction:column;gap:7px;min-width:0}.shop-card.equipped{border-color:#EA580C;background:#FFF7ED}.shop-preview{width:100%;aspect-ratio:1.45/1;border-radius:9px;overflow:hidden;background:#F1F5F9;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center}.shop-preview img{width:100%;height:100%;object-fit:contain}.shop-preview.bg img{object-fit:cover}.shop-preview.frame img{object-fit:contain;background:#F8FAFC}.shop-item-name{font-size:12px;font-weight:900;line-height:1.25}.shop-item-meta{font-size:10.5px;color:#64748B;font-weight:700;line-height:1.3}.shop-category-tabs{display:flex;gap:6px;flex-wrap:wrap}.shop-category-btn{border:2px solid #CBD5E1;background:#FFF;color:#334155;border-radius:8px;padding:7px 10px;font-size:11.5px;font-weight:900;cursor:pointer}.shop-category-btn.active{background:#1E293B;color:#FFF;border-color:#1E293B}.ticket-result{margin-top:8px;font-size:13px;font-weight:900;color:#7C3AED}
     .shop-card.previewing{border-color:#7C3AED;background:#F5F3FF}
     .shop-preview-btn{width:100%;padding:7px 4px;font-size:11px;border-color:#7C3AED;color:#6D28D9}
     .shop-preview-panel{margin-top:14px;border:2px solid #C4B5FD;background:#FAF5FF;border-radius:14px;padding:12px}
-    .shop-preview-stage{width:230px;height:230px;max-width:100%;margin:10px auto;position:relative;overflow:hidden;border:3px solid #1E293B;border-radius:16px;background:#E5E7EB}
+    .shop-preview-stage{width:230px;height:280px;max-width:100%;margin:14px auto 10px;position:relative;overflow:visible;border:3px solid #1E293B;border-radius:16px;background:#E5E7EB}
+    .preview-stage-clip{position:absolute;inset:0;overflow:hidden;border-radius:13px;background:#E5E7EB}
     .shop-preview-stage .preview-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
     .shop-preview-stage .preview-char{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2}
     .shop-preview-stage.cutout-stage{background:
@@ -209,12 +254,10 @@
     .shop-preview-stage .preview-char-cutout,
     .character-frame-stack .character-base-cutout{
       position:absolute;z-index:2;pointer-events:none;
-      object-fit:contain;object-position:center bottom;
-      left:50%;bottom:0;transform:translateX(-50%);
-      width:100%;height:100%;
+      object-fit:contain;object-position:center bottom;transform-origin:center center;
     }
-    .character-frame-stack{overflow:hidden}
-    .character-frame-clip{position:absolute;inset:0;border-radius:0;overflow:hidden}
+    .character-frame-stack{overflow:visible}
+    .character-frame-clip{position:absolute;inset:0;border-radius:12px;overflow:hidden}
     .character-frame-clip .character-bg-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
     .character-frame-clip .character-base-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2}
     .character-frame-stack .character-accessory-layer{z-index:6}
@@ -222,10 +265,15 @@
 
     .shop-preview-stage .preview-slogan{position:absolute;z-index:5;object-fit:contain;pointer-events:none}
     .shop-preview-stage .preview-accessory{position:absolute;z-index:6;object-fit:contain;pointer-events:none}
+    .shop-preview-stage .preview-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:12;pointer-events:none}
     .preview-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
     .preview-control{background:#FFF;border:1.5px solid #E2E8F0;border-radius:9px;padding:7px}
     .preview-control label{display:flex;justify-content:space-between;font-size:10.5px;font-weight:900;color:#475569;margin-bottom:4px}
     .preview-control input{width:100%}
+    .character-adjust-box{margin-top:12px;padding:12px;border:2px solid #93C5FD;border-radius:13px;background:#EFF6FF}
+    .character-adjust-title{font-size:12px;font-weight:900;color:#1E3A8A;margin-bottom:3px}
+    .character-adjust-help{font-size:10.5px;color:#64748B;margin-bottom:9px;line-height:1.4}
+    .character-adjust-actions{display:flex;justify-content:flex-end;gap:6px;margin-top:8px;flex-wrap:wrap}
 
     .left-emotion-badge {
       position: absolute; top: 18px; right: 40px;
@@ -324,7 +372,7 @@
       .hompy-left-side { width: 100%; padding: 10px; }
       .mini-room-box { display: flex; align-items: center; gap: 12px; text-align: left; padding: 8px; }
       .large-mii-frame { width: 70px; height: 70px; margin: 0; flex-shrink: 0; }
-      .character-stage{margin:0;flex-shrink:0;width:auto}.character-profile-viewport{width:110px;height:110px}.character-frame-stack{width:230px;height:230px;transform:translate(-50%,-50%) scale(.4782608696)}.shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .character-stage{margin:4px 0;flex-shrink:0;width:auto}.character-profile-viewport{width:120px;height:146px}.character-frame-stack{width:230px;height:280px;transform:translate(-50%,-50%) scale(.5217391304)}.shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
       .left-emotion-badge { top: 2px; right: 2px; width: 24px; height: 24px; font-size: 13px; }
       .hompy-nav-tabs { width: 100%; flex-direction: row; overflow-x: auto; gap: 4px; padding-bottom: 2px; }
       .btn-tab-menu { flex: 1 0 auto; min-width: 60px; padding: 8px 6px; font-size: 11.5px; }
@@ -334,6 +382,7 @@
       .custom-input-row { flex-direction: column; align-items: stretch; gap: 6px; }
       .custom-input-row input { width: 100% !important; }
       .char-select-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+      .variant-select-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
   </style>
 </head>
@@ -355,7 +404,7 @@
     const CHAR_AVATARS = {
       kageyama: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="50" fill="#1E293B"/><path d="M25 45 C25 20 75 20 75 45 C75 35 65 25 50 25 C35 25 25 35 25 45 Z" fill="#0F172A"/><circle cx="50" cy="55" r="28" fill="#FDDFB7"/><path d="M22 42 C30 20 70 20 78 42 C70 38 60 35 50 38 C40 35 30 38 22 42 Z" fill="#020617"/><ellipse cx="38" cy="52" rx="4" ry="5" fill="#1E293B"/><ellipse cx="62" cy="52" rx="4" ry="5" fill="#1E293B"/><circle cx="39" cy="50" r="1.5" fill="#FFF"/><circle cx="63" cy="50" r="1.5" fill="#FFF"/><path d="M34 45 L44 48" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round"/><path d="M66 45 L56 48" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round"/><path d="M44 68 Q50 64 56 68" stroke="#0F172A" stroke-width="2" fill="none"/><path d="M30 82 L70 82 L65 100 L35 100 Z" fill="#EA580C"/></svg>`,
       oikawa: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="50" fill="#0D9488"/><circle cx="50" cy="55" r="28" fill="#FDDFB7"/><path d="M20 45 C25 15 75 15 80 45 C72 32 62 28 50 32 C38 28 28 32 20 45 Z" fill="#78350F"/><ellipse cx="38" cy="52" rx="4" ry="5" fill="#451A03"/><ellipse cx="62" cy="52" rx="4" ry="5" fill="#451A03"/><circle cx="39" cy="50" r="1.5" fill="#FFF"/><circle cx="63" cy="50" r="1.5" fill="#FFF"/><path d="M34 46 Q40 43 44 46" stroke="#78350F" stroke-width="2" fill="none"/><path d="M66 46 Q60 43 56 46" stroke="#78350F" stroke-width="2" fill="none"/><path d="M42 66 Q50 72 58 66" stroke="#451A03" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M30 82 L70 82 L65 100 L35 100 Z" fill="#14B8A6"/></svg>`,
-      miya: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="50" fill="#CA8A04"/><circle cx="50" cy="55" r="28" fill="#FDDFB7"/><path d="M22 45 C25 18 75 18 78 45 C65 30 55 32 50 30 C45 32 35 30 22 45 Z" fill="#EAB308"/><path d="M45 25 L75 35 L65 45 Z" fill="#CA8A04"/><ellipse cx="38" cy="52" rx="4" ry="5" fill="#1E293B"/><ellipse cx="62" cy="52" rx="4" ry="5" fill="#1E293B"/><circle cx="39" cy="50" r="1.5" fill="#FFF"/><circle cx="63" cy="50" r="1.5" fill="#FFF"/><path d="M34 46 L44 45" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M66 46 L56 45" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M44 66 Q50 70 56 66" stroke="#1E293B" stroke-width="2" fill="none"/><path d="M30 82 L70 82 L65 100 L35 100 Z" fill="#18181B"/></svg>`,
+      tsumu: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="50" fill="#CA8A04"/><circle cx="50" cy="55" r="28" fill="#FDDFB7"/><path d="M22 45 C25 18 75 18 78 45 C65 30 55 32 50 30 C45 32 35 30 22 45 Z" fill="#EAB308"/><path d="M45 25 L75 35 L65 45 Z" fill="#CA8A04"/><ellipse cx="38" cy="52" rx="4" ry="5" fill="#1E293B"/><ellipse cx="62" cy="52" rx="4" ry="5" fill="#1E293B"/><circle cx="39" cy="50" r="1.5" fill="#FFF"/><circle cx="63" cy="50" r="1.5" fill="#FFF"/><path d="M34 46 L44 45" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M66 46 L56 45" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M44 66 Q50 70 56 66" stroke="#1E293B" stroke-width="2" fill="none"/><path d="M30 82 L70 82 L65 100 L35 100 Z" fill="#18181B"/></svg>`,
       osamu: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="50" fill="#475569"/><circle cx="50" cy="55" r="28" fill="#FDDFB7"/><path d="M22 45 C25 18 75 18 78 45 C65 30 55 32 50 30 C45 32 35 30 22 45 Z" fill="#64748B"/><ellipse cx="38" cy="52" rx="4" ry="5" fill="#1E293B"/><ellipse cx="62" cy="52" rx="4" ry="5" fill="#1E293B"/><circle cx="39" cy="50" r="1.5" fill="#FFF"/><circle cx="63" cy="50" r="1.5" fill="#FFF"/><path d="M34 47 L44 47" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M66 47 L56 47" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M45 67 L55 67" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M30 82 L70 82 L65 100 L35 100 Z" fill="#18181B"/></svg>`
     };
 
@@ -368,8 +417,8 @@
         name: "오이카와 토오루", imgFile: "oikawa.png",
         num: "1", school: "아오바죠사이", pos: "Setter (주장)", food: "우유빵", act: "살인 서브", motto: "재능은 꽃피우는 것, 센스는 갈고닦는 것!"
       },
-      miya: {
-        name: "츠무", imgFile: "miya.png",
+      tsumu: {
+        name: "츠무", imgFile: "tsumu.png",
         num: "7", school: "이나리자키", pos: "Setter (세터)", food: "참치 뱃살", act: "2도류 서브", motto: "내 토스 칠 자격 있나? 증명해봐라."
       },
       osamu: {
@@ -390,49 +439,240 @@
       }
     };
 
+
+    // --------------------------------------------------------------
+    // 캐릭터별 이미지 버전
+    // 파일은 현재 index.html과 같은 위치(루트)에 둔 기준입니다.
+    // 다른 폴더에 넣었다면 아래 file 경로만 바꾸면 됩니다.
+    // --------------------------------------------------------------
+    const CHAR_VARIANTS = {
+      kageyama: [
+        {id:"default", name:"기본 카게야마", file:"kageyama.png"},
+        {id:"doctor", name:"의사 카게야마", file:"kageyama doctor.png"},
+        {id:"middle_school", name:"중학생 카게야마", file:"kageyama middle school.png"},
+        {id:"festival", name:"축제 카게야마", file:"kageyama festival.png"}
+      ],
+      oikawa: [
+        {id:"default", name:"기본 오이카와", file:"oikawa.png"},
+        {id:"festival", name:"축제 오이카와", file:"Oikawa Festival.png"},
+        {id:"weapon", name:"무기 오이카와", file:"Oikawa weapon.png"},
+        {id:"adult", name:"어른 오이카와", file:"Oikawa adult.png"}
+      ],
+      tsumu: [
+        {id:"default", name:"기본 츠무", file:"tsumu.png"},
+        {id:"smile", name:"웃는 츠무", file:"Tsumu smile.png"},
+        {id:"look", name:"츠무 Look", file:"Tsumu look.png"},
+        {id:"shower", name:"샤워 츠무", file:"Tsumu Shower.png"}
+      ],
+      osamu: [
+        {id:"default", name:"기본 사무", file:"osamu.png"},
+        {id:"look", name:"사무 Look", file:"Osamu look.png"},
+        {id:"shower", name:"샤워 사무", file:"Osamu Shower.png"}
+      ],
+      kenma: [
+        {id:"default", name:"기본 켄마", file:"kenma.png"},
+        {id:"festival", name:"축제 켄마", file:"Kenma Festival.png"}
+      ],
+      kita: [
+        {id:"default", name:"기본 키타", file:"kita.png"},
+        {id:"uniform", name:"유니폼 키타", file:"kita uniform.png"}
+      ],
+      goshiki: [
+        {id:"default", name:"기본 고시키", file:"goshiki.png"},
+        {id:"winter", name:"겨울 고시키", file:"Goshiki winter.png"},
+        {id:"school_uniform", name:"교복 고시키", file:"Goshiki school uniform.png"}
+      ]
+    };
+
+    function getCharacterVariants(charKey=state.char){
+      const meta=CHAR_META[charKey]||CHAR_META.kageyama;
+      return CHAR_VARIANTS[charKey] || [{id:"default",name:`기본 ${meta.name}`,file:meta.imgFile}];
+    }
+
+    function getSelectedVariant(charKey=state.char){
+      const list=getCharacterVariants(charKey);
+      const wanted=(charKey===state.char ? state.charVariant : null) || "default";
+      return list.find(v=>v.id===wanted) || list[0];
+    }
+
+    function getActiveCharacterMeta(charKey=state.char){
+      const meta=CHAR_META[charKey]||CHAR_META.kageyama;
+      const variant=(charKey===state.char)
+        ? getSelectedVariant(charKey)
+        : (getCharacterVariants(charKey)[0] || {file:meta.imgFile});
+      return {...meta,imgFile:variant.file,variantName:variant.name,variantId:variant.id};
+    }
+
+    function getVariantStorageKey(charKey=state.char){
+      return `haikyu_char_variant_${state.user||'guest'}_${state.lang||'en'}_${charKey}`;
+    }
+
+    function loadSavedVariant(charKey=state.char){
+      const list=getCharacterVariants(charKey);
+      const saved=localStorage.getItem(getVariantStorageKey(charKey));
+      state.charVariant=list.some(v=>v.id===saved)?saved:(list[0]?.id||"default");
+    }
+
+    function selectVariant(id){
+      if(!getCharacterVariants().some(v=>v.id===id)) return;
+      state.charVariant=id;
+      render();
+    }
+
+    function saveSelectedVariant(){
+      localStorage.setItem(getVariantStorageKey(), state.charVariant || "default");
+    }
+
+    function openVariantSelect(){
+      loadSavedVariant(state.char);
+      state.variantSelecting=true;
+      render();
+    }
+
+    function backToCharacterSelect(){
+      state.variantSelecting=false;
+      render();
+    }
+
     const SCHOOL_IDS = {
       "카라스노 고교":"karasuno", "아오바죠사이":"aobajohsai", "이나리자키":"inarizaki", "네코마 고교":"nekoma", "시라토리자와":"shiratorizawa"
     };
     const SCHOOL_LABELS = {karasuno:"카라스노",aobajohsai:"아오바죠사이",inarizaki:"이나리자키",nekoma:"네코마",shiratorizawa:"시라토리자와",all:"전 학교 공용"};
     const SHOP_ITEMS = [
-      {id:"acc_crown",type:"accessory",slot:"head",name:"왕관",price:15,school:"all",file:"assets/shop/accessories/crown.png"},
-      {id:"acc_sunglasses",type:"accessory",slot:"face",name:"선글라스",price:12,school:"all",file:"assets/shop/accessories/sunglasses.png"},
-      {id:"acc_glasses",type:"accessory",slot:"face",name:"안경",price:10,school:"all",file:"assets/shop/accessories/glasses.png"},
-      {id:"acc_headset",type:"accessory",slot:"head",name:"헤드셋",price:15,school:"all",file:"assets/shop/accessories/headset.png"},
-      {id:"acc_volleyball",type:"accessory",slot:"side",name:"배구공",price:10,school:"all",file:"assets/shop/accessories/volleyball.png"},
-      {id:"acc_spike",type:"accessory",slot:"side",name:"스파이크",price:12,school:"all",file:"assets/shop/accessories/spike.png"},
-      {id:"acc_milk",type:"accessory",slot:"side",name:"우유",price:8,school:"all",file:"assets/shop/accessories/milk.png"},
-      {id:"acc_onigiri",type:"accessory",slot:"side",name:"주먹밥",price:8,school:"all",file:"assets/shop/accessories/onigiri.png"},
-      {id:"acc_game",type:"accessory",slot:"side",name:"게임기",price:15,school:"all",file:"assets/shop/accessories/game.png"},
-      {id:"acc_rice",type:"accessory",slot:"side",name:"벼",price:10,school:"all",file:"assets/shop/accessories/rice.png"},
-      {id:"acc_stars",type:"accessory",slot:"effect",name:"반짝이",price:20,school:"all",file:"assets/shop/accessories/stars.png"},
-      {id:"bg_hill",type:"background",name:"언덕",price:12,school:"all",file:"assets/shop/backgrounds/hill.png"},
-      {id:"bg_gym",type:"background",name:"체육관",price:12,school:"all",file:"assets/shop/backgrounds/gym.png"},
-      {id:"bg_gym2",type:"background",name:"체육관 2",price:15,school:"all",file:"assets/shop/backgrounds/gym2.png"},
-      {id:"bg_karasuno",type:"background",name:"카라스노",price:18,school:"karasuno",file:"assets/shop/backgrounds/karasuno.png"},
-      {id:"bg_karasuno_gym",type:"background",name:"카라스노 체육관",price:22,school:"karasuno",file:"assets/shop/backgrounds/karasuno_gym.png"},
-      {id:"bg_karasuno_road",type:"background",name:"카라스노 체육관 가는 길",price:20,school:"karasuno",file:"assets/shop/backgrounds/karasuno_road.png"},
-      {id:"bg_aobajohsai",type:"background",name:"아오바죠사이",price:18,school:"aobajohsai",file:"assets/shop/backgrounds/aobajohsai.png"},
-      {id:"bg_aobajohsai_gym",type:"background",name:"아오바죠사이 체육관",price:22,school:"aobajohsai",file:"assets/shop/backgrounds/aobajohsai_gym.png"},
-      {id:"bg_nekoma",type:"background",name:"네코마",price:18,school:"nekoma",file:"assets/shop/backgrounds/nekoma.png"},
-      {id:"bg_nekoma_gym",type:"background",name:"네코마 체육관",price:22,school:"nekoma",file:"assets/shop/backgrounds/nekoma_gym.png"},
-      {id:"bg_shiratorizawa",type:"background",name:"시라토리자와",price:18,school:"shiratorizawa",file:"assets/shop/backgrounds/shiratorizawa.png"},
-      {id:"bg_shiratorizawa_gym",type:"background",name:"시라토리자와 체육관",price:22,school:"shiratorizawa",file:"assets/shop/backgrounds/shiratorizawa_gym.png"},
-      {id:"slogan_karasuno",type:"slogan",name:"飛べ · 날아라",price:25,school:"karasuno",file:"assets/shop/slogans/karasuno.png"},
-      {id:"slogan_aobajohsai",type:"slogan",name:"코트를 제패하라",price:25,school:"aobajohsai",file:"assets/shop/slogans/aobajohsai.png"},
-      {id:"slogan_nekoma",type:"slogan",name:"이어라",price:25,school:"nekoma",file:"assets/shop/slogans/nekoma.png"},
-      {id:"slogan_inarizaki",type:"slogan",name:"추억 따위 필요 없어",price:25,school:"inarizaki",file:"assets/shop/slogans/inarizaki.png"},
-      {id:"slogan_shiratorizawa",type:"slogan",name:"강자로 있어라",price:25,school:"shiratorizawa",file:"assets/shop/slogans/shiratorizawa.png"}
+      // =========================
+      // 액세서리 - 기존
+      // =========================
+      {id:"acc_crown",type:"accessory",slot:"head",name:"왕관",price:6,school:"all",file:"assets/shop/accessories/crown.png"},
+      {id:"acc_sunglasses",type:"accessory",slot:"face",name:"선글라스",price:5,school:"all",file:"assets/shop/accessories/sunglasses.png"},
+      {id:"acc_glasses",type:"accessory",slot:"face",name:"안경",price:4,school:"all",file:"assets/shop/accessories/glasses.png"},
+      {id:"acc_headset",type:"accessory",slot:"head",name:"헤드셋",price:6,school:"all",file:"assets/shop/accessories/headset.png"},
+      {id:"acc_spike",type:"accessory",slot:"side",name:"스파이크",price:5,school:"all",file:"assets/shop/accessories/spike.png"},
+      {id:"acc_milk",type:"accessory",slot:"side",name:"우유",price:3,school:"all",file:"assets/shop/accessories/milk.png"},
+      {id:"acc_onigiri",type:"accessory",slot:"side",name:"주먹밥",price:3,school:"all",file:"assets/shop/accessories/onigiri.png"},
+      {id:"acc_game",type:"accessory",slot:"side",name:"게임기",price:6,school:"all",file:"assets/shop/accessories/game.png"},
+      {id:"acc_rice",type:"accessory",slot:"side",name:"벼",price:4,school:"all",file:"assets/shop/accessories/rice.png"},
+      {id:"acc_stars",type:"accessory",slot:"effect",name:"반짝이",price:8,school:"all",file:"assets/shop/accessories/stars.png"},
+
+      // =========================
+      // 액세서리 - 추가
+      // =========================
+      {id:"acc_band",type:"accessory",slot:"head",name:"밴드",price:4,school:"all",file:"assets/shop/accessories/band.png"},
+      {id:"acc_broken",type:"accessory",slot:"effect",name:"브로큰 효과",price:5,school:"all",file:"assets/shop/accessories/broken.png"},
+      {id:"acc_bunny",type:"accessory",slot:"head",name:"토끼 귀",price:6,school:"all",file:"assets/shop/accessories/bunny.png"},
+      {id:"acc_drink",type:"accessory",slot:"side",name:"음료",price:4,school:"all",file:"assets/shop/accessories/drink.png"},
+      {id:"acc_eagle",type:"accessory",slot:"side",name:"독수리",price:7,school:"all",file:"assets/shop/accessories/eagle.png"},
+      {id:"acc_eye_mask",type:"accessory",slot:"face",name:"아이 마스크",price:5,school:"all",file:"assets/shop/accessories/eye mask.png"},
+      {id:"acc_feather",type:"accessory",slot:"effect",name:"깃털",price:5,school:"all",file:"assets/shop/accessories/feather.png"},
+      {id:"acc_headband",type:"accessory",slot:"head",name:"머리띠",price:5,school:"all",file:"assets/shop/accessories/headband.png"},
+      {id:"acc_heart_sun",type:"accessory",slot:"effect",name:"하트 선",price:6,school:"all",file:"assets/shop/accessories/heart sun.png"},
+      {id:"acc_hearts",type:"accessory",slot:"effect",name:"하트",price:6,school:"all",file:"assets/shop/accessories/hearts.png"},
+      {id:"acc_party_hat",type:"accessory",slot:"head",name:"파티 모자",price:6,school:"all",file:"assets/shop/accessories/party hat.png"},
+      {id:"acc_question",type:"accessory",slot:"effect",name:"물음표",price:4,school:"all",file:"assets/shop/accessories/question.png"},
+      {id:"acc_sweat",type:"accessory",slot:"effect",name:"땀방울",price:4,school:"all",file:"assets/shop/accessories/sweat.png"},
+
+      // 캐릭터/마스코트 장식
+      {id:"acc_goshiki_mini",type:"accessory",slot:"side",name:"고시키 미니",price:8,school:"shiratorizawa",file:"assets/shop/accessories/goshiki mini.png"},
+      {id:"acc_hinara_karas",type:"accessory",slot:"side",name:"히나타 카라스",price:8,school:"karasuno",file:"assets/shop/accessories/hinara karas.png"},
+      {id:"acc_hinata_doll",type:"accessory",slot:"side",name:"히나타 인형",price:7,school:"karasuno",file:"assets/shop/accessories/hinata doll.png"},
+      {id:"acc_kageyama_doll",type:"accessory",slot:"side",name:"카게야마 인형",price:7,school:"karasuno",file:"assets/shop/accessories/kageyama doll.png"},
+      {id:"acc_kageyama_karas_1",type:"accessory",slot:"side",name:"카게야마 카라스 1",price:8,school:"karasuno",file:"assets/shop/accessories/kageyama karas 1.png"},
+      {id:"acc_kageyama_karas_2",type:"accessory",slot:"side",name:"카게야마 카라스 2",price:8,school:"karasuno",file:"assets/shop/accessories/kageyama karas 2.png"},
+      {id:"acc_kageyama_mini",type:"accessory",slot:"side",name:"카게야마 미니",price:8,school:"karasuno",file:"assets/shop/accessories/kageyama mini.png"},
+      {id:"acc_kenma_cat",type:"accessory",slot:"side",name:"켄마 고양이",price:8,school:"nekoma",file:"assets/shop/accessories/kenma cat.png"},
+      {id:"acc_kenma_mini",type:"accessory",slot:"side",name:"켄마 미니",price:8,school:"nekoma",file:"assets/shop/accessories/kenma mini.png"},
+      {id:"acc_kita_doll",type:"accessory",slot:"side",name:"키타 인형",price:7,school:"inarizaki",file:"assets/shop/accessories/kita doll.png"},
+      {id:"acc_tsumu_doll",type:"accessory",slot:"side",name:"미야 인형",price:7,school:"inarizaki",file:"assets/shop/accessories/tsumu doll.png"},
+      {id:"acc_tsumu_fox",type:"accessory",slot:"side",name:"미야 여우",price:8,school:"inarizaki",file:"assets/shop/accessories/tsumu fox.png"},
+      {id:"acc_oikawa_mini",type:"accessory",slot:"side",name:"오이카와 미니",price:8,school:"aobajohsai",file:"assets/shop/accessories/oikawa mini.png"},
+      {id:"acc_osamu_doll",type:"accessory",slot:"side",name:"오사무 인형",price:7,school:"inarizaki",file:"assets/shop/accessories/osamu doll.png"},
+      {id:"acc_osamu_mini",type:"accessory",slot:"side",name:"오사무 미니",price:8,school:"inarizaki",file:"assets/shop/accessories/osamu mini.png"},
+      {id:"acc_osamu_tsumu_fox",type:"accessory",slot:"side",name:"오사무·미야 여우",price:9,school:"inarizaki",file:"assets/shop/accessories/osamu tsumu fox.png"},
+      {id:"acc_twins_mini",type:"accessory",slot:"side",name:"쌍둥이 미니",price:9,school:"inarizaki",file:"assets/shop/accessories/twins mini.png"},
+
+      // =========================
+      // 배경
+      // =========================
+      {id:"bg_hill",type:"background",name:"언덕",price:5,school:"all",file:"assets/shop/backgrounds/hill.png"},
+      {id:"bg_gym",type:"background",name:"체육관",price:5,school:"all",file:"assets/shop/backgrounds/gym.png"},
+      {id:"bg_gym2",type:"background",name:"체육관 2",price:6,school:"all",file:"assets/shop/backgrounds/gym2.png"},
+      {id:"bg_karasuno",type:"background",name:"카라스노",price:7,school:"karasuno",file:"assets/shop/backgrounds/karasuno.png"},
+      {id:"bg_karasuno_gym",type:"background",name:"카라스노 체육관",price:9,school:"karasuno",file:"assets/shop/backgrounds/karasuno_gym.png"},
+      {id:"bg_karasuno_road",type:"background",name:"카라스노 체육관 가는 길",price:8,school:"karasuno",file:"assets/shop/backgrounds/karasuno_road.png"},
+      {id:"bg_aobajohsai",type:"background",name:"아오바죠사이",price:7,school:"aobajohsai",file:"assets/shop/backgrounds/aobajohsai.png"},
+      {id:"bg_aobajohsai_gym",type:"background",name:"아오바죠사이 체육관",price:9,school:"aobajohsai",file:"assets/shop/backgrounds/aobajohsai_gym.png"},
+      {id:"bg_nekoma",type:"background",name:"네코마",price:7,school:"nekoma",file:"assets/shop/backgrounds/nekoma.png"},
+      {id:"bg_nekoma_gym",type:"background",name:"네코마 체육관",price:9,school:"nekoma",file:"assets/shop/backgrounds/nekoma_gym.png"},
+      {id:"bg_shiratorizawa",type:"background",name:"시라토리자와",price:7,school:"shiratorizawa",file:"assets/shop/backgrounds/shiratorizawa.png"},
+      {id:"bg_shiratorizawa_gym",type:"background",name:"시라토리자와 체육관",price:9,school:"shiratorizawa",file:"assets/shop/backgrounds/shiratorizawa_gym.png"},
+
+      // =========================
+      // 슬로건
+      // =========================
+      {id:"slogan_karasuno",type:"slogan",name:"飛べ · 날아라",price:10,school:"karasuno",file:"assets/shop/slogans/karasuno.png"},
+      {id:"slogan_aobajohsai",type:"slogan",name:"코트를 제패하라",price:10,school:"aobajohsai",file:"assets/shop/slogans/aobajohsai.png"},
+      {id:"slogan_nekoma",type:"slogan",name:"이어라",price:10,school:"nekoma",file:"assets/shop/slogans/nekoma.png"},
+      {id:"slogan_inarizaki",type:"slogan",name:"추억 따위 필요 없어",price:10,school:"inarizaki",file:"assets/shop/slogans/inarizaki.png"},
+      {id:"slogan_shiratorizawa",type:"slogan",name:"강자로 있어라",price:10,school:"shiratorizawa",file:"assets/shop/slogans/shiratorizawa.png"},
+
+      // =========================
+      // 프레임 - 학교별 전용
+      // =========================
+      {id:"frame_karasuno",type:"frame",name:"카라스노 프레임",price:7,school:"karasuno",file:"assets/shop/frames/Karasuno frame.png"},
+      {id:"frame_aobajohsai",type:"frame",name:"아오바죠사이 프레임",price:7,school:"aobajohsai",file:"assets/shop/frames/Aoba Johsai frame.png"},
+      {id:"frame_inarizaki",type:"frame",name:"이나리자키 프레임",price:7,school:"inarizaki",file:"assets/shop/frames/Inarizaki frame.png"},
+      {id:"frame_nekoma",type:"frame",name:"네코마 프레임",price:7,school:"nekoma",file:"assets/shop/frames/Nekoma frame.png"},
+      {id:"frame_shiratorizawa",type:"frame",name:"시라토리자와 프레임",price:7,school:"shiratorizawa",file:"assets/shop/frames/Shiratorizawa frame.png"}
     ];
     function getCharSchoolId(charKey=state.char){const meta=CHAR_META[charKey]||CHAR_META.kageyama;return SCHOOL_IDS[meta.school]||"all"}
     function getShopItem(id){return SHOP_ITEMS.find(x=>x.id===id)||null}
-    function getShopDefaultData(){return {tickets:50,ownedItems:[],equipped:{background:null,slogan:null,head:null,face:null,side:null,effect:null},ticketClaims:{},transforms:{}}}
-    function normalizeShopData(v){const b=getShopDefaultData(),s=v&&typeof v==='object'?v:{};return {tickets:Number(s.tickets||0),ownedItems:Array.isArray(s.ownedItems)?Array.from(new Set(s.ownedItems)):[],equipped:{...b.equipped,...(s.equipped&&typeof s.equipped==='object'?s.equipped:{})},ticketClaims:s.ticketClaims&&typeof s.ticketClaims==='object'?s.ticketClaims:{},transforms:s.transforms&&typeof s.transforms==='object'?s.transforms:{}}}
+    function getCharacterShopData(charKey=state.char){
+      const shop=state.userData.shop;
+      shop.characterData=shop.characterData||{};
+      if(!shop.characterData[charKey]){
+        shop.characterData[charKey]={ownedItems:[],equipped:{background:null,slogan:null,frame:null,head:null,face:null,side:null,effect:null},transforms:{},characterTransform:{x:0,y:34,scale:78}};
+      }
+
+      const d=shop.characterData[charKey];
+      d.ownedItems=Array.isArray(d.ownedItems)?Array.from(new Set(d.ownedItems)):[];
+      d.equipped={background:null,slogan:null,frame:null,head:null,face:null,side:null,effect:null,...(d.equipped||{})};
+      d.transforms=d.transforms&&typeof d.transforms==='object'?d.transforms:{};
+      d.characterTransform={
+        x:Number(d.characterTransform?.x ?? 0),
+        y:Number(d.characterTransform?.y ?? 34),
+        scale:Number(d.characterTransform?.scale ?? 78)
+      };
+
+      // 구버전(global shop 데이터) → 현재 캐릭터 인벤토리로 1회 자동 이전
+      // 새 캐릭터별 인벤토리를 도입하기 전에 구매/장착했던 아이템이 사라져 보이는 문제 방지
+      if(!d._legacyMigrated){
+        const legacyOwned=Array.isArray(shop.ownedItems)?shop.ownedItems:[];
+        if(legacyOwned.length && d.ownedItems.length===0){
+          d.ownedItems=Array.from(new Set(legacyOwned));
+        }
+
+        const legacyEq=shop.equipped&&typeof shop.equipped==='object'?shop.equipped:{};
+        const hasCurrentEquip=Object.values(d.equipped).some(Boolean);
+        if(!hasCurrentEquip && Object.values(legacyEq).some(Boolean)){
+          d.equipped={...d.equipped,...legacyEq};
+        }
+
+        const legacyTransforms=shop.transforms&&typeof shop.transforms==='object'?shop.transforms:{};
+        if(Object.keys(d.transforms).length===0 && Object.keys(legacyTransforms).length){
+          d.transforms={...legacyTransforms};
+        }
+
+        d._legacyMigrated=true;
+      }
+
+      return d;
+    }
+    function getShopDefaultData(){return {tickets:0,ownedItems:[],equipped:{background:null,slogan:null,frame:null,head:null,face:null,side:null,effect:null},ticketClaims:{},transforms:{},characterData:{}}}
+    function normalizeShopData(v){const b=getShopDefaultData(),s=v&&typeof v==='object'?v:{};return {tickets:Number(s.tickets||0),ownedItems:Array.isArray(s.ownedItems)?Array.from(new Set(s.ownedItems)):[],equipped:{...b.equipped,...(s.equipped&&typeof s.equipped==='object'?s.equipped:{})},ticketClaims:s.ticketClaims&&typeof s.ticketClaims==='object'?s.ticketClaims:{},transforms:s.transforms&&typeof s.transforms==='object'?s.transforms:{},characterData:s.characterData&&typeof s.characterData==='object'?s.characterData:{}}}
     function getTicketTier(correct,total){if(!total)return 0;const p=correct/total*100;if(p>=99.999)return 3;if(p>=80)return 2;if(p>=60)return 1;return 0}
     function awardCheerTickets(testType,correct,total){const tier=getTicketTier(correct,total),key=`${testType}:${String(state.selectedDay||'all')}`,prev=Number(state.userData.shop.ticketClaims[key]||0),delta=Math.max(0,tier-prev);if(tier>prev)state.userData.shop.ticketClaims[key]=tier;if(delta>0)state.userData.shop.tickets+=delta;return delta}
 
     function renderCharacterAvatar(charKey) {
-      const meta = CHAR_META[charKey];
+      const meta = getActiveCharacterMeta(charKey);
 
       const fallbackAvatar = CHAR_AVATARS[charKey] || `
         <svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -453,64 +693,80 @@
       `;
     }
 
-
-    const CUTOUT_CACHE = new Map();
-
-    function getCutoutDataUrl(src) {
-      if (CUTOUT_CACHE.has(src)) return CUTOUT_CACHE.get(src);
-      return null;
-    }
-
-    function makeWhiteTransparent(imgEl, threshold = 242) {
-      try {
-        if (!imgEl || !imgEl.naturalWidth || !imgEl.naturalHeight) return;
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        canvas.width = imgEl.naturalWidth;
-        canvas.height = imgEl.naturalHeight;
-        ctx.drawImage(imgEl, 0, 0);
-        const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const d = image.data;
-
-        // Remove only near-white pixels that are visually background-like.
-        // Soft alpha around the threshold keeps anti-aliased hair edges cleaner.
-        for (let i = 0; i < d.length; i += 4) {
-          const r = d[i], g = d[i+1], b = d[i+2];
-          const min = Math.min(r,g,b), max = Math.max(r,g,b);
-          const isNeutral = (max - min) < 18;
-          if (isNeutral && min >= threshold) {
-            const fade = Math.max(0, Math.min(1, (255 - min) / (255 - threshold)));
-            d[i+3] = Math.round(255 * fade);
-          }
-        }
-        ctx.putImageData(image, 0, 0);
-        const url = canvas.toDataURL('image/png');
-        CUTOUT_CACHE.set(imgEl.getAttribute('src'), url);
-        imgEl.src = url;
-      } catch (e) {
-        console.warn('캐릭터 배경 제거 실패:', e);
-      }
-    }
-
-    function characterCutoutImg(meta, className='preview-char-cutout') {
-      const cached = getCutoutDataUrl(meta.imgFile);
-      return `<img class="${className}" src="${cached || meta.imgFile}" alt="${meta.name}"
-        ${cached ? '' : `onload="makeWhiteTransparent(this)"`}
+    function characterCutoutImg(meta, className='preview-char-cutout', extraStyle='', elementId='') {
+      return `<img ${elementId ? `id="${elementId}"` : ''} class="${className}" src="${meta.imgFile}" alt="${meta.name}"
+        style="${extraStyle}"
         onerror="this.style.display='none';">`;
     }
 
+    function getCharacterTransform(charKey=state.char){
+      return getCharacterShopData(charKey).characterTransform;
+    }
+
+    function updateCharacterTransform(key,value){
+      const t=getCharacterTransform();
+      t[key]=Number(value);
+      const el=document.getElementById('profile-character-live');
+      if(el){
+        el.style.left=`calc(50% + ${t.x}px)`;
+        el.style.top=`calc(50% + ${t.y}px)`;
+        el.style.width=`${t.scale}%`;
+        el.style.height=`${t.scale}%`;
+      }
+      const preview=document.getElementById('shop-preview-character-live');
+      if(preview){
+        preview.style.left=`calc(50% + ${t.x}px)`;
+        preview.style.top=`calc(50% + ${t.y}px)`;
+        preview.style.width=`${t.scale}%`;
+        preview.style.height=`${t.scale}%`;
+      }
+      const label=document.getElementById(`char-${key}-value`);
+      if(label) label.textContent=key==='scale'?`${t[key]}%`:`${t[key]}px`;
+    }
+
+    function resetCharacterTransform(){
+      getCharacterShopData().characterTransform={x:0,y:34,scale:78};
+      render();
+    }
+
+    function saveCharacterTransform(){
+      saveUserData();
+      alert('캐릭터 위치를 저장했습니다.');
+    }
+
+    function renderCharacterAdjustControls(){
+      const t=getCharacterTransform();
+      return `<div class="character-adjust-box">
+        <div class="character-adjust-title">🧍 캐릭터 자체 위치 조정</div>
+        <div class="character-adjust-help">캐릭터를 작게 하거나 아래로 내려서 왕관·귀·슬로건을 놓을 공간을 만들 수 있어요.</div>
+        <div class="preview-controls">
+          <div class="preview-control"><label><span>↔ 캐릭터 좌우</span><span id="char-x-value">${t.x}px</span></label><input type="range" min="-90" max="90" step="1" value="${t.x}" oninput="updateCharacterTransform('x',this.value)"></div>
+          <div class="preview-control"><label><span>↕ 캐릭터 위아래</span><span id="char-y-value">${t.y}px</span></label><input type="range" min="-20" max="100" step="1" value="${t.y}" oninput="updateCharacterTransform('y',this.value)"></div>
+          <div class="preview-control"><label><span>🔍 캐릭터 크기</span><span id="char-scale-value">${t.scale}%</span></label><input type="range" min="45" max="105" step="1" value="${t.scale}" oninput="updateCharacterTransform('scale',this.value)"></div>
+        </div>
+        <div class="character-adjust-actions">
+          <button class="btn-pixel-white" onclick="resetCharacterTransform()">↺ 기본 위치</button>
+          <button class="btn-pixel-black" onclick="saveCharacterTransform()">💾 캐릭터 위치 저장</button>
+        </div>
+      </div>`;
+    }
+
     function renderDecoratedCharacter(charKey) {
-      const meta = CHAR_META[charKey] || CHAR_META.kageyama;
+      const meta = getActiveCharacterMeta(charKey);
       const shop = state.userData?.shop || getShopDefaultData();
-      const eq = shop.equipped || {};
+      const charShop = getCharacterShopData(charKey);
+      const eq = charShop.equipped || {};
       const bg = getShopItem(eq.background);
       const slogan = getShopItem(eq.slogan);
+      const frame = getShopItem(eq.frame);
 
       const layers = ["head", "face", "side", "effect"]
         .map(slot => ({ slot, item: getShopItem(eq[slot]) }))
         .filter(x => x.item);
 
-      const sloganT = slogan ? getPreviewTransform(slogan) : null;
+      const sloganT = slogan ? getPreviewTransform(slogan, charKey) : null;
+      const charT = getCharacterTransform(charKey);
+      const charStyle = `left:calc(50% + ${charT.x}px);top:calc(50% + ${charT.y}px);width:${charT.scale}%;height:${charT.scale}%;transform:translate(-50%,-50%);`;
 
       return `
         <div class="character-stage">
@@ -523,7 +779,7 @@
                        alt="${bg.name}"
                        onerror="this.style.display='none';">
                 ` : ''}
-                ${characterCutoutImg(meta, 'character-base-cutout')}
+                ${characterCutoutImg(meta, 'character-base-cutout', charStyle, 'profile-character-live')}
               </div>
 
               ${slogan ? `
@@ -541,7 +797,7 @@
               ` : ''}
 
               ${layers.map(({ item }) => {
-                const t = getPreviewTransform(item);
+                const t = getPreviewTransform(item, charKey);
                 return `
                   <img class="character-accessory-layer"
                        src="${item.file}"
@@ -556,6 +812,13 @@
                        onerror="this.style.display='none';">
                 `;
               }).join('')}
+
+              ${frame ? `
+                <img class="character-frame-overlay"
+                     src="${frame.file}"
+                     alt="${frame.name}"
+                     onerror="this.style.display='none';">
+              ` : ''}
             </div>
           </div>
         </div>
@@ -670,7 +933,7 @@
         spellCorrect:'철자까지 깔끔! 아주 좋은 플레이였어.', spellWrong:'앗, 한 끗 차이네. 다음엔 오이카와 씨처럼 완벽하게~',
         food:'역시 간식은 중요하지~ 기분 좋아졌어.', train:'좋아, 감각 올라왔다. 이제 시험에서 보여줘.', saved:'이건 다시 볼 가치가 있겠네. 단어장에 예쁘게 저장~'
       },
-      miya: {
+      tsumu: {
         enter: s => `${s} 할 거면 제대로 해라. 어중간하게 외운 건 토스 받을 자격도 없다.`,
         shuffle:'순서 바뀌었다고 흔들리면 우짜노. 진짜 외웠는지 보자.',
         quizCorrect:'오, 맞혔네. 그 정도는 해줘야지.', quizWrong:'그걸 틀리나? 다시 보고 이번엔 머리에 확 넣어라.',
@@ -872,6 +1135,8 @@
       user: null, // 'jiyeon' | 'gyungmin'
       lang: null,
       char: 'kageyama',
+      charVariant: 'default',
+      variantSelecting: false,
       entered: false,
       tab: 'practice',
       speech: "...뭐하냐? 멍때리지 말고 얼른 단어 외워라.",
@@ -922,6 +1187,7 @@
       state.user = null;
       state.lang = null;
       state.entered = false;
+      state.variantSelecting = false;
       state.selectedDay = 'all';
       state.tab = 'practice';
       render();
@@ -930,6 +1196,7 @@
     function changeLanguage() {
       state.lang = null;
       state.entered = false;
+      state.variantSelecting = false;
       state.selectedDay = 'all';
       state.tab = 'practice';
       render();
@@ -1125,7 +1392,7 @@
       const currThresh = EXP_THRESHOLDS[lvl - 1];
       const remExp = exp - currThresh;
       const reqExp = nextThresh - currThresh;
-      const meta = CHAR_META[state.char] || CHAR_META.kageyama;
+      const meta = getActiveCharacterMeta(state.char);
 
       return {
         level: lvl, exp: remExp, maxExp: reqExp, title: STAGE_TITLES[lvl - 1],
@@ -1478,7 +1745,7 @@
         return;
       }
 
-      if (!state.entered) {
+      if (!state.entered && !state.variantSelecting) {
         const langLabel = state.lang === 'ja' ? '🇯🇵 일본어 모드' : '🇺🇸 영어 모드';
         app.innerHTML = `
           <div class="login-card-gym">
@@ -1502,7 +1769,48 @@
                 </div>
               `).join('')}
             </div>
-            <button class="btn-pixel-black" style="width: 100%; padding: 14px; font-size: 16px;" onclick="enterGym()">체육관 문 열기 (Enter) ➔</button>
+            <button class="btn-pixel-black" style="width: 100%; padding: 14px; font-size: 16px;" onclick="openVariantSelect()">캐릭터 버전 선택 ➔</button>
+          </div>
+        `;
+        return;
+      }
+
+      if (!state.entered && state.variantSelecting) {
+        const langLabel = state.lang === 'ja' ? '🇯🇵 일본어 모드' : '🇺🇸 영어 모드';
+        const variants = getCharacterVariants(state.char);
+        const baseMeta = CHAR_META[state.char] || CHAR_META.kageyama;
+
+        app.innerHTML = `
+          <div class="login-card-gym" style="max-width:620px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;">
+              <button class="btn-pixel-white" onclick="backToCharacterSelect()">← 선수 다시 선택</button>
+              <span style="font-weight:900;color:#EA580C;font-size:12.5px;">👤 ${getUserDisplayName()} · ${langLabel}</span>
+            </div>
+
+            <div style="margin-bottom:5px;">${renderMikasaBall(46)}</div>
+            <h3 style="font-weight:900;color:#1E293B;margin:0 0 5px;">${baseMeta.name} 버전 선택</h3>
+            <p style="color:#64748B;font-size:13px;font-weight:700;margin:0 0 12px;">
+              이번에 사용할 ${baseMeta.name} 이미지를 골라주세요.
+            </p>
+
+            <div class="variant-select-grid">
+              ${variants.map(v=>`
+                <div class="variant-card ${state.charVariant===v.id?'active':''}" onclick="selectVariant('${v.id}')">
+                  <div class="variant-preview">
+                    <img src="${v.file}" alt="${v.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;color:#94A3B8;font-size:11px;font-weight:800;padding:8px;">
+                      이미지 파일 확인<br>${v.file}
+                    </div>
+                  </div>
+                  <div style="font-size:12px;font-weight:900;color:#1E293B;">${v.name}</div>
+                  ${state.charVariant===v.id?'<div style="font-size:10px;color:#EA580C;font-weight:900;margin-top:3px;">✓ 선택됨</div>':''}
+                </div>
+              `).join('')}
+            </div>
+
+            <button class="btn-pixel-black" style="width:100%;padding:14px;font-size:16px;" onclick="enterGym()">
+              이 버전으로 체육관 입장 ➔
+            </button>
           </div>
         `;
         return;
@@ -1536,7 +1844,7 @@
       app.innerHTML = `
         <div class="minihompy-window">
           <div class="window-top-bar">
-            <span style="display:flex; align-items:center; gap:6px;">飛べ 카라스노 고교 체육관 · ${getUserDisplayName()} [${state.lang === 'ja' ? '🇯🇵 일본어' : '🇺🇸 영어'}] : ${charInfo.name} ${renderMikasaBall(17)} <span title="Supabase + localStorage 백업" style="font-size:10px; opacity:.72;">☁ 저장</span></span>
+            <span style="display:flex; align-items:center; gap:6px;">飛べ 카라스노 고교 체육관 · ${getUserDisplayName()} [${state.lang === 'ja' ? '🇯🇵 일본어' : '🇺🇸 영어'}] : ${charInfo.name} · ${charInfo.variantName || '기본'} ${renderMikasaBall(17)} <span title="Supabase + localStorage 백업" style="font-size:10px; opacity:.72;">☁ 저장</span></span>
             <div style="display: flex; gap: 6px;">
               <div style="width: 12px; height: 12px; background: #FFFFFF; border-radius: 3px;"></div>
               <div style="width: 12px; height: 12px; background: #FFFFFF; border-radius: 3px;"></div>
@@ -1544,7 +1852,7 @@
             </div>
           </div>
           <div class="window-url-bar">
-            http://karasuno.gym.club/?lang=${state.lang}&char=${state.char}&level=${charInfo.level}
+            http://karasuno.gym.club/?lang=${state.lang}&char=${state.char}&variant=${state.charVariant}&level=${charInfo.level}
           </div>
           <div class="minihompy-body">
             <div class="hompy-left-side">
@@ -1642,8 +1950,9 @@
                 <button class="btn-pixel-white" style="flex:1; padding:6px 3px; font-size:10.5px;" onclick="feedPartner()">🍙 ${charInfo.food} · ${CARE_COSTS.food}🪙</button>
                 <button class="btn-pixel-white" style="flex:1; padding:6px 3px; font-size:10.5px; display:flex; align-items:center; justify-content:center; gap:3px;" onclick="actionPartner()">${renderMikasaBall(13)} ${charInfo.act} · ${CARE_COSTS.train}🪙</button>
               </div>
-              <div style="margin-top: 2px; display: flex; gap: 4px;">
-                <button class="btn-pixel-white" style="flex: 1; padding: 6px; font-size: 11px;" onclick="state.entered=false; render();">🔄 선수 교체</button>
+              <div style="margin-top: 2px; display: flex; gap: 4px; flex-wrap:wrap;">
+                <button class="btn-pixel-white" style="flex: 1; padding: 6px; font-size: 11px;" onclick="state.entered=false; state.variantSelecting=false; render();">🔄 선수 교체</button>
+                <button class="btn-pixel-white" style="flex: 1; padding: 6px; font-size: 11px;" onclick="state.entered=false; state.variantSelecting=true; loadSavedVariant(state.char); render();">🖼️ 버전 변경</button>
                 <button class="btn-pixel-white" style="flex: 1; padding: 6px; font-size: 11px;" onclick="changeLanguage()">🌐 언어 변경</button>
                 <button class="btn-pixel-white" style="flex: 1; padding: 6px; font-size: 11px;" onclick="resetToUserSelect()">👥 사용자 변경</button>
               </div>
@@ -1657,6 +1966,7 @@
               <button class="btn-tab-menu ${state.tab === 'custom' ? 'active' : ''}" onclick="switchTab('custom')">단어장</button>
               <button class="btn-tab-menu ${state.tab === 'spaced' ? 'active' : ''}" onclick="switchTab('spaced')">복습</button>
               <button class="btn-tab-menu ${state.tab === 'shop' ? 'active' : ''}" onclick="switchTab('shop')">상점</button>
+              <button class="btn-tab-menu ${state.tab === 'inventory' ? 'active' : ''}" onclick="switchTab('inventory')">인벤토리</button>
               <button class="btn-tab-menu ${state.tab === 'history' ? 'active' : ''}" onclick="switchTab('history')">기록</button>
             </div>
 
@@ -1915,15 +2225,28 @@
         `;
       }
 
+      if (state.tab === 'inventory') {
+        const charShop=getCharacterShopData();
+        const owned=charShop.ownedItems.map(getShopItem).filter(Boolean);
+        const previewItem=getShopItem(state.shopPreviewItemId);
+        return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div><h4 style="font-weight:900;margin:0">🎒 ${CHAR_META[state.char].name} 인벤토리</h4><div style="font-size:10.5px;color:#64748B;margin-top:3px">이 캐릭터가 구입한 아이템만 보여요.</div></div>
+          <div style="font-weight:900;color:#7C3AED">🎟️ ${state.userData.shop.tickets}장</div>
+        </div>
+        ${renderCharacterAdjustControls()}
+        ${previewItem?renderShopItemPreview(previewItem):''}
+        ${owned.length?`<div class="shop-grid">${owned.map(item=>{const slot=item.type==='accessory'?item.slot:item.type,equipped=charShop.equipped[slot]===item.id;return `<div class="shop-card ${equipped?'equipped':''}"><div class="shop-preview ${item.type==='background'?'bg':item.type==='frame'?'frame':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}</div><div class="shop-item-meta">${equipped?'장착 중':'보유 중'}</div>${(item.type==='accessory'||item.type==='slogan')?`<button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">🎛️ 위치 조정</button>`:`<button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">👀 미리보기</button>`}<button class="${equipped?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;padding:7px 4px;font-size:11px" onclick="${equipped?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${equipped?'장착 해제':'장착하기'}</button></div>`}).join('')}</div>`:`<div style="padding:30px;text-align:center;color:#94A3B8;font-weight:800">아직 구입한 아이템이 없어요.</div>`}`;
+      }
+
       if (state.tab === 'shop') {
-        const schoolId=getCharSchoolId(),visibleItems=SHOP_ITEMS.filter(item=>item.type===state.shopCategory&&(item.school==='all'||item.school===schoolId));
-        const labels={accessory:'🎀 액세서리',background:'🖼️ 배경',slogan:'🏳️ 슬로건'};
+        const schoolId=getCharSchoolId(),charShop=getCharacterShopData(),visibleItems=SHOP_ITEMS.filter(item=>item.type===state.shopCategory&&(item.school==='all'||item.school===schoolId));
+        const labels={accessory:'🎀 액세서리',background:'🖼️ 배경',slogan:'🏳️ 슬로건',frame:'🖼️ 프레임'};
         const previewItem=getShopItem(state.shopPreviewItemId);
         return `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h4 style="font-weight:900;margin:0 0 4px">🛍️ 꾸미기 상점</h4><div style="font-size:11.5px;color:#64748B;font-weight:700">${CHAR_META[state.char].name} · ${SCHOOL_LABELS[schoolId]||CHAR_META[state.char].school}</div></div><div style="font-weight:900;color:#7C3AED;background:#F5F3FF;border:1.5px solid #C4B5FD;border-radius:9px;padding:7px 10px">🎟️ ${state.userData.shop.tickets}장</div></div>
         <div class="shop-category-tabs" style="margin-top:12px">${Object.keys(labels).map(cat=>`<button class="shop-category-btn ${state.shopCategory===cat?'active':''}" onclick="setShopCategory('${cat}')">${labels[cat]}</button>`).join('')}</div>
-        <div style="font-size:10.5px;color:#94A3B8;margin-top:8px">모든 아이템은 구매 전에 미리보기할 수 있습니다. 액세서리와 슬로건은 위치·크기·투명도까지 조정해볼 수 있어요.</div>
+        <div style="font-size:10.5px;color:#94A3B8;margin-top:8px">모든 아이템은 구매 전에 미리보기할 수 있습니다. 액세서리와 슬로건은 위치·크기·투명도·각도를 조정할 수 있고, 프레임은 프로필 테두리에 자동으로 맞춰집니다.</div><div style="margin-top:10px;padding:10px;border:1.5px solid #FCD34D;border-radius:10px;background:#FFFBEB"><div style="font-size:11px;font-weight:900;color:#92400E;margin-bottom:6px">🪙 코인으로 응원 티켓 구매 · 보유 ${state.userData.coins}🪙</div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn-pixel-white" onclick="buyCheerTickets(1)">20🪙 → 🎟️1</button><button class="btn-pixel-white" onclick="buyCheerTickets(3)">50🪙 → 🎟️3</button><button class="btn-pixel-black" onclick="buyCheerTickets(5)">75🪙 → 🎟️5</button></div></div>
         ${previewItem?renderShopItemPreview(previewItem):''}
-        <div class="shop-grid">${visibleItems.map(item=>{const owned=state.userData.shop.ownedItems.includes(item.id),slot=item.type==='accessory'?item.slot:item.type,equipped=state.userData.shop.equipped[slot]===item.id,canBuy=state.userData.shop.tickets>=item.price,previewing=state.shopPreviewItemId===item.id;return `<div class="shop-card ${equipped?'equipped':''} ${previewing?'previewing':''}"><div class="shop-preview ${item.type==='background'?'bg':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}</div><div class="shop-item-meta">${item.school==='all'?'전 캐릭터 공용':`${SCHOOL_LABELS[item.school]} 전용`}${item.type==='accessory'?` · ${item.slot==='head'?'머리':item.slot==='face'?'얼굴':item.slot==='effect'?'효과':'주변 소품'}`:''}</div><button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">${previewing?'미리보기 닫기':'👀 미리보기'}</button>${owned?`<button class="${equipped?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;padding:7px 4px;font-size:11px" onclick="${equipped?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${equipped?'장착 해제':'장착하기'}</button>`:`<button class="btn-pixel-white" style="width:100%;padding:7px 4px;font-size:11px;${canBuy?'border-color:#7C3AED;color:#6D28D9;':'opacity:.55;'}" onclick="buyShopItem('${item.id}')" ${canBuy?'':'disabled'}>🎟️ ${item.price} · 구매</button>`}</div>`}).join('')}</div>`;
+        <div class="shop-grid">${visibleItems.map(item=>{const owned=charShop.ownedItems.includes(item.id),slot=item.type==='accessory'?item.slot:item.type,equipped=charShop.equipped[slot]===item.id,canBuy=state.userData.shop.tickets>=item.price,previewing=state.shopPreviewItemId===item.id;return `<div class="shop-card ${equipped?'equipped':''} ${previewing?'previewing':''}"><div class="shop-preview ${item.type==='background'?'bg':item.type==='frame'?'frame':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}</div><div class="shop-item-meta">${item.school==='all'?'전 캐릭터 공용':`${SCHOOL_LABELS[item.school]} 전용`}${item.type==='accessory'?` · ${item.slot==='head'?'머리':item.slot==='face'?'얼굴':item.slot==='effect'?'효과':'주변 소품'}`:item.type==='frame'?' · 프로필 프레임':''}</div><button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">${previewing?'미리보기 닫기':'👀 미리보기'}</button>${owned?`<button class="${equipped?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;padding:7px 4px;font-size:11px" onclick="${equipped?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${equipped?'장착 해제':'장착하기'}</button>`:`<button class="btn-pixel-white" style="width:100%;padding:7px 4px;font-size:11px;${canBuy?'border-color:#7C3AED;color:#6D28D9;':'opacity:.55;'}" onclick="buyShopItem('${item.id}')" ${canBuy?'':'disabled'}>🎟️ ${item.price} · 구매</button>`}</div>`}).join('')}</div>`;
       }
 
       if (state.tab === 'history') {
@@ -1956,20 +2279,23 @@
 
     function getDefaultPreviewTransform(item){
       if(!item) return {x:0,y:0,scale:100,opacity:100,rotate:0};
-      if(item.type==='slogan') return {x:0,y:-112,scale:80,opacity:100,rotate:0};
+      if(item.type==='slogan') return {x:0,y:-105,scale:72,opacity:100,rotate:0};
       if(item.type==='background') return {x:0,y:0,scale:100,opacity:100,rotate:0};
+      if(item.type==='frame') return {x:0,y:0,scale:100,opacity:100,rotate:0};
       const slot=item.slot;
-      if(slot==='head') return {x:0,y:-92,scale:42,opacity:100,rotate:0};
-      if(slot==='face') return {x:0,y:-18,scale:48,opacity:100,rotate:0};
+      if(slot==='head') return {x:0,y:-78,scale:38,opacity:100,rotate:0};
+      if(slot==='face') return {x:0,y:-10,scale:44,opacity:100,rotate:0};
       if(slot==='side') return {x:72,y:36,scale:36,opacity:100,rotate:0};
       return {x:0,y:0,scale:92,opacity:95,rotate:0};
     }
-    function getPreviewTransform(item){
-      if(!item) return {x:0,y:0,scale:100,opacity:100};
-      const saved = state.userData?.shop?.transforms?.[item.id];
-      if(saved && !state.shopPreviewTransforms[item.id]) state.shopPreviewTransforms[item.id]={rotate:0,...saved};
-      if(!state.shopPreviewTransforms[item.id]) state.shopPreviewTransforms[item.id]=getDefaultPreviewTransform(item);
-      return state.shopPreviewTransforms[item.id];
+    function getPreviewTransform(item, charKey=state.char){
+      if(!item) return {x:0,y:0,scale:100,opacity:100,rotate:0};
+      const charShop=getCharacterShopData(charKey);
+      const key=`${charKey}:${item.id}`;
+      const saved=charShop.transforms?.[item.id];
+      if(saved&&!state.shopPreviewTransforms[key]) state.shopPreviewTransforms[key]={rotate:0,...saved};
+      if(!state.shopPreviewTransforms[key]) state.shopPreviewTransforms[key]=getDefaultPreviewTransform(item);
+      return state.shopPreviewTransforms[key];
     }
     function previewShopItem(id){
       state.shopPreviewItemId = state.shopPreviewItemId===id ? null : id;
@@ -1982,8 +2308,8 @@
       const t=getPreviewTransform(item);
       t[key]=Number(value);
       if(state.userData?.shop){
-        state.userData.shop.transforms = state.userData.shop.transforms || {};
-        state.userData.shop.transforms[id] = {...t};
+        const charShop=getCharacterShopData();
+        charShop.transforms[id]={...t};
       }
       const el=document.getElementById('shop-preview-moving-layer');
       if(el){
@@ -2002,69 +2328,115 @@
     }
     function resetShopPreviewTransform(id){
       const item=getShopItem(id); if(!item) return;
-      state.shopPreviewTransforms[id]=getDefaultPreviewTransform(item);
-      state.userData.shop.transforms = state.userData.shop.transforms || {};
-      state.userData.shop.transforms[id] = {...state.shopPreviewTransforms[id]};
+      const key=`${state.char}:${id}`;
+      state.shopPreviewTransforms[key]=getDefaultPreviewTransform(item);
+      const charShop=getCharacterShopData();
+      charShop.transforms[id]={...state.shopPreviewTransforms[key]};
       render();
     }
     function renderShopItemPreview(item){
       if(!item) return '';
-      const meta=CHAR_META[state.char]||CHAR_META.kageyama;
+      const meta=getActiveCharacterMeta(state.char);
+      const charShop=getCharacterShopData();
+      const eq=charShop.equipped||{};
+      const equippedBg=getShopItem(eq.background);
+      const equippedFrame=getShopItem(eq.frame);
       const t=getPreviewTransform(item);
+      const charT=getCharacterTransform();
       const isBg=item.type==='background';
+      const isFrame=item.type==='frame';
+      const movable=item.type==='accessory'||item.type==='slogan';
       const movingClass=item.type==='slogan'?'preview-slogan':'preview-accessory';
       const movingStyle=`left:calc(50% + ${t.x}px);top:calc(50% + ${t.y}px);width:${t.scale}%;opacity:${t.opacity/100};transform:translate(-50%,-50%) rotate(${t.rotate || 0}deg);`;
+      const charStyle=`left:calc(50% + ${charT.x}px);top:calc(50% + ${charT.y}px);width:${charT.scale}%;height:${charT.scale}%;transform:translate(-50%,-50%);`;
+      const previewBg=isBg?item:equippedBg;
+      const previewFrame=isFrame?item:equippedFrame;
+
       return `<div class="shop-preview-panel">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-          <div><b>👀 ${item.name} 미리보기</b><div style="font-size:10.5px;color:#64748B;margin-top:2px">실제 장착 모습 기준으로 확인합니다.</div></div>
+          <div>
+            <b>👀 ${item.name} 미리보기</b>
+            <div style="font-size:10.5px;color:#64748B;margin-top:2px">
+              ${isFrame?'프레임은 실제 프로필 테두리에 자동으로 맞춰집니다.':'왼쪽 실제 프로필과 같은 230×280 좌표계입니다.'}
+            </div>
+          </div>
           <button class="btn-pixel-white" onclick="previewShopItem('${item.id}')">닫기 ✕</button>
         </div>
 
         <div class="shop-preview-stage ${isBg?'':'cutout-stage'}">
-          ${isBg?`<img class="preview-bg" src="${item.file}" alt="${item.name}">`:''}
-          ${characterCutoutImg(meta,'preview-char-cutout')}
-          ${!isBg?`<img id="shop-preview-moving-layer" class="${movingClass}" src="${item.file}" alt="${item.name}" style="${movingStyle}">`:''}
+          <div class="preview-stage-clip">
+            ${previewBg?`<img class="preview-bg" src="${previewBg.file}" alt="${previewBg.name}" onerror="this.style.display='none';">`:''}
+            ${characterCutoutImg(meta,'preview-char-cutout',charStyle,'shop-preview-character-live')}
+          </div>
+
+          ${movable?`<img id="shop-preview-moving-layer" class="${movingClass}" src="${item.file}" alt="${item.name}" style="${movingStyle}" onerror="this.style.display='none';">`:''}
+
+          ${previewFrame?`<img class="preview-frame" src="${previewFrame.file}" alt="${previewFrame.name}" onerror="this.style.display='none';">`:''}
         </div>
 
         ${isBg?`
-          <div style="font-size:11px;color:#64748B;text-align:center;font-weight:800">배경이 캐릭터 뒤에 표시됩니다.</div>
+          <div style="font-size:11px;color:#64748B;text-align:center;font-weight:800">배경은 캐릭터 뒤에 꽉 차게 적용됩니다.</div>
+        `:isFrame?`
+          <div style="font-size:11px;color:#64748B;text-align:center;font-weight:800">프레임은 캐릭터·배경·액세서리보다 가장 위에 표시됩니다.</div>
         `:`
         <div class="preview-controls">
           <div class="preview-control"><label><span>↔ 좌우 위치</span><span id="preview-x-value">${t.x}px</span></label><input type="range" min="-180" max="180" step="1" value="${t.x}" oninput="updateShopPreviewTransform('${item.id}','x',this.value)"></div>
-          <div class="preview-control"><label><span>↕ 위아래 위치</span><span id="preview-y-value">${t.y}px</span></label><input type="range" min="-220" max="180" step="1" value="${t.y}" oninput="updateShopPreviewTransform('${item.id}','y',this.value)"></div>
+          <div class="preview-control"><label><span>↕ 위아래 위치</span><span id="preview-y-value">${t.y}px</span></label><input type="range" min="-220" max="220" step="1" value="${t.y}" oninput="updateShopPreviewTransform('${item.id}','y',this.value)"></div>
           <div class="preview-control"><label><span>🔍 크기</span><span id="preview-scale-value">${t.scale}%</span></label><input type="range" min="8" max="180" step="1" value="${t.scale}" oninput="updateShopPreviewTransform('${item.id}','scale',this.value)"></div>
           <div class="preview-control"><label><span>◐ 투명도</span><span id="preview-opacity-value">${t.opacity}%</span></label><input type="range" min="0" max="100" step="1" value="${t.opacity}" oninput="updateShopPreviewTransform('${item.id}','opacity',this.value)"></div>
           <div class="preview-control"><label><span>↻ 각도</span><span id="preview-rotate-value">${t.rotate || 0}°</span></label><input type="range" min="-180" max="180" step="1" value="${t.rotate || 0}" oninput="updateShopPreviewTransform('${item.id}','rotate',this.value)"></div>
         </div>
-        <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px"><button class="btn-pixel-white" onclick="resetShopPreviewTransform('${item.id}')">↺ 위치 초기화</button><button class="btn-pixel-black" onclick="savePreviewPosition('${item.id}')">💾 이 위치 저장</button></div>`}
+        <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn-pixel-white" onclick="resetShopPreviewTransform('${item.id}')">↺ 아이템 위치 초기화</button>
+          <button class="btn-pixel-black" onclick="savePreviewPosition('${item.id}')">💾 이 위치 저장</button>
+        </div>`}
       </div>`;
     }
     function savePreviewPosition(id){
       const item=getShopItem(id); if(!item) return;
-      state.userData.shop.transforms = state.userData.shop.transforms || {};
-      state.userData.shop.transforms[id] = {...getPreviewTransform(item)};
+      const charShop=getCharacterShopData();
+      charShop.transforms[id]={...getPreviewTransform(item)};
       saveUserData();
       alert('이 위치를 저장했습니다.');
     }
     function setShopCategory(category){state.shopCategory=category;state.shopPreviewItemId=null;render()}
 
-    function buyShopItem(id){const item=getShopItem(id);if(!item)return;const s=getCharSchoolId();if(item.school!=='all'&&item.school!==s)return alert('이 아이템은 현재 캐릭터의 학교에서는 사용할 수 없습니다.');if(state.userData.shop.ownedItems.includes(id))return;if(state.userData.shop.tickets<item.price)return alert(`응원 티켓이 부족합니다. ${item.price}장이 필요합니다.`);state.userData.shop.tickets-=item.price;state.userData.shop.ownedItems.push(id);state.userData.shop.ownedItems=Array.from(new Set(state.userData.shop.ownedItems));saveUserData();render()}
-    function equipShopItem(id){const item=getShopItem(id);if(!item||!state.userData.shop.ownedItems.includes(id))return;const s=getCharSchoolId();if(item.school!=='all'&&item.school!==s)return alert('현재 캐릭터에게 장착할 수 없는 학교 전용 아이템입니다.');const slot=item.type==='accessory'?item.slot:item.type;state.userData.shop.equipped[slot]=id;state.userData.shop.transforms=state.userData.shop.transforms||{};state.userData.shop.transforms[id]={...getPreviewTransform(item)};saveUserData();render()}
-    function unequipShopItem(id){const item=getShopItem(id);if(!item)return;const slot=item.type==='accessory'?item.slot:item.type;if(state.userData.shop.equipped[slot]===id){state.userData.shop.equipped[slot]=null;saveUserData()}render()}
+    function buyCheerTickets(bundle){const packs={1:{coins:20,tickets:1},3:{coins:50,tickets:3},5:{coins:75,tickets:5}},p=packs[bundle];if(!p)return;if(state.userData.coins<p.coins)return alert(`${p.coins} 코인이 필요합니다.`);state.userData.coins-=p.coins;state.userData.shop.tickets+=p.tickets;saveUserData();alert(`응원 티켓 ${p.tickets}장을 구매했습니다!`);render()}
+    function buyShopItem(id){const item=getShopItem(id);if(!item)return;const s=getCharSchoolId(),charShop=getCharacterShopData();if(item.school!=='all'&&item.school!==s)return alert('이 아이템은 현재 캐릭터의 학교에서는 사용할 수 없습니다.');if(charShop.ownedItems.includes(id))return;if(state.userData.shop.tickets<item.price)return alert(`응원 티켓이 부족합니다. ${item.price}장이 필요합니다.`);state.userData.shop.tickets-=item.price;charShop.ownedItems.push(id);charShop.ownedItems=Array.from(new Set(charShop.ownedItems));saveUserData();render()}
+    function equipShopItem(id){const item=getShopItem(id),charShop=getCharacterShopData();if(!item||!charShop.ownedItems.includes(id))return;const s=getCharSchoolId();if(item.school!=='all'&&item.school!==s)return alert('현재 캐릭터에게 장착할 수 없는 학교 전용 아이템입니다.');const slot=item.type==='accessory'?item.slot:item.type;charShop.equipped[slot]=id;charShop.transforms[id]={...getPreviewTransform(item)};saveUserData();render()}
+    function unequipShopItem(id){
+      const item=getShopItem(id);
+      if(!item)return;
+      const charShop=getCharacterShopData();
+      const slot=item.type==='accessory'?item.slot:item.type;
+      if(charShop.equipped[slot]===id){
+        charShop.equipped[slot]=null;
+        saveUserData();
+      }
+      render();
+    }
 
     function selectUser(u) {
       state.user = u;
       state.lang = null;
       state.entered = false;
+      state.variantSelecting = false;
       state.selectedDay = 'all';
       state.tab = 'practice';
       render();
     }
 
     function selectLang(l) { state.lang = l; render(); }
-    function selectChar(c) { state.char = c; render(); }
+    function selectChar(c) {
+      state.char = c;
+      state.charVariant = 'default';
+      state.variantSelecting = false;
+      render();
+    }
 
     async function enterGym() {
+      saveSelectedVariant();
+      state.variantSelecting = false;
       state.entered = true;
       await loadUserData();
       const lName = state.lang === 'ja' ? '일본어' : '영어';
@@ -2095,18 +2467,45 @@
       render();
     }
 
+    function addCareExp(amount) {
+      const oldLevel = getCharInfo().level;
+      state.userData.exp = Number(state.userData.exp || 0) + amount;
+      const newLevel = getCharInfo().level;
+      if (newLevel > oldLevel) {
+        setTimeout(() => alert(`🎉 파트너 승격! [Lv.${newLevel} ${STAGE_TITLES[newLevel - 1]}]`), 0);
+      }
+    }
+
     function feedPartner() {
-      if (state.userData.coins < CARE_COSTS.food) return alert(`${(CHAR_META[state.char] || CHAR_META.kageyama).name}에게 ${CHAR_META[state.char].food}을(를) 주려면 ${CARE_COSTS.food}코인이 필요합니다.`);
+      const meta = CHAR_META[state.char] || CHAR_META.kageyama;
+      if (state.userData.coins < CARE_COSTS.food) {
+        alert(`${meta.name}에게 ${meta.food}을(를) 주려면 ${CARE_COSTS.food}코인이 필요합니다.`);
+        return;
+      }
+
       state.userData.coins -= CARE_COSTS.food;
-      state.userData.satisfaction = Math.min(4, state.userData.satisfaction + 1);
-      state.mood = 'happy'; state.speech = getCharSpeech('food'); saveUserData(); render();
+      addCareExp(10);
+      state.userData.satisfaction = Math.min(4, Number(state.userData.satisfaction || 0) + 1);
+      state.mood = 'happy';
+      state.speech = getCharSpeech('food');
+      saveUserData();
+      render();
     }
 
     function actionPartner() {
-      if (state.userData.coins < CARE_COSTS.train) return alert(`${CHAR_META[state.char].act}에는 ${CARE_COSTS.train}코인이 필요합니다.`);
+      const meta = CHAR_META[state.char] || CHAR_META.kageyama;
+      if (state.userData.coins < CARE_COSTS.train) {
+        alert(`${meta.act}에는 ${CARE_COSTS.train}코인이 필요합니다.`);
+        return;
+      }
+
       state.userData.coins -= CARE_COSTS.train;
-      state.userData.stamina = Math.min(4, state.userData.stamina + 1);
-      state.mood = 'happy'; state.speech = getCharSpeech('train'); saveUserData(); render();
+      addCareExp(20);
+      state.userData.stamina = Math.min(4, Number(state.userData.stamina || 0) + 1);
+      state.mood = 'happy';
+      state.speech = getCharSpeech('train');
+      saveUserData();
+      render();
     }
 
     function toggleFlashcardMeaning() { state.fcShowMeaning = !state.fcShowMeaning; render(); }
