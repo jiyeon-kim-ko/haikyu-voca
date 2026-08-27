@@ -3746,13 +3746,26 @@
 
     function merryStartStandalone(set){
       merryStopTimers();
-      const source=set==='intransitive'?MERRY_INTRANSITIVE:set==='collocation'?MERRY_COLLOCATIONS:MERRY_PREP_NOUN_PREP;
+      const source=set==='intransitive'
+        ? MERRY_INTRANSITIVE
+        : set==='collocation'
+          ? MERRY_COLLOCATIONS
+          : MERRY_PREP_NOUN_PREP;
+
+      // 자료에 들어 있는 항목을 하나도 빼지 않고 전부 출제합니다.
+      // 랜덤 10문제 제한 없이 원본 자료 순서를 그대로 유지합니다.
       merryStandalone={
         mode:'play',
         set,
-        deck:merryShuffle(source.map((x,i)=>({x,i,q:null}))).slice(0,Math.min(10,source.length)),
-        idx:0,score:0,correct:0,wrong:[],locked:false,selected:null,
-        reward:null,rewarded:false
+        deck:source.map((x,i)=>({x,i,q:null})),
+        idx:0,
+        score:0,
+        correct:0,
+        wrong:[],
+        locked:false,
+        selected:null,
+        reward:null,
+        rewarded:false
       };
       merryState.screen='standalone';
       merryRenderOnly();
@@ -3924,9 +3937,9 @@
         <div class="merry-sub">원하는 유형을 골라 독립적으로 연습할 수 있어요.</div><div style="margin-top:10px;padding:9px 11px;border-radius:10px;background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;font-size:11px;font-weight:850;">퀴즈를 끝까지 완료하면 EXP · 코인 · 응원 티켓 보상을 받아요.</div>
         <div class="merry-quiz-grid">
           <div class="merry-quiz-card"><span class="merry-progress-chip">2라운드</span><h3>전치사·접속사·접속부사</h3><p>60초 스피드 분류 + 실전 빈칸 10문제</p><button type="button" class="merry-btn merry-primary" onclick="merryStart()">시작하기</button></div>
-          <div class="merry-quiz-card"><span class="merry-progress-chip">10문제 랜덤</span><h3>빈출 자동사</h3><p>자동사와 함께 쓰는 전치사/부사를 맞혀요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('intransitive')">시작하기</button></div>
-          <div class="merry-quiz-card"><span class="merry-progress-chip">10문제 랜덤</span><h3>연어 + 고급어휘</h3><p>빈칸에 들어갈 핵심 어휘를 골라요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('collocation')">시작하기</button></div>
-          <div class="merry-quiz-card"><span class="merry-progress-chip">10문제 랜덤</span><h3>전치사 + 명사 + 전치사</h3><p>뜻을 보고 빈출 세트 표현을 맞혀요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('prepNounPrep')">시작하기</button></div>
+          <div class="merry-quiz-card"><span class="merry-progress-chip">자료 전체</span><h3>빈출 자동사</h3><p>자료에 있는 ${MERRY_INTRANSITIVE.length}개 표현을 전부 순서대로 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('intransitive')">시작하기</button></div>
+          <div class="merry-quiz-card"><span class="merry-progress-chip">자료 전체</span><h3>연어 + 고급어휘</h3><p>자료에 있는 ${MERRY_COLLOCATIONS.length}개 연어·고급어휘를 전부 순서대로 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('collocation')">시작하기</button></div>
+          <div class="merry-quiz-card"><span class="merry-progress-chip">자료 전체</span><h3>전치사 + 명사 + 전치사</h3><p>자료에 있는 ${MERRY_PREP_NOUN_PREP.length}개 세트 표현을 전부 순서대로 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('prepNounPrep')">시작하기</button></div>
         </div>
       </div></div>`;
 
