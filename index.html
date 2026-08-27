@@ -557,6 +557,18 @@
       .user-char-bubble{font-size:10.5px}
     }
 
+
+    .equipped-instance-list{display:flex;flex-direction:column;gap:7px;margin:10px 0}
+    .equipped-instance-row{display:flex;align-items:center;gap:8px;padding:8px 9px;border:1.5px solid #C4B5FD;border-radius:10px;background:#FAF5FF}
+    .equipped-instance-row img{width:42px;height:42px;object-fit:contain;border-radius:7px;background:#FFF;border:1px solid #E2E8F0}
+    .equipped-instance-row .info{flex:1;min-width:0}.equipped-instance-row .name{font-size:11px;font-weight:900}.equipped-instance-row .meta{font-size:9.5px;color:#7C3AED;font-weight:800}
+    .instance-editor{padding:11px;border:2px solid #C4B5FD;border-radius:12px;background:#FAF5FF;margin:10px 0}
+    .shop-manage-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+    .shop-manage-card{border:1.5px solid #E2E8F0;border-radius:11px;padding:10px;background:#FFF}
+    .shop-manage-head{display:flex;gap:8px;align-items:center}.shop-manage-head img{width:54px;height:54px;object-fit:contain;border:1px solid #E2E8F0;border-radius:8px;background:#F8FAFC}
+    .shop-manage-name{font-size:12px;font-weight:900}.shop-manage-meta{font-size:10px;color:#64748B;font-weight:700;line-height:1.45}
+    .shop-manage-actions{display:flex;gap:5px;margin-top:8px}.shop-manage-actions button{flex:1}
+    @media(max-width:620px){.shop-manage-grid{grid-template-columns:1fr}.equipped-instance-row{flex-wrap:wrap}}
 </style>
 </head>
 <body>
@@ -1112,23 +1124,25 @@
       {id:"frame_shiratorizawa",type:"frame",name:"시라토리자와 프레임",price:7,school:"shiratorizawa",file:"assets/shop/frames/Shiratorizawa frame.png"}
     ];
     function getCharSchoolId(charKey=state.char){const meta=CHAR_META[charKey]||CHAR_META.kageyama;return SCHOOL_IDS[meta.school]||"all"}
-    function getAllShopItems(){
-      return [...SHOP_ITEMS,...CUSTOM_CONTENT.items.map(i=>({...i,file:customAssetUrl(i.assetId)}))];
+    function getRawShopItems(){return [...SHOP_ITEMS,...CUSTOM_CONTENT.items.map(i=>({...i,file:customAssetUrl(i.assetId)}))];}
+    function getAllShopItems(includeDeleted=false){
+      const shop=state.userData?.shop||getShopDefaultData(),edits=shop.catalogEdits||{},deleted=new Set(shop.deletedItemIds||[]);
+      return getRawShopItems().map(i=>({...i,...(edits[i.id]||{})})).filter(i=>includeDeleted||!deleted.has(i.id));
     }
-    function getShopItem(id){return getAllShopItems().find(x=>x.id===id)||null}
+    function getShopItem(id){const shop=state.userData?.shop||getShopDefaultData();if((shop.deletedItemIds||[]).includes(id))return null;const raw=getRawShopItems().find(x=>x.id===id);return raw?({...raw,...((shop.catalogEdits||{})[id]||{})}):null}
+    function getManagedShopItem(id){const raw=getRawShopItems().find(x=>x.id===id),edits=state.userData?.shop?.catalogEdits||{};return raw?({...raw,...(edits[id]||{})}):null}
     function getCharacterShopData(charKey=state.char){
       const shop=state.userData.shop;
       shop.characterData=shop.characterData||{};
 
       if(!shop.characterData[charKey]){
-        shop.characterData[charKey]={
-          ownedItems:[],
-          variantData:{}
-        };
+        shop.characterData[charKey]={ownedItems:[],ownedCounts:{},variantData:{}};
       }
 
       const d=shop.characterData[charKey];
       d.ownedItems=Array.isArray(d.ownedItems)?Array.from(new Set(d.ownedItems)):[];
+      d.ownedCounts=d.ownedCounts&&typeof d.ownedCounts==='object'?d.ownedCounts:{};
+      d.ownedItems.forEach(id=>{if(!Number(d.ownedCounts[id]))d.ownedCounts[id]=1;});
       d.variantData=d.variantData&&typeof d.variantData==='object'?d.variantData:{};
 
       // 기존 캐릭터 단위 장착/위치 데이터를 현재 버전으로 1회 이전
@@ -1194,6 +1208,18 @@
 
       const vd=charShop.variantData[resolvedVariant];
       vd.equipped={background:null,slogan:null,frame:null,head:null,face:null,side:null,effect:null,...(vd.equipped||{})};
+      vd.equippedAccessories=Array.isArray(vd.equippedAccessories)?vd.equippedAccessories:[];
+      if(!vd._multiAccessoryMigrated){
+        ['head','face','side','effect'].forEach(slot=>{
+          const itemId=vd.equipped[slot];
+          if(itemId&&!vd.equippedAccessories.some(x=>x.itemId===itemId)){
+            const item=getManagedShopItem(itemId);
+            vd.equippedAccessories.push({instanceId:`legacy_${slot}_${itemId}`,itemId,slot,transform:{...(vd.transforms?.[itemId]||(item?getDefaultTransform(item):{x:0,y:0,scale:30,opacity:100,rotate:0}))}});
+          }
+          vd.equipped[slot]=null;
+        });
+        vd._multiAccessoryMigrated=true;
+      }
       vd.transforms=vd.transforms&&typeof vd.transforms==='object'?vd.transforms:{};
       vd.characterTransform={
         x:Number(vd.characterTransform?.x ?? 0),
@@ -1203,7 +1229,7 @@
       return vd;
     }
 
-    function getShopDefaultData(){return {tickets:0,legacySeedRemoved:true,ownedItems:[],equipped:{background:null,slogan:null,frame:null,head:null,face:null,side:null,effect:null},ticketClaims:{},transforms:{},characterData:{}}}
+    function getShopDefaultData(){return {tickets:0,legacySeedRemoved:true,ownedItems:[],equipped:{background:null,slogan:null,frame:null,head:null,face:null,side:null,effect:null},ticketClaims:{},transforms:{},characterData:{},catalogEdits:{},deletedItemIds:[]}}
     function normalizeShopData(v){
       const b=getShopDefaultData(),s=v&&typeof v==='object'?v:{};
       const isExistingShop = v && typeof v==='object';
@@ -1224,9 +1250,64 @@
         equipped:{...b.equipped,...(s.equipped&&typeof s.equipped==='object'?s.equipped:{})},
         ticketClaims:s.ticketClaims&&typeof s.ticketClaims==='object'?s.ticketClaims:{},
         transforms:s.transforms&&typeof s.transforms==='object'?s.transforms:{},
-        characterData:s.characterData&&typeof s.characterData==='object'?s.characterData:{}
+        characterData:s.characterData&&typeof s.characterData==='object'?s.characterData:{},
+        catalogEdits:s.catalogEdits&&typeof s.catalogEdits==='object'?s.catalogEdits:{},
+        deletedItemIds:Array.isArray(s.deletedItemIds)?Array.from(new Set(s.deletedItemIds)):[]
       }
     }
+
+    function getOwnedCount(itemId,charKey=state.char){const d=getCharacterShopData(charKey);return Math.max(0,Number(d.ownedCounts?.[itemId]||0))}
+    function getEquippedAccessoryCount(itemId,charKey=state.char){return (getCharacterVariantData(charKey).equippedAccessories||[]).filter(x=>x.itemId===itemId).length}
+    function getAccessoryInstance(instanceId,charKey=state.char){return (getCharacterVariantData(charKey).equippedAccessories||[]).find(x=>x.instanceId===instanceId)||null}
+    function equipAccessoryCopy(itemId){
+      const item=getShopItem(itemId);if(!item||item.type!=='accessory')return;
+      if(getEquippedAccessoryCount(itemId)>=getOwnedCount(itemId))return alert('보유한 수량을 모두 장착 중입니다. 같은 아이템을 한 개 더 구매해주세요.');
+      const vd=getCharacterVariantData(),t={...getPreviewTransform(item)};
+      vd.equippedAccessories.push({instanceId:`inst_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,itemId:item.id,slot:item.slot,transform:t});
+      saveUserData();render();
+    }
+    function unequipAccessoryInstance(instanceId){const vd=getCharacterVariantData();vd.equippedAccessories=(vd.equippedAccessories||[]).filter(x=>x.instanceId!==instanceId);if(state.shopPreviewInstanceId===instanceId)state.shopPreviewInstanceId=null;saveUserData();render()}
+    function editAccessoryInstance(instanceId){state.shopPreviewInstanceId=state.shopPreviewInstanceId===instanceId?null:instanceId;render()}
+    function updateAccessoryInstanceTransform(instanceId,key,value){
+      const inst=getAccessoryInstance(instanceId);if(!inst)return;inst.transform=inst.transform||{x:0,y:0,scale:30,opacity:100,rotate:0};inst.transform[key]=Number(value);
+      const el=document.querySelector(`[data-accessory-instance="${instanceId}"]`);if(el){const t=inst.transform;el.style.left=`calc(50% + ${t.x}px)`;el.style.top=`calc(50% + ${t.y}px)`;el.style.width=`${t.scale}%`;el.style.opacity=t.opacity/100;el.style.transform=`translate(-50%,-50%) rotate(${t.rotate||0}deg)`}
+      const lab=document.getElementById(`inst-${instanceId}-${key}`);if(lab)lab.textContent=(key==='opacity'||key==='scale')?`${inst.transform[key]}%`:key==='rotate'?`${inst.transform[key]}°`:`${inst.transform[key]}px`;
+    }
+    function saveAccessoryInstanceTransform(){saveUserData();state.shopPreviewInstanceId=null;render()}
+    function resetAccessoryInstanceTransform(instanceId){const inst=getAccessoryInstance(instanceId),item=inst?getShopItem(inst.itemId):null;if(!inst||!item)return;inst.transform={...getDefaultTransform(item)};render()}
+    function renderAccessoryInstanceEditor(){
+      const id=state.shopPreviewInstanceId;if(!id)return '';const inst=getAccessoryInstance(id),item=inst?getShopItem(inst.itemId):null;if(!inst||!item)return '';const t=inst.transform||getDefaultTransform(item);
+      return `<div class="instance-editor"><div style="font-size:12px;font-weight:900;margin-bottom:3px;">🎛️ ${item.name} 개별 위치 조정</div><div style="font-size:10px;color:#64748B;margin-bottom:8px;">같은 액세서리라도 복사본마다 위치를 따로 저장해요.</div><div class="preview-controls">
+      <div class="preview-control"><label><span>↔ 좌우</span><span id="inst-${id}-x">${t.x}px</span></label><input type="range" min="-180" max="180" value="${t.x}" oninput="updateAccessoryInstanceTransform('${id}','x',this.value)"></div>
+      <div class="preview-control"><label><span>↕ 위아래</span><span id="inst-${id}-y">${t.y}px</span></label><input type="range" min="-220" max="220" value="${t.y}" oninput="updateAccessoryInstanceTransform('${id}','y',this.value)"></div>
+      <div class="preview-control"><label><span>🔍 크기</span><span id="inst-${id}-scale">${t.scale}%</span></label><input type="range" min="8" max="180" value="${t.scale}" oninput="updateAccessoryInstanceTransform('${id}','scale',this.value)"></div>
+      <div class="preview-control"><label><span>◐ 투명도</span><span id="inst-${id}-opacity">${t.opacity}%</span></label><input type="range" min="0" max="100" value="${t.opacity}" oninput="updateAccessoryInstanceTransform('${id}','opacity',this.value)"></div>
+      <div class="preview-control"><label><span>↻ 각도</span><span id="inst-${id}-rotate">${t.rotate||0}°</span></label><input type="range" min="-180" max="180" value="${t.rotate||0}" oninput="updateAccessoryInstanceTransform('${id}','rotate',this.value)"></div></div>
+      <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px;"><button class="btn-pixel-white" onclick="resetAccessoryInstanceTransform('${id}')">↺ 초기화</button><button class="btn-pixel-black" onclick="saveAccessoryInstanceTransform()">💾 저장</button></div></div>`;
+    }
+    function editManagedShopItem(id){
+      const item=getManagedShopItem(id);if(!item)return;
+      const name=prompt('아이템 이름',item.name);if(name===null)return;
+      const priceRaw=prompt('응원 티켓 가격',String(item.price??0));if(priceRaw===null)return;
+      const school=prompt('사용 범위: all / karasuno / aobajohsai / nekoma / inarizaki / shiratorizawa',item.school||'all');if(school===null)return;
+      let slot=item.slot;if(item.type==='accessory'){const s=prompt('액세서리 분류: head / face / side / effect',item.slot||'side');if(s===null)return;slot=s;}
+      state.userData.shop.catalogEdits=state.userData.shop.catalogEdits||{};
+      state.userData.shop.catalogEdits[id]={...(state.userData.shop.catalogEdits[id]||{}),name:name.trim()||item.name,price:Math.max(0,Number(priceRaw)||0),school:school.trim()||'all',...(item.type==='accessory'?{slot:slot.trim()||'side'}:{})};
+      saveUserData();render();
+    }
+    function deleteManagedShopItem(id){
+      const item=getManagedShopItem(id);if(!item)return;if(!confirm(`상점에서 "${item.name}"을 숨길까요?`))return;
+      state.userData.shop.deletedItemIds=Array.from(new Set([...(state.userData.shop.deletedItemIds||[]),id]));
+      Object.values(state.userData.shop.characterData||{}).forEach(cd=>Object.values(cd.variantData||{}).forEach(vd=>{vd.equippedAccessories=(vd.equippedAccessories||[]).filter(x=>x.itemId!==id);if(vd.equipped)['background','slogan','frame','head','face','side','effect'].forEach(k=>{if(vd.equipped[k]===id)vd.equipped[k]=null})}));
+      saveUserData();render();
+    }
+    function restoreManagedShopItem(id){state.userData.shop.deletedItemIds=(state.userData.shop.deletedItemIds||[]).filter(x=>x!==id);saveUserData();render()}
+    function resetManagedShopItem(id){if(state.userData.shop.catalogEdits)delete state.userData.shop.catalogEdits[id];saveUserData();render()}
+    function renderShopManager(){
+      const deleted=new Set(state.userData.shop.deletedItemIds||[]),items=getAllShopItems(true);
+      return `<div><h4 style="font-weight:900;margin:0 0 4px;">🛠️ 상점 아이템 관리</h4><div style="font-size:10.5px;color:#64748B;font-weight:700;">이름·가격·학교 범위·액세서리 분류를 편집하거나 상점에서 숨길 수 있어요.</div><div style="margin-top:9px;padding:9px;border:1.5px solid #FCD34D;border-radius:9px;background:#FFFBEB;font-size:10px;color:#92400E;font-weight:800;">삭제는 파일 자체를 지우지 않고 상점에서 숨기는 방식이라 언제든 복구할 수 있어요.</div><div class="shop-manage-grid">${items.map(item=>{const isDeleted=deleted.has(item.id),edited=!!state.userData.shop.catalogEdits?.[item.id];return `<div class="shop-manage-card" style="${isDeleted?'opacity:.55;background:#F8FAFC;':''}"><div class="shop-manage-head"><img src="${item.file}" onerror="this.style.display='none';"><div><div class="shop-manage-name">${escHtml(item.name)}</div><div class="shop-manage-meta">${item.type} · ${item.school||'all'} · 🎟️${item.price}${item.type==='accessory'?` · ${item.slot}`:''}${edited?' · 편집됨':''}${isDeleted?' · 숨김':''}</div></div></div><div class="shop-manage-actions">${isDeleted?`<button class="btn-pixel-black" onclick="restoreManagedShopItem('${item.id}')">복구</button>`:`<button class="btn-pixel-white" onclick="editManagedShopItem('${item.id}')">편집</button><button class="btn-pixel-white" style="color:#B91C1C;border-color:#FCA5A5;" onclick="deleteManagedShopItem('${item.id}')">삭제</button>`}${edited?`<button class="btn-pixel-white" onclick="resetManagedShopItem('${item.id}')">원래대로</button>`:''}</div></div>`}).join('')}</div></div>`;
+    }
+
     function getTicketTier(correct,total){if(!total)return 0;const p=correct/total*100;if(p>=99.999)return 3;if(p>=80)return 2;if(p>=60)return 1;return 0}
     function awardCheerTickets(testType,correct,total){const tier=getTicketTier(correct,total),key=`${testType}:${getTestScopeKey()}`,prev=Number(state.userData.shop.ticketClaims[key]||0),delta=Math.max(0,tier-prev);if(tier>prev)state.userData.shop.ticketClaims[key]=tier;if(delta>0)state.userData.shop.tickets+=delta;return delta}
 
@@ -1311,78 +1392,12 @@
     }
 
     function renderDecoratedCharacter(charKey) {
-      const meta = getActiveCharacterMeta(charKey);
-      const shop = state.userData?.shop || getShopDefaultData();
-      const charShop = getCharacterShopData(charKey);
-      const variantShop = getCharacterVariantData(charKey);
-      const eq = variantShop.equipped || {};
-      const bg = getShopItem(eq.background);
-      const slogan = getShopItem(eq.slogan);
-      const frame = getShopItem(eq.frame);
-
-      const layers = ["head", "face", "side", "effect"]
-        .map(slot => ({ slot, item: getShopItem(eq[slot]) }))
-        .filter(x => x.item);
-
-      const sloganT = slogan ? getPreviewTransform(slogan, charKey) : null;
-      const charT = getCharacterTransform(charKey);
-      const charStyle = `left:calc(50% + ${charT.x}px);top:calc(50% + ${charT.y}px);width:${charT.scale}%;height:${charT.scale}%;transform:translate(-50%,-50%);`;
-
-      return `
-        <div class="character-stage">
-          <div class="character-profile-viewport">
-            <div class="character-frame-stack">
-              <div class="character-frame-clip">
-                ${bg ? `
-                  <img class="character-bg-layer"
-                       src="${bg.file}"
-                       alt="${bg.name}"
-                       onerror="this.style.display='none';">
-                ` : ''}
-                ${characterCutoutImg(meta, 'character-base-cutout', charStyle, 'profile-character-live')}
-              </div>
-
-              ${slogan ? `
-                <img class="character-slogan-layer"
-                     src="${slogan.file}"
-                     alt="${slogan.name}"
-                     style="
-                       left:calc(50% + ${sloganT.x}px);
-                       top:calc(50% + ${sloganT.y}px);
-                       width:${sloganT.scale}%;
-                       opacity:${sloganT.opacity / 100};
-                       transform:translate(-50%,-50%) rotate(${sloganT.rotate || 0}deg);
-                     "
-                     onerror="this.style.display='none';">
-              ` : ''}
-
-              ${layers.map(({ item }) => {
-                const t = getPreviewTransform(item, charKey);
-                return `
-                  <img class="character-accessory-layer"
-                       src="${item.file}"
-                       alt="${item.name}"
-                       style="
-                         left:calc(50% + ${t.x}px);
-                         top:calc(50% + ${t.y}px);
-                         width:${t.scale}%;
-                         opacity:${t.opacity / 100};
-                         transform:translate(-50%,-50%) rotate(${t.rotate || 0}deg);
-                       "
-                       onerror="this.style.display='none';">
-                `;
-              }).join('')}
-
-              ${frame ? `
-                <img class="character-frame-overlay"
-                     src="${frame.file}"
-                     alt="${frame.name}"
-                     onerror="this.style.display='none';">
-              ` : ''}
-            </div>
-          </div>
-        </div>
-      `;
+      const meta=getActiveCharacterMeta(charKey),vd=getCharacterVariantData(charKey),eq=vd.equipped||{};
+      const bg=getShopItem(eq.background),slogan=getShopItem(eq.slogan),frame=getShopItem(eq.frame);
+      const accessories=(vd.equippedAccessories||[]).map(inst=>({inst,item:getShopItem(inst.itemId)})).filter(x=>x.item);
+      const sloganT=slogan?getPreviewTransform(slogan,charKey):null,charT=getCharacterTransform(charKey);
+      const charStyle=`left:calc(50% + ${charT.x}px);top:calc(50% + ${charT.y}px);width:${charT.scale}%;height:${charT.scale}%;transform:translate(-50%,-50%);`;
+      return `<div class="character-stage"><div class="character-profile-viewport"><div class="character-frame-stack"><div class="character-frame-clip">${bg?`<img class="character-bg-layer" src="${bg.file}" alt="${bg.name}" onerror="this.style.display='none';">`:''}${characterCutoutImg(meta,'character-base-cutout',charStyle,'profile-character-live')}</div>${slogan?`<img class="character-slogan-layer" src="${slogan.file}" alt="${slogan.name}" style="left:calc(50% + ${sloganT.x}px);top:calc(50% + ${sloganT.y}px);width:${sloganT.scale}%;opacity:${sloganT.opacity/100};transform:translate(-50%,-50%) rotate(${sloganT.rotate||0}deg);" onerror="this.style.display='none';">`:''}${accessories.map(({inst,item})=>{const t=inst.transform||getDefaultTransform(item);return `<img data-accessory-instance="${inst.instanceId}" class="character-accessory-layer" src="${item.file}" alt="${item.name}" style="left:calc(50% + ${t.x}px);top:calc(50% + ${t.y}px);width:${t.scale}%;opacity:${t.opacity/100};transform:translate(-50%,-50%) rotate(${t.rotate||0}deg);" onerror="this.style.display='none';">`}).join('')}${frame?`<img class="character-frame-overlay" src="${frame.file}" alt="${frame.name}" onerror="this.style.display='none';">`:''}</div></div></div>`;
     }
 
     // 미카사 V200W 느낌의 노랑 + 파랑 배구공 아이콘
@@ -1903,6 +1918,7 @@
         }
         const dst=out[charKey];
         dst.ownedItems=Array.from(new Set([...(dst.ownedItems||[]),...(src.ownedItems||[])]));
+        dst.ownedCounts={...(dst.ownedCounts||{})};Object.entries(src.ownedCounts||{}).forEach(([id,count])=>{dst.ownedCounts[id]=Math.max(Number(dst.ownedCounts[id]||0),Number(count||0));});
         dst.variantData={...(dst.variantData||{})};
         Object.entries(src.variantData||{}).forEach(([variantId,sv])=>{
           if(!dst.variantData[variantId]){
@@ -1911,6 +1927,7 @@
           }
           const dv=dst.variantData[variantId];
           dv.equipped={...(dv.equipped||{}),...(sv.equipped||{})};
+          dv.equippedAccessories=uniqueByJson([...(dv.equippedAccessories||[]),...(sv.equippedAccessories||[])]);
           dv.transforms={...(dv.transforms||{}),...(sv.transforms||{})};
           if(sv.characterTransform) dv.characterTransform={...(dv.characterTransform||{}),...sv.characterTransform};
         });
@@ -2804,6 +2821,7 @@
               <button class="btn-tab-menu ${state.tab === 'shop' ? 'active' : ''}" onclick="switchTab('shop')">상점</button>
               <button class="btn-tab-menu ${state.tab === 'inventory' ? 'active' : ''}" onclick="switchTab('inventory')">인벤토리</button>
               <button class="btn-tab-menu ${state.tab === 'customize' ? 'active' : ''}" onclick="switchTab('customize')">커스텀</button>
+              <button class="btn-tab-menu ${state.tab === 'shopManage' ? 'active' : ''}" onclick="switchTab('shopManage')">관리</button>
               <button class="btn-tab-menu ${state.tab === 'history' ? 'active' : ''}" onclick="switchTab('history')">기록</button>
               <button class="btn-tab-menu ${state.tab === 'timer' ? 'active' : ''}" onclick="switchTab('timer')">공부<br>타이머</button>
               <button class="btn-tab-menu ${state.tab === 'todo' ? 'active' : ''}" onclick="switchTab('todo')">할 일</button>
@@ -2948,6 +2966,7 @@
     }
 
     function renderTabContent() {
+      if (state.tab === 'shopManage') return renderShopManager();
       if (state.tab === 'todo') return renderTodoList();
       if (state.tab === 'merryChallenge') return renderMerryChallenge();
       if (state.tab === 'customize') return renderExtraCustomization();
@@ -3184,32 +3203,27 @@
       }
 
       if (state.tab === 'inventory') {
-        const charShop=getCharacterShopData();
-        const variantShop=getCharacterVariantData();
-        const owned=charShop.ownedItems.map(getShopItem).filter(Boolean);
+        const charShop=getCharacterShopData(),vd=getCharacterVariantData();
+        const owned=Object.keys(charShop.ownedCounts||{}).filter(id=>getOwnedCount(id)>0).map(getShopItem).filter(Boolean);
         const previewItem=getShopItem(state.shopPreviewItemId);
-        return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-          <div><h4 style="font-weight:900;margin:0">🎒 ${CHAR_META[state.char].name} 인벤토리</h4><div style="font-size:10.5px;color:#64748B;margin-top:3px">아이템 보유는 캐릭터 공통 · 장착/위치/캐릭터 크기는 <b>${getSelectedVariant().name}</b> 버전별 저장</div></div>
-          <div style="font-weight:900;color:#7C3AED">🎟️ ${state.userData.shop.tickets}장</div>
-        </div>
-        <div style="margin-top:10px;padding:9px 10px;border:1.5px solid #C4B5FD;border-radius:10px;background:#FAF5FF;font-size:10.5px;color:#6D28D9;font-weight:800;">
-          🖼️ 현재 버전: ${getSelectedVariant().name}<br>
-          이 버전의 장착 상태·아이템 위치·캐릭터 크기/위치는 다른 버전과 독립적으로 저장됩니다.
-        </div>
+        const instances=(vd.equippedAccessories||[]).map(inst=>({inst,item:getShopItem(inst.itemId)})).filter(x=>x.item);
+        return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div><h4 style="font-weight:900;margin:0">🎒 ${CHAR_META[state.char].name} 인벤토리</h4><div style="font-size:10.5px;color:#64748B;margin-top:3px">액세서리는 여러 개 동시 장착 · 같은 액세서리도 여러 개 구매 가능</div></div><div style="font-weight:900;color:#7C3AED">🎟️ ${state.userData.shop.tickets}장</div></div>
+        <div style="margin-top:10px;padding:9px 10px;border:1.5px solid #C4B5FD;border-radius:10px;background:#FAF5FF;font-size:10.5px;color:#6D28D9;font-weight:800;">🖼️ 현재 버전: ${getSelectedVariant().name}<br>같은 액세서리 복사본도 각각 위치·크기·투명도·각도를 따로 저장해요.</div>
         ${renderCharacterAdjustControls()}
-        ${previewItem?renderShopItemPreview(previewItem):''}
-        ${owned.length?`<div class="shop-grid">${owned.map(item=>{const slot=item.type==='accessory'?item.slot:item.type,equipped=variantShop.equipped[slot]===item.id;return `<div class="shop-card ${equipped?'equipped':''}"><div class="shop-preview ${item.type==='background'?'bg':item.type==='frame'?'frame':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}</div><div class="shop-item-meta">${equipped?'장착 중':'보유 중'}</div>${(item.type==='accessory'||item.type==='slogan')?`<button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">🎛️ 위치 조정</button>`:`<button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">👀 미리보기</button>`}<button class="${equipped?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;padding:7px 4px;font-size:11px" onclick="${equipped?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${equipped?'장착 해제':'장착하기'}</button></div>`}).join('')}</div>`:`<div style="padding:30px;text-align:center;color:#94A3B8;font-weight:800">아직 구입한 아이템이 없어요.</div>`}`;
+        ${instances.length?`<div style="font-size:11.5px;font-weight:900;margin-top:10px;">현재 장착 중인 액세서리 ${instances.length}개</div><div class="equipped-instance-list">${instances.map(({inst,item},idx)=>`<div class="equipped-instance-row"><img src="${item.file}" onerror="this.style.display='none';"><div class="info"><div class="name">${item.name} #${idx+1}</div><div class="meta">${item.slot} · 개별 위치 저장</div></div><button class="btn-pixel-white" onclick="editAccessoryInstance('${inst.instanceId}')">위치 조정</button><button class="btn-pixel-white" onclick="unequipAccessoryInstance('${inst.instanceId}')">해제</button></div>`).join('')}</div>`:''}
+        ${renderAccessoryInstanceEditor()}${previewItem?renderShopItemPreview(previewItem):''}
+        ${owned.length?`<div class="shop-grid">${owned.map(item=>{const count=getOwnedCount(item.id);if(item.type==='accessory'){const eqCount=getEquippedAccessoryCount(item.id),available=count-eqCount;return `<div class="shop-card ${eqCount?'equipped':''}"><div class="shop-preview"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name} × ${count}</div><div class="shop-item-meta">장착 ${eqCount}개 · 남은 ${available}개</div><button class="btn-pixel-white" onclick="previewShopItem('${item.id}')">👀 미리보기</button><button class="${available>0?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;" onclick="equipAccessoryCopy('${item.id}')" ${available>0?'':'disabled'}>＋ 하나 장착</button></div>`}const equipped=vd.equipped[item.type]===item.id;return `<div class="shop-card ${equipped?'equipped':''}"><div class="shop-preview ${item.type==='background'?'bg':item.type==='frame'?'frame':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}</div><div class="shop-item-meta">${equipped?'장착 중':'보유 중'}</div><button class="btn-pixel-white" onclick="previewShopItem('${item.id}')">${item.type==='slogan'?'🎛️ 위치 조정':'👀 미리보기'}</button><button class="${equipped?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;" onclick="${equipped?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${equipped?'장착 해제':'장착하기'}</button></div>`}).join('')}</div>`:`<div style="padding:30px;text-align:center;color:#94A3B8;font-weight:800">아직 구입한 아이템이 없어요.</div>`}`;
       }
 
       if (state.tab === 'shop') {
-        const schoolId=getCharSchoolId(),charShop=getCharacterShopData(),variantShop=getCharacterVariantData(),visibleItems=getAllShopItems().filter(item=>item.type===state.shopCategory&&(item.school==='all'||item.school===schoolId));
-        const labels={accessory:'🎀 액세서리',background:'🖼️ 배경',slogan:'🏳️ 슬로건',frame:'🖼️ 프레임'};
-        const previewItem=getShopItem(state.shopPreviewItemId);
+        const schoolId=getCharSchoolId(),vd=getCharacterVariantData(),visibleItems=getAllShopItems().filter(item=>item.type===state.shopCategory&&(item.school==='all'||item.school===schoolId));
+        const labels={accessory:'🎀 액세서리',background:'🖼️ 배경',slogan:'🏳️ 슬로건',frame:'🖼️ 프레임'},previewItem=getShopItem(state.shopPreviewItemId);
         return `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h4 style="font-weight:900;margin:0 0 4px">🛍️ 꾸미기 상점</h4><div style="font-size:11.5px;color:#64748B;font-weight:700">${CHAR_META[state.char].name} · ${SCHOOL_LABELS[schoolId]||CHAR_META[state.char].school}</div></div><div style="font-weight:900;color:#7C3AED;background:#F5F3FF;border:1.5px solid #C4B5FD;border-radius:9px;padding:7px 10px">🎟️ ${state.userData.shop.tickets}장</div></div>
         <div class="shop-category-tabs" style="margin-top:12px">${Object.keys(labels).map(cat=>`<button class="shop-category-btn ${state.shopCategory===cat?'active':''}" onclick="setShopCategory('${cat}')">${labels[cat]}</button>`).join('')}</div>
-        <div style="font-size:10.5px;color:#94A3B8;margin-top:8px">모든 아이템은 구매 전에 미리보기할 수 있습니다. 액세서리와 슬로건은 위치·크기·투명도·각도를 조정할 수 있고, 프레임은 프로필 테두리에 자동으로 맞춰집니다.</div><div style="margin-top:10px;padding:10px;border:1.5px solid #FCD34D;border-radius:10px;background:#FFFBEB"><div style="font-size:11px;font-weight:900;color:#92400E;margin-bottom:6px">🪙 코인으로 응원 티켓 구매 · 보유 ${state.userData.coins}🪙</div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn-pixel-white" onclick="buyCheerTickets(1)">20🪙 → 🎟️1</button><button class="btn-pixel-white" onclick="buyCheerTickets(3)">50🪙 → 🎟️3</button><button class="btn-pixel-black" onclick="buyCheerTickets(5)">75🪙 → 🎟️5</button></div></div>
+        <div style="font-size:10.5px;color:#94A3B8;margin-top:8px">액세서리는 같은 상품을 여러 번 구매하고 동시에 여러 개 장착할 수 있어요.</div>
+        <div style="margin-top:10px;padding:10px;border:1.5px solid #FCD34D;border-radius:10px;background:#FFFBEB"><div style="font-size:11px;font-weight:900;color:#92400E;margin-bottom:6px">🪙 코인으로 응원 티켓 구매 · 보유 ${state.userData.coins}🪙</div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn-pixel-white" onclick="buyCheerTickets(1)">20🪙 → 🎟️1</button><button class="btn-pixel-white" onclick="buyCheerTickets(3)">50🪙 → 🎟️3</button><button class="btn-pixel-black" onclick="buyCheerTickets(5)">75🪙 → 🎟️5</button></div></div>
         ${previewItem?renderShopItemPreview(previewItem):''}
-        <div class="shop-grid">${visibleItems.map(item=>{const owned=charShop.ownedItems.includes(item.id),slot=item.type==='accessory'?item.slot:item.type,equipped=variantShop.equipped[slot]===item.id,canBuy=state.userData.shop.tickets>=item.price,previewing=state.shopPreviewItemId===item.id;return `<div class="shop-card ${equipped?'equipped':''} ${previewing?'previewing':''}"><div class="shop-preview ${item.type==='background'?'bg':item.type==='frame'?'frame':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}</div><div class="shop-item-meta">${item.school==='all'?'전 캐릭터 공용':`${SCHOOL_LABELS[item.school]||'현재 학교'} 전용`}${item.type==='accessory'?` · ${item.slot==='head'?'머리':item.slot==='face'?'얼굴':item.slot==='effect'?'효과':'주변 소품'}`:item.type==='frame'?' · 프로필 프레임':''}</div><button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">${previewing?'미리보기 닫기':'👀 미리보기'}</button>${owned?`<button class="${equipped?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;padding:7px 4px;font-size:11px" onclick="${equipped?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${equipped?'장착 해제':'장착하기'}</button>`:`<button class="btn-pixel-white" style="width:100%;padding:7px 4px;font-size:11px;${canBuy?'border-color:#7C3AED;color:#6D28D9;':'opacity:.55;'}" onclick="buyShopItem('${item.id}')" ${canBuy?'':'disabled'}>🎟️ ${item.price} · 구매</button>`}</div>`}).join('')}</div>`;
+        <div class="shop-grid">${visibleItems.map(item=>{const count=getOwnedCount(item.id),isAcc=item.type==='accessory',eq=isAcc?getEquippedAccessoryCount(item.id)>0:vd.equipped[item.type]===item.id,canBuy=state.userData.shop.tickets>=item.price,previewing=state.shopPreviewItemId===item.id;return `<div class="shop-card ${eq?'equipped':''} ${previewing?'previewing':''}"><div class="shop-preview ${item.type==='background'?'bg':item.type==='frame'?'frame':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}${isAcc&&count?` × ${count}`:''}</div><div class="shop-item-meta">${item.school==='all'?'전 캐릭터 공용':`${SCHOOL_LABELS[item.school]||'현재 학교'} 전용`}${isAcc?` · ${item.slot}`:''}</div><button class="btn-pixel-white" onclick="previewShopItem('${item.id}')">${previewing?'미리보기 닫기':'👀 미리보기'}</button>${isAcc?`<button class="btn-pixel-white" style="width:100%;${canBuy?'border-color:#7C3AED;color:#6D28D9;':'opacity:.55;'}" onclick="buyShopItem('${item.id}')" ${canBuy?'':'disabled'}>🎟️ ${item.price} · ${count?'추가 구매':'구매'}</button>${count?`<button class="btn-pixel-black" style="width:100%;" onclick="equipAccessoryCopy('${item.id}')" ${getEquippedAccessoryCount(item.id)>=count?'disabled':''}>＋ 하나 장착</button>`:''}`:count?`<button class="${eq?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;" onclick="${eq?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${eq?'장착 해제':'장착하기'}</button>`:`<button class="btn-pixel-white" style="width:100%;${canBuy?'border-color:#7C3AED;color:#6D28D9;':'opacity:.55;'}" onclick="buyShopItem('${item.id}')" ${canBuy?'':'disabled'}>🎟️ ${item.price} · 구매</button>`}</div>`}).join('')}</div>`;
       }
 
       if (state.tab === 'timer') {
@@ -3395,28 +3409,23 @@
     function setShopCategory(category){state.shopCategory=category;state.shopPreviewItemId=null;render()}
 
     function buyCheerTickets(bundle){const packs={1:{coins:20,tickets:1},3:{coins:50,tickets:3},5:{coins:75,tickets:5}},p=packs[bundle];if(!p)return;if(state.userData.coins<p.coins)return alert(`${p.coins} 코인이 필요합니다.`);state.userData.coins-=p.coins;state.userData.shop.tickets+=p.tickets;saveUserData();alert(`응원 티켓 ${p.tickets}장을 구매했습니다!`);render()}
-    function buyShopItem(id){const item=getShopItem(id);if(!item)return;const s=getCharSchoolId(),charShop=getCharacterShopData();if(item.school!=='all'&&item.school!==s)return alert('이 아이템은 현재 캐릭터의 학교에서는 사용할 수 없습니다.');if(charShop.ownedItems.includes(id))return;if(state.userData.shop.tickets<item.price)return alert(`응원 티켓이 부족합니다. ${item.price}장이 필요합니다.`);state.userData.shop.tickets-=item.price;charShop.ownedItems.push(id);charShop.ownedItems=Array.from(new Set(charShop.ownedItems));saveUserData();render()}
-    function equipShopItem(id){
-      const item=getShopItem(id),charShop=getCharacterShopData(),variantShop=getCharacterVariantData();
-      if(!item||!charShop.ownedItems.includes(id))return;
-      const s=getCharSchoolId();
-      if(item.school!=='all'&&item.school!==s)return alert('현재 캐릭터에게 장착할 수 없는 학교 전용 아이템입니다.');
-      const slot=item.type==='accessory'?item.slot:item.type;
-      variantShop.equipped[slot]=id;
-      variantShop.transforms[id]={...getPreviewTransform(item)};
-      saveUserData();
-      render();
+    function buyShopItem(id){
+      const item=getShopItem(id);if(!item)return;const s=getCharSchoolId(),charShop=getCharacterShopData();
+      if(item.school!=='all'&&item.school!==s)return alert('이 아이템은 현재 캐릭터의 학교에서는 사용할 수 없습니다.');
+      if(state.userData.shop.tickets<item.price)return alert(`응원 티켓이 부족합니다. ${item.price}장이 필요합니다.`);
+      if(item.type!=='accessory'&&getOwnedCount(id)>0)return alert('이미 보유한 아이템입니다.');
+      state.userData.shop.tickets-=item.price;charShop.ownedCounts[id]=getOwnedCount(id)+1;if(!charShop.ownedItems.includes(id))charShop.ownedItems.push(id);saveUserData();render()
+    }
+        function equipShopItem(id){
+      const item=getShopItem(id),variantShop=getCharacterVariantData();if(!item||getOwnedCount(id)<=0)return;
+      const s=getCharSchoolId();if(item.school!=='all'&&item.school!==s)return alert('현재 캐릭터에게 장착할 수 없는 학교 전용 아이템입니다.');
+      if(item.type==='accessory'){equipAccessoryCopy(id);return;}
+      variantShop.equipped[item.type]=id;variantShop.transforms[id]={...getPreviewTransform(item)};saveUserData();render();
     }
     function unequipShopItem(id){
-      const item=getShopItem(id);
-      if(!item)return;
-      const variantShop=getCharacterVariantData();
-      const slot=item.type==='accessory'?item.slot:item.type;
-      if(variantShop.equipped[slot]===id){
-        variantShop.equipped[slot]=null;
-        saveUserData();
-      }
-      render();
+      const item=getManagedShopItem(id);if(!item)return;const variantShop=getCharacterVariantData();
+      if(item.type==='accessory'){const a=(variantShop.equippedAccessories||[]).filter(x=>x.itemId===id);if(a.length)unequipAccessoryInstance(a[a.length-1].instanceId);return;}
+      if(variantShop.equipped[item.type]===id){variantShop.equipped[item.type]=null;saveUserData();}render();
     }
 
     function selectUser(u) {
