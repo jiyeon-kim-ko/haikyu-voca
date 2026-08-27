@@ -462,7 +462,36 @@
       .variant-select-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .study-timer-clock { font-size:42px; }
     }
-  </style>
+  
+    /* Merry TOEIC · 전접부 스피드 챌린지 */
+    .merry-wrap{--merry-red:#E8344E;--merry-red-dark:#C82740;--merry-green:#16A34A;--merry-bg:#F7F7F9;width:100%;max-width:760px;margin:0 auto;padding:10px;color:#20242D;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .merry-card{background:#FFF;border:1px solid #E5E7EB;border-radius:18px;padding:20px;box-shadow:0 6px 24px rgba(17,24,39,.06)}
+    .merry-brand{font-size:12px;font-weight:900;color:var(--merry-red);letter-spacing:.02em}.merry-title{font-size:clamp(25px,6vw,38px);font-weight:950;line-height:1.12;margin:8px 0}.merry-sub{color:#6B7280;font-weight:700;line-height:1.55;font-size:14px}
+    .merry-rules{display:grid;gap:8px;margin:18px 0}.merry-rule{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:12px;padding:11px 12px;font-weight:850;font-size:13px}
+    .merry-btn{min-height:56px;border:0;border-radius:14px;padding:12px 16px;font-weight:900;font-size:16px;cursor:pointer;transition:.15s transform,.15s background}.merry-btn:active{transform:scale(.98)}
+    .merry-primary{background:var(--merry-red);color:#FFF;width:100%}.merry-primary:hover{background:var(--merry-red-dark)}
+    .merry-choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:16px}.merry-choice{background:#FFF;border:2px solid #E5E7EB;color:#222}.merry-choice:hover{border-color:var(--merry-red);color:var(--merry-red)}
+    .merry-topline{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;font-weight:900}.merry-score{color:var(--merry-red)}
+    .merry-timer-track{height:10px;background:#E5E7EB;border-radius:999px;overflow:hidden;margin-bottom:16px}.merry-timer-fill{height:100%;background:var(--merry-red);transition:width .2s linear,background .2s}.merry-timer-fill.danger{background:#DC2626}
+    .merry-word-stage{min-height:260px;border-radius:18px;background:var(--merry-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;position:relative;overflow:hidden}.merry-word{font-size:clamp(34px,9vw,58px);font-weight:950;letter-spacing:-.02em;word-break:break-word}
+    .merry-feedback{min-height:30px;margin-top:12px;font-size:14px;font-weight:900}.merry-feedback.ok{color:var(--merry-green)}.merry-feedback.no{color:#DC2626}
+    .merry-pop{animation:merryPop .2s ease}.merry-shake{animation:merryShake .28s ease}.merry-flash-ok{animation:merryFlashOk .3s ease}.merry-flash-no{animation:merryFlashNo .3s ease}
+    @keyframes merryPop{50%{transform:scale(1.045)}}@keyframes merryShake{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}@keyframes merryFlashOk{50%{background:#ECFDF5}}@keyframes merryFlashNo{50%{background:#FEF2F2}}
+    .merry-q{font-size:clamp(18px,4.6vw,26px);font-weight:900;line-height:1.55;margin:16px 0 18px}.merry-options{display:grid;gap:9px}.merry-option{text-align:left;background:#FFF;border:2px solid #E5E7EB;color:#20242D}.merry-option.correct{border-color:#22C55E;background:#F0FDF4}.merry-option.wrong{border-color:#EF4444;background:#FEF2F2}.merry-option:disabled{opacity:1;cursor:default}
+    .merry-explain{margin-top:12px;padding:12px;border-radius:12px;background:#FFF7F7;border:1px solid #FECDD3;font-size:13px;font-weight:800;line-height:1.5}
+    .merry-result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}.merry-stat{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:12px;padding:12px;text-align:center}.merry-stat b{display:block;font-size:21px}
+    .merry-level{padding:16px;border-radius:14px;background:#FFF1F2;border:1px solid #FECDD3;margin:14px 0}.merry-level h3{margin:0 0 5px;color:var(--merry-red)}.merry-note{font-size:11px;color:#9CA3AF}.merry-wrong-section{margin-top:18px}.merry-wrong-item{padding:11px;border-bottom:1px solid #E5E7EB;font-size:13px;line-height:1.55}
+    .merry-round-badge{display:inline-flex;align-items:center;gap:5px;background:#FFF1F2;color:var(--merry-red);border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900}.merry-next{margin-top:12px;width:100%}.merry-fade{animation:merryFade .18s ease}@keyframes merryFade{from{opacity:.25;transform:translateY(5px)}to{opacity:1;transform:none}}
+    @media(max-width:520px){.merry-card{padding:14px;border-radius:15px}.merry-choice-grid{gap:6px}.merry-choice{font-size:13px;padding:10px 4px}.merry-result-grid{grid-template-columns:1fr}.merry-word-stage{min-height:230px}}
+
+
+    .merry-quiz-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+    .merry-quiz-card{border:1.5px solid #E5E7EB;border-radius:15px;background:#FFF;padding:15px;text-align:left}
+    .merry-quiz-card h3{margin:5px 0;font-size:16px}.merry-quiz-card p{margin:4px 0;color:#6B7280;font-size:12px;line-height:1.5}
+    .merry-quiz-card .merry-btn{margin-top:10px;font-size:13px;width:100%}
+    .merry-progress-chip{display:inline-block;padding:4px 8px;border-radius:999px;background:#FFF1F2;color:#BE123C;font-size:10px;font-weight:900}
+    @media(max-width:520px){.merry-quiz-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
   <div id="app" class="bg-cover-wrapper"></div>
@@ -2702,6 +2731,7 @@
               <button class="btn-tab-menu ${state.tab === 'customize' ? 'active' : ''}" onclick="switchTab('customize')">커스텀</button>
               <button class="btn-tab-menu ${state.tab === 'history' ? 'active' : ''}" onclick="switchTab('history')">기록</button>
               <button class="btn-tab-menu ${state.tab === 'timer' ? 'active' : ''}" onclick="switchTab('timer')">공부<br>타이머</button>
+              <button class="btn-tab-menu ${state.tab === 'merryChallenge' ? 'active' : ''}" onclick="switchTab('merryChallenge')">퀴즈</button>
             </div>
 
             <div class="hompy-main-content">
@@ -2730,6 +2760,7 @@
     }
 
     function renderTabContent() {
+      if (state.tab === 'merryChallenge') return renderMerryChallenge();
       if (state.tab === 'customize') return renderExtraCustomization();
       if (state.tab === 'practice') {
         const list = getFilteredVocab();
@@ -3432,7 +3463,296 @@
       await saveCloudCustomContent();syncBgmSource(false);render();
     }
 
+
+    // ==============================================================
+    // 메리토익 · 전접부 스피드 챌린지
+    // 진행 상태는 JS 메모리 변수로만 관리합니다.
+    // ==============================================================
+    const MERRY_R1_POOL = {
+      '전치사': ['despite','in spite of','notwithstanding','because of','due to','owing to','on account of','thanks to','during','prior to','in advance of','following','in case of','in the event of','without','for the purpose of','excluding','barring','aside from','in addition to','along with','instead of','unlike'],
+      '접속사': ['although','though','even though','even if','because','now that','by the time','as soon as','if','unless','provided that','as long as','only if','so that','in order that','except that','as if','as though','whereas','once','while'],
+      '접속부사': ['nevertheless','nonetheless','however','therefore','thus','consequently','hence','as a result','meanwhile','in the meantime','previously','beforehand','afterwards','subsequently','thereafter','otherwise','moreover','furthermore','instead','on the other hand','in contrast','conversely','in other words','namely']
+    };
+
+    const MERRY_R2_BANK = [
+      {q:'______ the heavy rain, the outdoor festival continued as scheduled.',o:['Although','Despite','Nevertheless','Because'],a:1,e:'빈칸 뒤가 명사(the heavy rain) → 전치사 자리'},
+      {q:'______ the shipment was delayed, the client agreed to extend the deadline.',o:['Because of','Due to','Since','Therefore'],a:2,e:'빈칸 뒤가 주어+동사 → 접속사 자리'},
+      {q:'The store will remain closed ______ the renovation is complete.',o:['until','by','during','meanwhile'],a:0,e:'뒤에 절이 왔으니 접속사로 쓸 수 있는 until. by는 절 못 받아요'},
+      {q:'Sales rose sharply ______ the holiday season.',o:['while','during','as soon as','however'],a:1,e:'뒤에 명사(the holiday season) → 전치사 during'},
+      {q:'______ signing the lease, tenants must review all of the building rules.',o:['Prior to','In order that','Beforehand','Once'],a:0,e:'뒤에 동명사(signing) → 전치사 자리'},
+      {q:'The equipment must be inspected ______ it is used for the first time.',o:['before','prior to','in advance of','beforehand'],a:0,e:'뒤에 절 → 접속사로 쓸 수 있는 건 before뿐'},
+      {q:'______ the manager approved the budget, the team began hiring immediately.',o:['Now that','Owing to','Thanks to','Consequently'],a:0,e:'뒤에 절 → 접속사 now that'},
+      {q:'Attendance at the workshop was low ______ the poor weather.',o:['because','since','owing to','accordingly'],a:2,e:'뒤에 명사 → 전치사 owing to'},
+      {q:'Please submit the report by Friday; ______, the entire project will be delayed.',o:['despite','otherwise','unless','in case of'],a:1,e:'세미콜론 뒤 콤마 → 접속부사 자리'},
+      {q:'______ you confirm your reservation by noon, it will be released to other guests.',o:['Unless','Without','Except for','Otherwise'],a:0,e:'뒤에 절 → 접속사 unless'},
+      {q:'The seminar was rescheduled ______ a scheduling conflict at the venue.',o:['although','in case','due to','nonetheless'],a:2,e:'뒤에 명사 → 전치사 due to'},
+      {q:'Mr. Ortega revised the proposal ______ it would meet the new guidelines.',o:['so that','so as to','in order to','therefore'],a:0,e:'뒤에 절 → 접속사 so that. so as to / in order to는 동사원형 앞'},
+      {q:'______ improve efficiency, the plant installed automated sorting machines.',o:['So that','In order to','Because','Given that'],a:1,e:'뒤에 동사원형(improve) → in order to'},
+      {q:'The new remote-work policy applies to all branches ______ the Busan office.',o:['except for','except that','nevertheless','whereas'],a:0,e:'뒤에 명사 → 전치사 except for'},
+      {q:'Online orders increased last quarter; ______, in-store sales declined slightly.',o:['whereas','despite','meanwhile','although'],a:2,e:'세미콜론 뒤 → 접속부사 자리'},
+      {q:"______ the merger was announced, the company's stock rose by 12 percent.",o:['After','Following','Afterward','Subsequently'],a:0,e:'뒤에 절 → 접속사로 쓸 수 있는 After. Following은 전치사'},
+      {q:'Registration for the training session will close ______ all of the seats are filled.',o:['as soon as','upon','at once','immediately'],a:0,e:'뒤에 절 → 접속사 as soon as'},
+      {q:'______ his limited experience, Mr. Reyes handled the negotiation skillfully.',o:['Given','Given that','Considering that','Nevertheless'],a:0,e:'뒤에 명사 → 전치사 Given'},
+      {q:'The vendor offered an additional discount ______ we ordered in bulk.',o:['provided that','in case of','in the event of','instead of'],a:0,e:'뒤에 절 → 접속사 provided that'},
+      {q:'The renovation is nearly finished; ______, the lobby will reopen next week.',o:['as a result','because','so that','despite'],a:0,e:'세미콜론 뒤 콤마 → 접속부사 자리'}
+    ];
+
+
+    const MERRY_INTRANSITIVE = [
+      ['respond','to','~에 응답하다, 대답하다'],['react','to','~에 반응하다'],['enroll','in','~에 등록하다'],['take part','in','~에 참석하다'],
+      ['correspond','to / with','~에 상응하다, 일치하다'],['accord','with','~에 조화를 이루다, 일치하다'],['conform','to','~에 순응하다, ~을 준수하다'],
+      ['call','on','~에 방문하다, ~을 요구하다'],['call','for','~을 요청하다'],['call','off','~을 취소하다'],['come','in / by','들르다, 방문하다'],
+      ['come','as','~한 감정상태가 되다'],['refrain','from','~을 삼가다, 금하다'],['interfere','with','~을 방해하다'],['look','over','~을 검토하다'],
+      ['look','into','~을 살펴보다, 조사하다'],['fuse','with','~와 결합하다'],['go','toward','(수익금, 기금 등이) ~에 보탬이 되다'],
+      ['go','through','겪다, 경험하다'],['get','through','끝마치다, 통과하다'],['get','through to','~에 연락이 닿다'],['leaf','through','훑어보다, 간략히 보다'],
+      ['hand','over','건네다'],['take','over','인계받다, 떠맡다, 맡다'],['take','up','차지하다'],['account','for','설명하다, 차지하다'],
+      ['come','down with','(전염병 등에) 걸리다'],['give','out','(대화의 주제, 화제, 문제점 등을) 제기하다, 발표하다'],['put','up with','견디다, 참다'],
+      ['give','in to','~의 의견을 마지못해 들어주다'],['coincide','with','(두 가지 일정이 동시에) 맞물리다'],['preside','over','~을 주재하다, 관장하다, ~을 주도하다'],
+      ['search','for','찾다, 검색하다'],['collaborate','with','~와 협력하다'],['collaborate','on','~에 관해 협력하다'],
+      ['compete','with / against','~와 경쟁하다'],['compete','for','~때문에 경쟁하다'],['object','to','~에 반대하다'],['subscribe','to','~을 구독하다, ~에 가입하다'],['fill','out','~을 기입하다 / ~을 작성하다']
+    ];
+
+    const MERRY_COLLOCATIONS = [
+      ['fully understand','fully','완벽히 이해하다'],['come as a disappointment','come','실망감을 느끼다'],['in moderation','in','적당히, 적절히'],
+      ['be entered into a drawing','entered','추첨의 대상이 되다'],['qualify for','for','~에 자격이 있다'],['readily accessible','readily','쉽게 접근/열람이 가능한'],
+      ['from time to time','from / to','때때로, 이따금씩'],['competitive edge','edge','경쟁력'],['competitive advantage','advantage','경쟁적 우위'],
+      ['missing items','missing','누락된/빠진/분실된 제품'],['missed deadline','missed','놓쳐진 마감기한'],['ask for a favor','favor','부탁하다'],
+      ['by a large margin','by','큰 차이로'],['ease traffic','ease','교통정체를 완화하다'],['see if','see','~인지 아닌지 알아보다'],['wonder if','wonder','~인지 아닌지 궁금하다'],
+      ['at the last time','at','막판에, 임박하여'],['get into trouble','into','곤란해지다, 분쟁을 일으키다'],['justification for','for','~에 대한 명분, 정당성'],
+      ['reason for','for','~에 대한 이유'],['terms and conditions','terms','약관, 조항'],['from [시점] onward','onward','~부터 계속, 쭉'],['from now on','on','지금서부터 앞으로 계속'],
+      ['vitamin supplements','supplements','비타민 보충제'],['keep [목적어] under control','under','~을 통제/관리하다'],['hiring process','hiring','고용 과정, 채용 과정'],
+      ['on short notice','on','급작스러운 통보에도'],['feasibility study','feasibility','실행 가능성 조사'],['cut down on','on','~을 줄이다, 삭감하다'],['go out of business','out of','파산하다'],
+      ['go smoothly','smoothly','원활하게 진행되다'],['sales associate','associate','판매사원, 영업사원'],['probationary period','probationary','견습 기간'],
+      ['be accountable for','for','~에 책임이 있다'],['be accountable to','to','사람: ~에게 책임을 부여하다'],['at random','at','무작위로'],['deduction for','for','~의 공제'],
+      ['take a specimen','take','예를 들다'],['advanced course','advanced','고급난이도 수업'],['advance notice','advance','사전 통보'],['prior notice','prior','사전 통보'],
+      ['as a token of appreciation','token','감사함의 표시로'],['be representative of','of','~을 나타내다, 대표하다'],['cost breakdown','breakdown','비용 상세표시, 비용 세분화/분류'],
+      ['set back','set','방해하다, 늦추게 하다'],['keep [사람] informed','informed','~에게 계속 소식을 전하다'],['keep [사람] updated','updated','~에게 계속 소식을 전하다'],
+      ['under any circumstances','under','어떠한 경우에도'],['expenses incurred','incurred','발생한 비용'],['compile data','compile','데이터를 수집하다'],
+      ['put forth','put','제안하다'],['accept an offer','accept','제안을 수락하다'],['decline an offer','decline','제안을 거절하다'],['in progress','in','진행 중인'],
+      ['subsequent to + N','to','~다음에, 뒤에'],['go forward with','with','~을 진행하다'],['raise concerns','raise','우려를 제기하다'],['voice concerns','voice','우려를 표명하다'],
+      ['make an exception','make','예외를 두다'],['from scratch','from','처음부터'],['well deserved','deserved','응당 자격이 되는, 충분히 자격이 되는']
+    ];
+
+    const MERRY_PREP_NOUN_PREP = [
+      ['in appreciation of','~을 감사하여'],['in response to','~에 부응하여, 응하여'],['in comparison with','~와 비교하여'],['in contrast to','~와 대조하여'],
+      ['in advance of','~보다 전에, 앞서서'],['in the event of','~일 경우에 (= in case of)'],['in the hope of','~을 바래서, ~을 희망하여'],
+      ['by means of','~을 수단으로 하여, ~의 도움을 받아'],['on account of','~때문에'],['in search of','~을 찾아서'],['in the search for','~을 찾아서'],
+      ['in need of','~을 필요로 하는'],['in exchange for','~와 교환하여'],['in anticipation of','~을 맞이하여, 예상하여'],['in excess of','~을 초과하여'],
+      ['in regard to','~에 관하여'],['in preparation for','~을 준비하여'],['in keeping with','~을 따라'],['in accordance with','~을 준수하여, ~에 따라'],
+      ['in recognition of','~을 인정하여'],['in conjunction with','~와 결합하여, 함께'],['in honor of','~을 축하하여, 기념하여'],['in observance of','~을 기려서, 기념하여'],
+      ['in view of / in light of','~견지에서'],['in terms of','~면에서'],['in favor of','~을 찬성하여'],['in reference to','~을 참조하여'],
+      ['in connection with','~와 관련되어'],['in agreement with','~와 일치하여, ~에 따라서']
+    ];
+
+    let merryStandalone={mode:'hub',set:null,deck:[],idx:0,score:0,correct:0,wrong:[],locked:false,selected:null};
+
+    function merryStartStandalone(set){
+      merryStopTimers();
+      const source=set==='intransitive'?MERRY_INTRANSITIVE:set==='collocation'?MERRY_COLLOCATIONS:MERRY_PREP_NOUN_PREP;
+      merryStandalone={
+        mode:'play',
+        set,
+        deck:merryShuffle(source.map((x,i)=>({x,i,q:null}))).slice(0,Math.min(10,source.length)),
+        idx:0,score:0,correct:0,wrong:[],locked:false,selected:null,
+        reward:null,rewarded:false
+      };
+      merryState.screen='standalone';
+      merryRenderOnly();
+    }
+
+    function merryStandaloneQuestion(){
+      const entry=merryStandalone.deck[merryStandalone.idx];
+      if(!entry)return null;
+
+      // 같은 문제를 다시 렌더링해도 보기 순서가 절대 바뀌지 않도록 캐시
+      if(entry.q)return entry.q;
+
+      const item=entry.x;
+      let q=null;
+
+      if(merryStandalone.set==='intransitive'){
+        const [base,answer,meaning]=item;
+        const distract=merryShuffle([...new Set(MERRY_INTRANSITIVE.map(x=>x[1]).filter(x=>x!==answer))]).slice(0,3);
+        q={stem:`${base} ( □ )`,sub:meaning,answer,options:merryShuffle([answer,...distract])};
+      }else if(merryStandalone.set==='collocation'){
+        const [phrase,answer,meaning]=item;
+        const stem=phrase.includes(answer)?phrase.replace(answer,'□'):`□ ${phrase}`;
+        const distract=merryShuffle([...new Set(MERRY_COLLOCATIONS.map(x=>x[1]).filter(x=>x!==answer))]).slice(0,3);
+        q={stem,sub:meaning,answer,options:merryShuffle([answer,...distract])};
+      }else{
+        const [phrase,meaning]=item;
+        const distract=merryShuffle([...new Set(MERRY_PREP_NOUN_PREP.map(x=>x[0]).filter(x=>x!==phrase))]).slice(0,3);
+        q={stem:meaning,sub:'뜻에 맞는 표현을 고르세요.',answer:phrase,options:merryShuffle([phrase,...distract])};
+      }
+
+      entry.q=q;
+      return q;
+    }
+
+    function merryAnswerStandaloneByIndex(index){
+      if(merryStandalone.locked)return;
+      const q=merryStandaloneQuestion();
+      if(!q)return;
+      const choice=q.options[Number(index)];
+      if(typeof choice==='undefined')return;
+
+      merryStandalone.locked=true;
+      merryStandalone.selected=choice;
+
+      if(choice===q.answer){
+        merryStandalone.correct++;
+        merryStandalone.score+=10;
+      }else{
+        merryStandalone.wrong.push({q,chosen:choice});
+      }
+      merryRenderOnly(choice===q.answer?'ok':'no');
+    }
+
+    function merryNextStandalone(){
+      if(!merryStandalone.locked)return;
+      merryStandalone.idx++;
+      if(merryStandalone.idx>=merryStandalone.deck.length){
+        merryStandalone.mode='result';
+        const reward=merryApplyStandaloneReward();
+        state.userData.studyHistory=Array.isArray(state.userData.studyHistory)?state.userData.studyHistory:[];
+        state.userData.studyHistory.push({
+          date:new Date().toISOString().split('T')[0],
+          type:`merry_${merryStandalone.set}`,
+          total:merryStandalone.deck.length,
+          correct:merryStandalone.correct,
+          score:merryStandalone.score,
+          reward
+        });
+        saveUserData();
+      }else{
+        merryStandalone.locked=false;
+        merryStandalone.selected=null;
+      }
+      merryRenderOnly();
+    }
+
+    function merryStandaloneTitle(){return merryStandalone.set==='intransitive'?'빈출 자동사':merryStandalone.set==='collocation'?'연어 + 고급어휘':'전치사 + 명사 + 전치사'}
+
+
+    function merryTicketReward(correct,total){
+      if(!total)return 0;
+      const rate=correct/total;
+      if(rate>=0.999)return 3;
+      if(rate>=0.8)return 2;
+      if(rate>=0.6)return 1;
+      return 0;
+    }
+
+    function merryApplyStandaloneReward(){
+      if(merryStandalone.rewarded)return merryStandalone.reward;
+      const correct=Number(merryStandalone.correct||0);
+      const total=Number(merryStandalone.deck.length||10);
+
+      // 퀴즈 종료 보상: 정답 1개당 3 EXP + 4 코인
+      const exp=correct*3;
+      const coins=correct*4;
+      const tickets=merryTicketReward(correct,total);
+
+      state.userData.exp=Number(state.userData.exp||0)+exp;
+      state.userData.coins=Number(state.userData.coins||0)+coins;
+      state.userData.shop=normalizeShopData(state.userData.shop);
+      state.userData.shop.tickets=Number(state.userData.shop.tickets||0)+tickets;
+
+      merryStandalone.reward={exp,coins,tickets};
+      merryStandalone.rewarded=true;
+      return merryStandalone.reward;
+    }
+
+    function merryApplyMainReward(){
+      if(merryState.rewarded)return merryState.reward;
+
+      // ROUND 1은 60초라 문제 수가 무제한이므로 보상 파밍 방지를 위해
+      // ROUND 2 실전 10문제 정확도를 기준으로 지급
+      const correct=Number(merryState.r2Correct||0);
+      const exp=correct*4;
+      const coins=correct*5;
+      const tickets=merryTicketReward(correct,10);
+
+      state.userData.exp=Number(state.userData.exp||0)+exp;
+      state.userData.coins=Number(state.userData.coins||0)+coins;
+      state.userData.shop=normalizeShopData(state.userData.shop);
+      state.userData.shop.tickets=Number(state.userData.shop.tickets||0)+tickets;
+
+      merryState.reward={exp,coins,tickets};
+      merryState.rewarded=true;
+      return merryState.reward;
+    }
+
+
+    function merryFreshState(){return {screen:'start',round1Score:0,round2Score:0,combo:0,maxCombo:0,r1Time:60,r1Deck:[],r1Current:null,r1Locked:false,r1Feedback:'',r1Wrongs:[],r1Correct:0,r1Total:0,r2Questions:[],r2Index:0,r2Time:15,r2Locked:false,r2Selected:null,r2Correct:0,r2Wrongs:[],r2Feedback:'',reward:null,rewarded:false}}
+    let merryState=merryFreshState(),merryR1Timer=null,merryR2Timer=null,merryFeedbackTimer=null;
+
+    function merryShuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+    function merryBuildR1Deck(){const out=[];Object.entries(MERRY_R1_POOL).forEach(([type,words])=>words.forEach(word=>out.push({word,type})));return merryShuffle(out)}
+    function merryNextR1(){if(!merryState.r1Deck.length)merryState.r1Deck=merryBuildR1Deck();merryState.r1Current=merryState.r1Deck.pop();merryState.r1Locked=false;merryState.r1Feedback='';merryRenderOnly()}
+    function merryStart(){merryStopTimers();merryState=merryFreshState();merryState.screen='r1';merryState.r1Deck=merryBuildR1Deck();merryNextR1();merryR1Timer=setInterval(()=>{merryState.r1Time--;if(merryState.r1Time<=0){merryState.r1Time=0;merryEndR1();return}merryUpdateTimerOnly()},1000)}
+    function merryAnswerR1(choice){if(merryState.screen!=='r1'||merryState.r1Locked||!merryState.r1Current)return;merryState.r1Locked=true;merryState.r1Total++;const cur=merryState.r1Current,correct=choice===cur.type;if(correct){merryState.combo++;merryState.maxCombo=Math.max(merryState.maxCombo,merryState.combo);let add=10;if(merryState.combo%3===0)add+=5;merryState.round1Score+=add;merryState.r1Correct++;merryState.r1Feedback=`정답! +${add}점${add>10?' · 콤보 보너스':''}`}else{merryState.combo=0;merryState.r1Feedback=`정답은 ${cur.type}예요`;if(!merryState.r1Wrongs.some(x=>x.word===cur.word))merryState.r1Wrongs.push({word:cur.word,correct:cur.type,chosen:choice})}merryRenderOnly(correct?'ok':'no');clearTimeout(merryFeedbackTimer);merryFeedbackTimer=setTimeout(()=>{if(merryState.screen==='r1')merryNextR1()},800)}
+    function merryEndR1(){clearInterval(merryR1Timer);merryR1Timer=null;clearTimeout(merryFeedbackTimer);merryState.screen='between';merryRenderOnly()}
+    function merryStartR2(){merryState.screen='r2';merryState.r2Questions=merryShuffle(MERRY_R2_BANK).slice(0,10);merryState.r2Index=0;merryState.r2Correct=0;merryState.r2Wrongs=[];merryState.round2Score=0;merryPrepareR2()}
+    function merryPrepareR2(){clearInterval(merryR2Timer);merryState.r2Time=15;merryState.r2Locked=false;merryState.r2Selected=null;merryState.r2Feedback='';merryRenderOnly();merryR2Timer=setInterval(()=>{merryState.r2Time--;if(merryState.r2Time<=0){merryState.r2Time=0;clearInterval(merryR2Timer);merryR2Timer=null;merryTimeoutR2();return}merryUpdateTimerOnly()},1000)}
+    function merryAnswerR2(idx){if(merryState.screen!=='r2'||merryState.r2Locked)return;clearInterval(merryR2Timer);merryR2Timer=null;merryState.r2Locked=true;merryState.r2Selected=idx;const q=merryState.r2Questions[merryState.r2Index],correct=idx===q.a;if(correct){merryState.r2Correct++;merryState.round2Score+=20;merryState.r2Feedback='정답이에요!'}else{merryState.r2Feedback=q.e;merryState.r2Wrongs.push({...q,selected:idx,timeout:false})}merryRenderOnly(correct?'ok':'no')}
+    function merryTimeoutR2(){if(merryState.r2Locked)return;merryState.r2Locked=true;merryState.r2Selected=-1;const q=merryState.r2Questions[merryState.r2Index];merryState.r2Feedback=`시간이 끝났어요. ${q.e}`;merryState.r2Wrongs.push({...q,selected:-1,timeout:true});merryRenderOnly('no')}
+    function merryNextR2(){if(!merryState.r2Locked)return;merryState.r2Index++;if(merryState.r2Index>=merryState.r2Questions.length){
+        clearInterval(merryR2Timer);merryR2Timer=null;merryState.screen='result';
+        const reward=merryApplyMainReward();
+        state.userData.studyHistory=Array.isArray(state.userData.studyHistory)?state.userData.studyHistory:[];
+        state.userData.studyHistory.push({
+          date:new Date().toISOString().split('T')[0],
+          type:'merry_preposition_conjunction',
+          total:10,
+          correct:merryState.r2Correct,
+          score:merryState.round1Score+merryState.round2Score,
+          reward
+        });
+        saveUserData();
+        merryRenderOnly();
+        return
+      }merryPrepareR2()}
+    function merryRestart(){merryStopTimers();merryState=merryFreshState();merryRenderOnly()}
+    function merryStopTimers(){if(merryR1Timer)clearInterval(merryR1Timer);if(merryR2Timer)clearInterval(merryR2Timer);clearTimeout(merryFeedbackTimer);merryR1Timer=merryR2Timer=merryFeedbackTimer=null}
+    function merryUpdateTimerOnly(){const value=merryState.screen==='r1'?merryState.r1Time:merryState.r2Time,max=merryState.screen==='r1'?60:15,txt=document.getElementById('merry-timer-text'),fill=document.getElementById('merry-timer-fill');if(txt)txt.textContent=`${value}초`;if(fill){fill.style.width=`${Math.max(0,value/max*100)}%`;fill.classList.toggle('danger',value<=10)}}
+    function merryRenderOnly(effect=''){if(state.tab!=='merryChallenge')return;const el=document.getElementById('tab-content');if(!el)return;el.innerHTML=renderMerryChallenge();if(effect){const stage=document.querySelector('.merry-word-stage,.merry-card');if(stage)stage.classList.add(effect==='ok'?'merry-flash-ok':'merry-flash-no',effect==='ok'?'merry-pop':'merry-shake')}}
+    function merryTypeHint(type){return type==='전치사'?'뒤에 명사':type==='접속사'?'뒤에 주어+동사':'앞 문장이 끝난 뒤'}
+    function merryLevel(){const total=merryState.round1Score+merryState.round2Score,acc=merryState.r2Correct;if(total>=500&&acc>=9)return{t:'👑 전접부 마스터',m:'900+ 각 나왔어요 🔥 빈칸 뒤만 보는 눈이 생겼네요'};if(total>=500&&acc<9)return{t:'마스터급 점수',m:'점수는 마스터급인데 실전 정답률이 아쉬워요! 9개 이상 맞히면 왕관이에요 👑'};if(total>=380)return{t:'800점대 감각',m:'거의 다 왔어요! 겸용 단어(before/after/since/until/except)만 잡으면 마스터예요'};if(total>=250)return{t:'700점대 진입',m:'감 잡았어요. 접속부사는 문장이 끝난 뒤에만 온다는 것, 기억하세요'};return{t:'새싹',m:'괜찮아요, 지금 알았으니 된 거예요 😊 전치사 뒤엔 명사, 접속사 뒤엔 주어+동사부터'}}
+
+    function renderMerryChallenge(){
+      if(merryState.screen==='start')return `<div class="merry-wrap merry-fade"><div class="merry-card">
+        <div class="merry-brand">메리토익 · Merry TOEIC</div><div class="merry-title">퀴즈</div>
+        <div class="merry-sub">원하는 유형을 골라 독립적으로 연습할 수 있어요.</div><div style="margin-top:10px;padding:9px 11px;border-radius:10px;background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;font-size:11px;font-weight:850;">퀴즈를 끝까지 완료하면 EXP · 코인 · 응원 티켓 보상을 받아요.</div>
+        <div class="merry-quiz-grid">
+          <div class="merry-quiz-card"><span class="merry-progress-chip">2라운드</span><h3>전치사·접속사·접속부사</h3><p>60초 스피드 분류 + 실전 빈칸 10문제</p><button type="button" class="merry-btn merry-primary" onclick="merryStart()">시작하기</button></div>
+          <div class="merry-quiz-card"><span class="merry-progress-chip">10문제 랜덤</span><h3>빈출 자동사</h3><p>자동사와 함께 쓰는 전치사/부사를 맞혀요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('intransitive')">시작하기</button></div>
+          <div class="merry-quiz-card"><span class="merry-progress-chip">10문제 랜덤</span><h3>연어 + 고급어휘</h3><p>빈칸에 들어갈 핵심 어휘를 골라요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('collocation')">시작하기</button></div>
+          <div class="merry-quiz-card"><span class="merry-progress-chip">10문제 랜덤</span><h3>전치사 + 명사 + 전치사</h3><p>뜻을 보고 빈출 세트 표현을 맞혀요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('prepNounPrep')">시작하기</button></div>
+        </div>
+      </div></div>`;
+
+      if(merryState.screen==='r1')return `<div class="merry-wrap merry-fade"><div class="merry-topline"><span class="merry-round-badge">ROUND 1 · 스피드 분류</span><span class="merry-score">점수 ${merryState.round1Score} · 콤보 ${merryState.combo}</span></div><div class="merry-topline"><span>60초 타임어택</span><span id="merry-timer-text">${merryState.r1Time}초</span></div><div class="merry-timer-track"><div id="merry-timer-fill" class="merry-timer-fill ${merryState.r1Time<=10?'danger':''}" style="width:${merryState.r1Time/60*100}%"></div></div><div class="merry-word-stage"><div class="merry-word">${merryState.r1Current?.word||''}</div><div class="merry-feedback ${merryState.r1Feedback.startsWith('정답!')?'ok':'no'}">${merryState.r1Feedback||'품사를 골라보세요 👉'}</div></div><div class="merry-choice-grid">${['전치사','접속사','접속부사'].map(x=>`<button type="button" class="merry-btn merry-choice" ${merryState.r1Locked?'disabled':''} onclick="merryAnswerR1('${x}')">${x}</button>`).join('')}</div></div>`;
+
+      if(merryState.screen==='between')return `<div class="merry-wrap merry-fade"><div class="merry-card" style="text-align:center;padding-top:38px;padding-bottom:38px;"><div class="merry-round-badge">ROUND 1 완료</div><div class="merry-title" style="font-size:28px;">이제 진짜 토익이에요.</div><div class="merry-sub" style="font-size:17px;color:#374151;">빈칸 뒤를 보세요 👉</div><div class="merry-result-grid"><div class="merry-stat"><b>${merryState.round1Score}</b>1라운드 점수</div><div class="merry-stat"><b>${merryState.maxCombo}</b>최대 콤보</div><div class="merry-stat"><b>${merryState.r1Correct}</b>정답 수</div></div><button type="button" class="merry-btn merry-primary" onclick="merryStartR2()">라운드 2 시작하기</button></div></div>`;
+
+      if(merryState.screen==='r2'){const q=merryState.r2Questions[merryState.r2Index];return `<div class="merry-wrap merry-fade"><div class="merry-topline"><span class="merry-round-badge">ROUND 2 · 실전 빈칸 저격</span><span>${merryState.r2Index+1} / 10</span></div><div class="merry-topline"><span class="merry-score">정답 ${merryState.r2Correct} · 점수 ${merryState.round2Score}</span><span id="merry-timer-text">${merryState.r2Time}초</span></div><div class="merry-timer-track"><div id="merry-timer-fill" class="merry-timer-fill ${merryState.r2Time<=10?'danger':''}" style="width:${merryState.r2Time/15*100}%"></div></div><div class="merry-card"><div class="merry-q">${q.q}</div><div class="merry-options">${q.o.map((opt,i)=>{let cls='';if(merryState.r2Locked&&i===q.a)cls='correct';else if(merryState.r2Locked&&i===merryState.r2Selected&&i!==q.a)cls='wrong';return `<button type="button" class="merry-btn merry-option ${cls}" ${merryState.r2Locked?'disabled':''} onclick="merryAnswerR2(${i})">(${String.fromCharCode(65+i)}) ${opt}</button>`}).join('')}</div>${merryState.r2Locked?`<div class="merry-explain">${merryState.r2Selected===q.a?'정답이에요! ':merryState.r2Selected===-1?'시간 초과! ':''}${q.e}</div><button type="button" class="merry-btn merry-primary merry-next" onclick="merryNextR2()">${merryState.r2Index===9?'결과 보기':'다음'}</button>`:''}</div></div>`}
+
+
+      if(merryState.screen==='standalone'){
+        if(merryStandalone.mode==='result'){
+          return `<div class="merry-wrap merry-fade"><div class="merry-card"><div class="merry-brand">메리토익 · Merry TOEIC</div><div class="merry-title">${merryStandaloneTitle()} 결과</div><div class="merry-result-grid"><div class="merry-stat"><b>${merryStandalone.score}</b>점수</div><div class="merry-stat"><b>${merryStandalone.correct}/${merryStandalone.deck.length}</b>정답</div><div class="merry-stat"><b>${Math.round(merryStandalone.correct/merryStandalone.deck.length*100)}%</b>정확도</div></div><div style="margin:10px 0 16px;padding:12px;border-radius:12px;background:#FFFBEB;border:1px solid #FDE68A;font-size:13px;font-weight:900;">🎁 완료 보상 · +${merryStandalone.reward?.exp||0} EXP · +${merryStandalone.reward?.coins||0} 코인 · +${merryStandalone.reward?.tickets||0} 응원 티켓</div><div class="merry-wrong-section"><h3>오답 노트</h3>${merryStandalone.wrong.length?merryStandalone.wrong.map((w,i)=>`<div class="merry-wrong-item"><b>${i+1}. ${w.q.stem}</b><br>정답: ${w.q.answer}<br>내가 고른 답: ${w.chosen}<br><span style="color:#6B7280;">${w.q.sub}</span></div>`).join(''):`<div class="merry-wrong-item">틀린 문제가 없어요. 아주 좋아요!</div>`}</div><button type="button" class="merry-btn merry-primary" style="margin-top:16px;" onclick="merryStartStandalone('${merryStandalone.set}')">다시 풀기</button><button type="button" class="merry-btn merry-choice" style="width:100%;margin-top:8px;" onclick="merryRestart()">퀴즈 목록으로</button></div></div>`;
+        }
+        const q=merryStandaloneQuestion();
+        return `<div class="merry-wrap merry-fade"><div class="merry-topline"><span class="merry-round-badge">${merryStandaloneTitle()}</span><span>${merryStandalone.idx+1} / ${merryStandalone.deck.length}</span></div><div class="merry-topline"><span class="merry-score">점수 ${merryStandalone.score}</span><span>정답 ${merryStandalone.correct}</span></div><div class="merry-card"><div class="merry-q">${q.stem}</div><div class="merry-sub" style="margin-bottom:12px;">${q.sub}</div><div class="merry-options">${q.options.map((opt,optIndex)=>{let cls='';if(merryStandalone.locked&&opt===q.answer)cls='correct';else if(merryStandalone.locked&&opt===merryStandalone.selected&&opt!==q.answer)cls='wrong';return `<button type="button" class="merry-btn merry-option ${cls}" ${merryStandalone.locked?'disabled':''} onclick="merryAnswerStandaloneByIndex(${optIndex})">${opt}</button>`}).join('')}</div>${merryStandalone.locked?`<div class="merry-explain">${merryStandalone.selected===q.answer?'정답이에요!':'정답은 '+q.answer+'예요.'}<br>${q.sub}</div><button type="button" class="merry-btn merry-primary merry-next" onclick="merryNextStandalone()">${merryStandalone.idx===merryStandalone.deck.length-1?'결과 보기':'다음'}</button>`:''}</div></div>`;
+      }
+
+      const total=merryState.round1Score+merryState.round2Score,level=merryLevel();
+      return `<div class="merry-wrap merry-fade"><div class="merry-card"><div class="merry-brand">메리토익 · Merry TOEIC</div><div class="merry-title">퀴즈 결과</div><div class="merry-level"><h3>${level.t}</h3><div style="font-weight:800;line-height:1.55;">${level.m}</div><div class="merry-note" style="margin-top:6px;">* 재미를 위한 레벨이며 실제 TOEIC 점수가 아니에요.</div></div><div class="merry-result-grid"><div class="merry-stat"><b>${total}</b>총점</div><div class="merry-stat"><b>${merryState.round1Score}</b>ROUND 1</div><div class="merry-stat"><b>${merryState.round2Score}</b>ROUND 2</div><div class="merry-stat"><b>${merryState.maxCombo}</b>최대 콤보</div><div class="merry-stat"><b>${merryState.r2Correct}/10</b>실전 정답</div><div class="merry-stat"><b>${merryState.r2Correct*10}%</b>ROUND 2 정확도</div></div><div style="margin:10px 0 16px;padding:12px;border-radius:12px;background:#FFFBEB;border:1px solid #FDE68A;font-size:13px;font-weight:900;">🎁 완료 보상 · +${merryState.reward?.exp||0} EXP · +${merryState.reward?.coins||0} 코인 · +${merryState.reward?.tickets||0} 응원 티켓</div><div class="merry-wrong-section"><h3>오답 노트</h3><h4>ROUND 1 · 헷갈린 단어</h4>${merryState.r1Wrongs.length?merryState.r1Wrongs.map(x=>`<div class="merry-wrong-item"><b>${x.word}</b> → ${x.correct} (${merryTypeHint(x.correct)}) · 내가 고른 품사: ${x.chosen}</div>`).join(''):`<div class="merry-wrong-item">틀린 단어가 없어요. 아주 좋아요!</div>`}<h4 style="margin-top:18px;">ROUND 2 · 틀린 문제</h4>${merryState.r2Wrongs.length?merryState.r2Wrongs.map((x,i)=>`<div class="merry-wrong-item"><b>${i+1}. ${x.q}</b><br>정답: (${String.fromCharCode(65+x.a)}) ${x.o[x.a]}<br><span style="color:#6B7280;">${x.e}</span>${x.timeout?'<br><span style="color:#DC2626;">시간 초과</span>':''}</div>`).join(''):`<div class="merry-wrong-item">라운드 2를 모두 맞혔어요!</div>`}</div><button type="button" class="merry-btn merry-primary" style="margin-top:18px;" onclick="merryRestart()">다시 풀기</button><div class="merry-note" style="text-align:center;margin-top:12px;">메리토익 (Merry TOEIC)</div></div></div>`;
+    }
+
     function switchTab(t) {
+      if(state.tab === 'merryChallenge' && t !== 'merryChallenge') merryStopTimers();
       state.tab = t;
       if (t === 'practice') initFlashcards();
       if (t === 'quiz') generateQuiz();
