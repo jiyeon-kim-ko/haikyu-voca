@@ -605,6 +605,24 @@
       {id:"bg_hill",type:"background",name:"언덕",price:5,school:"all",file:"assets/shop/backgrounds/hill.png"},
       {id:"bg_gym",type:"background",name:"체육관",price:5,school:"all",file:"assets/shop/backgrounds/gym.png"},
       {id:"bg_gym2",type:"background",name:"체육관 2",price:6,school:"all",file:"assets/shop/backgrounds/gym2.png"},
+      {id:"bg_sunset_school_gym",type:"background",name:"노을빛 학교와 체육관",price:7,school:"all",file:"assets/shop/backgrounds/Sunset School and Gym.jpg"},
+      {id:"bg_sunset_rooftop_power_lines",type:"background",name:"노을 옥상과 전선",price:7,school:"all",file:"assets/shop/backgrounds/Sunset Rooftop Power Lines.jpg"},
+      {id:"bg_roadside_store_hill",type:"background",name:"언덕길 가게",price:6,school:"all",file:"assets/shop/backgrounds/Roadside Store Hil.jpg"},
+      {id:"bg_snowy_school_gate",type:"background",name:"눈 내린 학교 정문",price:7,school:"all",file:"assets/shop/backgrounds/Snowy School Gate.jpg"},
+      {id:"bg_city_gymnasium_entrance",type:"background",name:"도시 체육관 입구",price:7,school:"all",file:"assets/shop/backgrounds/City Gymnasium Entrance.jpg"},
+      {id:"bg_gym_center",type:"background",name:"체육관 센터",price:6,school:"all",file:"assets/shop/backgrounds/Gym center.jpg"},
+      {id:"bg_vending_machine_terrace",type:"background",name:"자판기 테라스",price:6,school:"all",file:"assets/shop/backgrounds/Vending Machine Terrace.jpg"},
+      {id:"bg_school_gym_entrance",type:"background",name:"학교 체육관 입구",price:7,school:"all",file:"assets/shop/backgrounds/School Gym Entrance.jpg"},
+      {id:"bg_rural_apartment_park",type:"background",name:"시골 아파트와 공원",price:6,school:"all",file:"assets/shop/backgrounds/Rural Apartment and Park.jpg"},
+      {id:"bg_gym_dome_roof",type:"background",name:"체육관 돔 지붕",price:7,school:"all",file:"assets/shop/backgrounds/Gym Dome Roof.jpg"},
+      {id:"bg_club_room_storage",type:"background",name:"부실 창고",price:6,school:"all",file:"assets/shop/backgrounds/Club Room Storage.jpg"},
+      {id:"bg_volleyball_court_interior",type:"background",name:"배구 코트 내부",price:7,school:"all",file:"assets/shop/backgrounds/Volleyball Court Interior.jpg"},
+      {id:"bg_residential_alley_hill",type:"background",name:"주택가 언덕길",price:6,school:"all",file:"assets/shop/backgrounds/Residential Alley Hil.jpg"},
+      {id:"bg_bus_stop",type:"background",name:"버스 정류장",price:5,school:"all",file:"assets/shop/backgrounds/Bus Stop.jpg"},
+      {id:"bg_camp_rest_area",type:"background",name:"캠프 휴게소",price:6,school:"all",file:"assets/shop/backgrounds/Camp Rest Area.jpg"},
+      {id:"bg_club_room",type:"background",name:"부실",price:6,school:"all",file:"assets/shop/backgrounds/Club Room.jpg"},
+      {id:"bg_mountain_running",type:"background",name:"산길 러닝",price:7,school:"all",file:"assets/shop/backgrounds/Mountain Running.jpg"},
+      {id:"bg_starry_night_school",type:"background",name:"별밤 학교",price:8,school:"all",file:"assets/shop/backgrounds/Starry Night School.jpg"},
       {id:"bg_karasuno",type:"background",name:"카라스노",price:7,school:"karasuno",file:"assets/shop/backgrounds/karasuno.png"},
       {id:"bg_karasuno_gym",type:"background",name:"카라스노 체육관",price:9,school:"karasuno",file:"assets/shop/backgrounds/karasuno_gym.png"},
       {id:"bg_karasuno_road",type:"background",name:"카라스노 체육관 가는 길",price:8,school:"karasuno",file:"assets/shop/backgrounds/karasuno_road.png"},
@@ -1224,7 +1242,7 @@
 
     function getDefaultTimerData(){return {totalStudySeconds:0,completedPomodoros:0,history:[]}}
     function normalizeTimerData(v){const s=v&&typeof v==='object'?v:{};return {totalStudySeconds:Math.max(0,Number(s.totalStudySeconds||0)),completedPomodoros:Math.max(0,Number(s.completedPomodoros||0)),history:Array.isArray(s.history)?s.history:[]}}
-    function getDefaultTimerRuntime(){return {studyMinutes:25,restMinutes:5,phase:'focus',remainingSec:1500,running:false,sessionFocusSec:0,completedFocusBlocks:0,lastTickAt:null}}
+    function getDefaultTimerRuntime(){return {mode:'pomodoro',studyMinutes:25,restMinutes:5,countdownMinutes:60,phase:'focus',remainingSec:1500,elapsedSec:0,running:false,sessionFocusSec:0,completedFocusBlocks:0,lastTickAt:null}}
     function getTimerStorageKey(){return `haikyu_study_timer_${state.user||'guest'}_${state.lang||'en'}_${state.char||'kageyama'}`}
     function stopStudyTimerInterval(){if(studyTimerInterval){clearInterval(studyTimerInterval);studyTimerInterval=null}}
     function formatStudyTime(seconds){const s=Math.max(0,Math.floor(Number(seconds||0))),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;if(h>0)return `${h}시간 ${m}분`;if(m>0)return `${m}분 ${sec}초`;return `${sec}초`}
@@ -1237,19 +1255,28 @@
       try{
         const saved=JSON.parse(localStorage.getItem(getTimerStorageKey())||'null');
         if(saved&&typeof saved==='object'){
-          state.studyTimer={...base,studyMinutes:Math.min(180,Math.max(1,Number(saved.studyMinutes||25))),restMinutes:Math.min(60,Math.max(1,Number(saved.restMinutes||5))),phase:saved.phase==='rest'?'rest':'focus',remainingSec:Math.max(0,Number(saved.remainingSec??1500)),sessionFocusSec:Math.max(0,Number(saved.sessionFocusSec||0)),completedFocusBlocks:Math.max(0,Number(saved.completedFocusBlocks||0)),running:false,lastTickAt:null};
+          state.studyTimer={...base,mode:['pomodoro','countdown','stopwatch'].includes(saved.mode)?saved.mode:'pomodoro',studyMinutes:Math.min(180,Math.max(1,Number(saved.studyMinutes||25))),restMinutes:Math.min(60,Math.max(1,Number(saved.restMinutes||5))),countdownMinutes:Math.min(720,Math.max(1,Number(saved.countdownMinutes||60))),phase:saved.phase==='rest'?'rest':'focus',remainingSec:Math.max(0,Number(saved.remainingSec??1500)),elapsedSec:Math.max(0,Number(saved.elapsedSec||0)),sessionFocusSec:Math.max(0,Number(saved.sessionFocusSec||0)),completedFocusBlocks:Math.max(0,Number(saved.completedFocusBlocks||0)),running:false,lastTickAt:null};
         }else state.studyTimer=base;
       }catch(e){state.studyTimer=base}
       stopStudyTimerInterval();
     }
     function saveTimerRuntime(){if(!state.studyTimer)return;try{localStorage.setItem(getTimerStorageKey(),JSON.stringify({...state.studyTimer,running:false,lastTickAt:null}))}catch(e){console.warn('Timer save failed',e)}}
-    function setStudyTimerSetting(key,value){const t=state.studyTimer;if(!t||t.running)return;const n=Math.max(1,Math.floor(Number(value||1)));if(key==='studyMinutes')t.studyMinutes=Math.min(180,n);if(key==='restMinutes')t.restMinutes=Math.min(60,n);if(t.sessionFocusSec===0&&t.completedFocusBlocks===0){t.phase='focus';t.remainingSec=t.studyMinutes*60}else if(t.phase==='focus')t.remainingSec=Math.min(t.remainingSec,t.studyMinutes*60);else t.remainingSec=Math.min(t.remainingSec,t.restMinutes*60);saveTimerRuntime();render()}
+    function setTimerMode(mode){
+      const t=state.studyTimer;if(!t||t.running||!['pomodoro','countdown','stopwatch'].includes(mode))return;
+      t.mode=mode;t.phase='focus';t.elapsedSec=0;t.sessionFocusSec=0;t.completedFocusBlocks=0;
+      t.remainingSec=mode==='countdown'?(t.countdownMinutes||60)*60:mode==='pomodoro'?t.studyMinutes*60:0;
+      saveTimerRuntime();render();
+    }
+    function setStudyTimerSetting(key,value){const t=state.studyTimer;if(!t||t.running)return;const n=Math.max(1,Math.floor(Number(value||1)));if(key==='studyMinutes')t.studyMinutes=Math.min(180,n);if(key==='restMinutes')t.restMinutes=Math.min(60,n);if(key==='countdownMinutes')t.countdownMinutes=Math.min(720,n);if(t.sessionFocusSec===0&&t.completedFocusBlocks===0){t.phase='focus';t.remainingSec=t.studyMinutes*60}else if(t.phase==='focus')t.remainingSec=Math.min(t.remainingSec,t.studyMinutes*60);else t.remainingSec=Math.min(t.remainingSec,t.restMinutes*60);saveTimerRuntime();render()}
     function startStudyTimer(){const t=state.studyTimer;if(!t||t.running)return;t.running=true;t.lastTickAt=Date.now();if(t.remainingSec<=0)t.remainingSec=getTimerPhaseLengthSec();stopStudyTimerInterval();studyTimerInterval=setInterval(tickStudyTimer,250);updateStudyTimerDom()}
     function pauseStudyTimer(){const t=state.studyTimer;if(!t)return;if(t.running)tickStudyTimer();t.running=false;t.lastTickAt=null;stopStudyTimerInterval();saveTimerRuntime();updateStudyTimerDom()}
     function resetStudyTimer(){if(!confirm('현재 공부 타이머 세션을 초기화할까요? 아직 보상받지 않은 공부 시간도 초기화됩니다.'))return;const sm=state.studyTimer?.studyMinutes||25,rm=state.studyTimer?.restMinutes||5;state.studyTimer={...getDefaultTimerRuntime(),studyMinutes:sm,restMinutes:rm,remainingSec:sm*60};stopStudyTimerInterval();saveTimerRuntime();render()}
     function finishStudyTimerPhase(){const t=state.studyTimer;if(t.phase==='focus'){t.completedFocusBlocks+=1;state.userData.timerData.completedPomodoros+=1;t.phase='rest';t.remainingSec=t.restMinutes*60;state.speech=`집중 구간 완료! ${t.studyMinutes}분 훈련 끝. 잠깐 쉬었다가 다시 가자.`;saveUserData()}else{t.phase='focus';t.remainingSec=t.studyMinutes*60;state.speech=`휴식 끝. 다시 ${t.studyMinutes}분 집중 훈련 시작!`}t.lastTickAt=Date.now();saveTimerRuntime();render()}
-    function tickStudyTimer(){const t=state.studyTimer;if(!t||!t.running)return;const now=Date.now(),elapsed=Math.max(0,Math.min(5,(now-(t.lastTickAt||now))/1000));t.lastTickAt=now;if(t.phase==='focus')t.sessionFocusSec+=elapsed;t.remainingSec-=elapsed;if(t.remainingSec<=0){t.remainingSec=0;finishStudyTimerPhase();return}updateStudyTimerDom()}
-    function updateStudyTimerDom(){const t=state.studyTimer;if(!t)return;const c=document.getElementById('study-timer-clock');if(c)c.textContent=formatTimerClock(t.remainingSec);const p=document.getElementById('study-timer-phase');if(p)p.innerHTML=t.phase==='focus'?'📚 집중 공부':'☕ 휴식';const len=Math.max(1,getTimerPhaseLengthSec()),pct=Math.min(100,Math.max(0,((len-t.remainingSec)/len)*100)),bar=document.getElementById('study-timer-progress-fill');if(bar)bar.style.width=`${pct}%`;const ses=document.getElementById('study-timer-session');if(ses)ses.textContent=formatStudyTime(t.sessionFocusSec);const btn=document.getElementById('study-timer-start-btn');if(btn){btn.textContent=t.running?'⏸ 일시정지':'▶ 시작';btn.onclick=t.running?pauseStudyTimer:startStudyTimer}}
+    function tickStudyTimer(){const t=state.studyTimer;if(!t||!t.running)return;const now=Date.now(),elapsed=Math.max(0,Math.min(5,(now-(t.lastTickAt||now))/1000));t.lastTickAt=now;
+      if(t.mode==='stopwatch'){t.elapsedSec+=elapsed;t.sessionFocusSec+=elapsed;updateStudyTimerDom();return}
+      if(t.mode==='countdown'){t.sessionFocusSec+=elapsed;t.remainingSec-=elapsed;if(t.remainingSec<=0){t.remainingSec=0;t.running=false;t.lastTickAt=null;stopStudyTimerInterval();saveTimerRuntime();try{const A=window.AudioContext||window.webkitAudioContext;if(A){const c=new A(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.12;o.start();setTimeout(()=>{o.stop();c.close()},700)}}catch(e){}alert('⏰ 설정한 공부 시간이 끝났어요!');render();return}updateStudyTimerDom();return}
+      if(t.phase==='focus')t.sessionFocusSec+=elapsed;t.remainingSec-=elapsed;if(t.remainingSec<=0){t.remainingSec=0;finishStudyTimerPhase();return}updateStudyTimerDom()}
+    function updateStudyTimerDom(){const t=state.studyTimer;if(!t)return;const c=document.getElementById('study-timer-clock');if(c)c.textContent=formatTimerClock(t.mode==='stopwatch'?t.elapsedSec:t.remainingSec);const p=document.getElementById('study-timer-phase');if(p)p.innerHTML=t.mode==='stopwatch'?'⏱️ 스톱워치':t.mode==='countdown'?'⏳ 일반 타이머':(t.phase==='focus'?'📚 집중 공부':'☕ 휴식');const len=Math.max(1,getTimerPhaseLengthSec()),pct=Math.min(100,Math.max(0,((len-t.remainingSec)/len)*100)),bar=document.getElementById('study-timer-progress-fill');if(bar)bar.style.width=`${pct}%`;const ses=document.getElementById('study-timer-session');if(ses)ses.textContent=formatStudyTime(t.sessionFocusSec);const btn=document.getElementById('study-timer-start-btn');if(btn){btn.textContent=t.running?'⏸ 일시정지':'▶ 시작';btn.onclick=t.running?pauseStudyTimer:startStudyTimer}}
     function finishStudySession(){const t=state.studyTimer;if(!t)return;if(t.running)pauseStudyTimer();const seconds=Math.floor(t.sessionFocusSec);if(seconds<60)return alert('기록할 공부 시간이 아직 1분 미만입니다.');const reward=getStudyTimerReward(seconds),oldLevel=getCharInfo().level;state.userData.timerData.totalStudySeconds+=seconds;state.userData.exp+=reward.exp;state.userData.coins+=reward.coins;state.userData.shop.tickets+=reward.tickets;state.userData.timerData.history.push({date:new Date().toISOString(),seconds,pomodoros:t.completedFocusBlocks,exp:reward.exp,coins:reward.coins,tickets:reward.tickets});if(state.userData.timerData.history.length>100)state.userData.timerData.history=state.userData.timerData.history.slice(-100);const newLevel=getCharInfo().level,msg=[`📚 공부 세션 기록 완료!`,`집중 공부: ${formatStudyTime(seconds)}`,`보상: +${reward.exp} EXP / +${reward.coins} 코인${reward.tickets?` / +${reward.tickets} 응원 티켓`:''}`];if(newLevel>oldLevel)msg.push(`🎉 Lv.${newLevel} ${STAGE_TITLES[newLevel-1]} 승격!`);const sm=t.studyMinutes,rm=t.restMinutes;state.studyTimer={...getDefaultTimerRuntime(),studyMinutes:sm,restMinutes:rm,remainingSec:sm*60};saveTimerRuntime();saveUserData();alert(msg.join('\n'));render()}
     function getTodayTimerSeconds(){const today=new Date().toISOString().split('T')[0];return (state.userData.timerData?.history||[]).filter(h=>String(h.date||'').slice(0,10)===today).reduce((s,h)=>s+Number(h.seconds||0),0)}
 
@@ -2363,13 +2390,18 @@
         const t=state.studyTimer||getDefaultTimerRuntime(),timerData=state.userData.timerData||getDefaultTimerData(),reward=getStudyTimerReward(t.sessionFocusSec),todaySec=getTodayTimerSeconds(),phaseLen=Math.max(1,getTimerPhaseLengthSec()),progressPct=Math.min(100,Math.max(0,((phaseLen-t.remainingSec)/phaseLen)*100)),history=[...(timerData.history||[])].reverse().slice(0,10);
         return `<div class="study-timer-wrap">
           <div><h4 style="font-weight:900;margin:0 0 4px;">⏱️ 공부 타이머 · 뽀모도로</h4><div style="font-size:11px;color:#64748B;font-weight:700;">집중 시간만 최종 공부 시간으로 기록됩니다. 휴식 시간은 보상 계산에서 제외됩니다.</div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;">
+            <button class="${t.mode==='pomodoro'?'btn-pixel-black':'btn-pixel-white'}" onclick="setTimerMode('pomodoro')" ${t.running?'disabled':''}>🍅 뽀모도로</button>
+            <button class="${t.mode==='countdown'?'btn-pixel-black':'btn-pixel-white'}" onclick="setTimerMode('countdown')" ${t.running?'disabled':''}>⏳ 일반 타이머</button>
+            <button class="${t.mode==='stopwatch'?'btn-pixel-black':'btn-pixel-white'}" onclick="setTimerMode('stopwatch')" ${t.running?'disabled':''}>⏱️ 스톱워치</button>
+          </div>
           <div class="study-timer-settings">
             <div class="study-timer-setting-card"><label>📚 공부 시간 (분)</label><input type="number" min="1" max="180" value="${t.studyMinutes}" ${t.running?'disabled':''} onchange="setStudyTimerSetting('studyMinutes',this.value)"></div>
-            <div class="study-timer-setting-card"><label>☕ 휴식 시간 (분)</label><input type="number" min="1" max="60" value="${t.restMinutes}" ${t.running?'disabled':''} onchange="setStudyTimerSetting('restMinutes',this.value)"></div>
+            <div class="study-timer-setting-card"><label>☕ 휴식 시간 (분)</label><input type="number" min="1" max="60" value="${t.restMinutes}" ${t.running?'disabled':''} onchange="setStudyTimerSetting('restMinutes',this.value)"></div>${t.mode==='countdown'?`<div class="study-timer-setting-card"><label>⏳ 일반 타이머 (분)</label><input type="number" min="1" max="720" value="${t.countdownMinutes||60}" ${t.running?'disabled':''} onchange="setStudyTimerSetting('countdownMinutes',this.value)"></div>`:''}
           </div>
           <div class="study-timer-card">
-            <div id="study-timer-phase" class="study-timer-phase">${t.phase==='focus'?'📚 집중 공부':'☕ 휴식'}</div>
-            <div id="study-timer-clock" class="study-timer-clock">${formatTimerClock(t.remainingSec)}</div>
+            <div id="study-timer-phase" class="study-timer-phase">${t.mode==='stopwatch'?'⏱️ 스톱워치':t.mode==='countdown'?'⏳ 일반 타이머':(t.phase==='focus'?'📚 집중 공부':'☕ 휴식')}</div>
+            <div id="study-timer-clock" class="study-timer-clock">${formatTimerClock(t.mode==='stopwatch'?t.elapsedSec:t.remainingSec)}</div>
             <div class="study-timer-progress"><div id="study-timer-progress-fill" style="width:${progressPct}%"></div></div>
             <div style="font-size:11px;color:#64748B;font-weight:800;">이번 세션 집중 공부 <b id="study-timer-session" style="color:#EA580C;">${formatStudyTime(t.sessionFocusSec)}</b> · 완료 뽀모도로 ${t.completedFocusBlocks}회</div>
             <div class="study-timer-buttons"><button id="study-timer-start-btn" class="btn-pixel-black" onclick="${t.running?'pauseStudyTimer()':'startStudyTimer()'}">${t.running?'⏸ 일시정지':'▶ 시작'}</button><button class="btn-pixel-white" onclick="resetStudyTimer()">↺ 세션 초기화</button><button class="btn-pixel-white" style="border-color:#10B981;color:#047857;" onclick="finishStudySession()">✓ 종료하고 보상받기</button></div>
