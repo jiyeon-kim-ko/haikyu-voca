@@ -474,6 +474,10 @@
     const SUPABASE_URL = "https://lhvjtcxscdlpoxkougdn.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_I15ayHidHSDigXBcG6u5Pw_roCidQMA";
 
+    // 커스텀 파일 기기 간 동기화를 위해 Supabase Storage에
+    // PUBLIC bucket 이름을 정확히 `custom-assets` 로 만들어주세요.
+    // 업로드/삭제가 막히면 Storage Policies에서 anon INSERT/SELECT/DELETE 정책도 허용해야 합니다.
+
     const supabaseClient =
       (window.supabase && window.supabase.createClient)
         ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
@@ -562,6 +566,202 @@
       for(const id of ids)if(id)await hydrateCustomAsset(id);
     }
     function customAssetUrl(assetId){return CUSTOM_ASSET_URLS[assetId]||''}
+
+
+    // --------------------------------------------------------------
+    // 기기 간 커스터마이징 동기화 (Supabase Storage + 기존 DB 테이블)
+    //
+    // Supabase에서 아래 이름의 PUBLIC bucket을 한 번 만들어주세요:
+    //   custom-assets
+    //
+    // 이 코드는 기존 haikyu_voca_data 테이블에 character="__custom_content__"
+    // 특수 행을 하나 사용해 커스텀 메타데이터를 저장합니다.
+    // 실제 PNG/JPG/MP3 파일은 Storage bucket에 저장합니다.
+    // --------------------------------------------------------------
+    const CUSTOM_STORAGE_BUCKET = 'custom-assets';
+    const CUSTOM_CLOUD_CHARACTER = '__custom_content__';
+
+    function safeCloudPart(v){
+      return String(v||'guest')
+        .normalize('NFKC')
+        .replace(/[^a-zA-Z0-9가-힣._-]+/g,'_')
+        .slice(0,80) || 'guest';
+    }
+
+    function getCustomCloudScope(){
+      // 같은 사용자라면 영어/일본어와 상관없이 같은 커스텀 파일 목록을 사용
+      return safeCloudPart(state.user||'guest');
+    }
+
+    function getCustomCloudPublicUrl(path){
+      if(!supabaseClient || !path) return '';
+      const { data } = supabaseClient.storage.from(CUSTOM_STORAGE_BUCKET).getPublicUrl(path);
+      return data?.publicUrl || '';
+    }
+
+    function refreshCustomCloudUrls(){
+      const all=[...CUSTOM_CONTENT.variants,...CUSTOM_CONTENT.items,...CUSTOM_CONTENT.bgm];
+      all.forEach(x=>{
+        if(x.assetId && x.filePath){
+          const url=getCustomCloudPublicUrl(x.filePath);
+          if(url) CUSTOM_ASSET_URLS[x.assetId]=url;
+        }
+      });
+    }
+
+    async function uploadCustomFileToCloud(file, kind, assetId){
+      if(!supabaseClient) throw new Error('Supabase 연결이 없습니다.');
+      const ext=(file.name.split('.').pop()||'bin').replace(/[^a-zA-Z0-9]/g,'').toLowerCase() || 'bin';
+      const scope=getCustomCloudScope();
+      const path=`${scope}/${kind}/${Date.now()}_${safeCloudPart(assetId)}.${ext}`;
+
+      const { error }=await supabaseClient.storage
+        .from(CUSTOM_STORAGE_BUCKET)
+        .upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type||undefined});
+
+      if(error) throw error;
+      return {path,url:getCustomCloudPublicUrl(path)};
+    }
+
+    async function deleteCustomFileFromCloud(path){
+      if(!supabaseClient || !path) return;
+      const { error }=await supabaseClient.storage.from(CUSTOM_STORAGE_BUCKET).remove([path]);
+      if(error) console.warn('Storage delete failed:',error);
+    }
+
+    function getCustomCloudPayload(){
+      // blob URL은 저장하지 않고 Storage 경로만 저장
+      return {
+        version:2,
+        variants:CUSTOM_CONTENT.variants.map(v=>({...v})),
+        items:CUSTOM_CONTENT.items.map(i=>({...i})),
+        bgm:CUSTOM_CONTENT.bgm.map(b=>({...b})),
+        speech:CUSTOM_CONTENT.speech||{}
+      };
+    }
+
+    async function saveCloudCustomContent(){
+      saveCustomContent(); // 로컬 백업도 유지
+      if(!supabaseClient || !state.user) return false;
+
+      const payload={
+        user_name:state.user,
+        lang:'__shared__',
+        character:CUSTOM_CLOUD_CHARACTER,
+        exp:0,
+        coins:0,
+        satisfaction:3,
+        stamina:3,
+        my_vocab_ids:[],
+        attendance_dates:[],
+        study_history:[],
+        spaced_rep_data:{__custom_content:getCustomCloudPayload()},
+        custom_words:[],
+        updated_at:new Date().toISOString()
+      };
+
+      const {error}=await supabaseClient
+        .from('haikyu_voca_data')
+        .upsert(payload,{onConflict:'user_name,lang,character'});
+
+      if(error){
+        console.warn('Custom metadata cloud save failed:',error);
+        return false;
+      }
+      return true;
+    }
+
+    async function loadCloudCustomContent(){
+      // 먼저 로컬 콘텐츠를 유지해서 오프라인 fallback 가능
+      if(!supabaseClient || !state.user){
+        await hydrateCustomAssets();
+        return false;
+      }
+
+      try{
+        const {data,error}=await supabaseClient
+          .from('haikyu_voca_data')
+          .select('spaced_rep_data,updated_at')
+          .eq('user_name',state.user)
+          .eq('lang','__shared__')
+          .eq('character',CUSTOM_CLOUD_CHARACTER)
+          .maybeSingle();
+
+        if(error) throw error;
+
+        const cloud=data?.spaced_rep_data?.__custom_content;
+        if(cloud && typeof cloud==='object'){
+          CUSTOM_CONTENT={
+            variants:Array.isArray(cloud.variants)?cloud.variants:[],
+            items:Array.isArray(cloud.items)?cloud.items:[],
+            bgm:Array.isArray(cloud.bgm)?cloud.bgm:[],
+            speech:cloud.speech&&typeof cloud.speech==='object'?cloud.speech:{}
+          };
+          saveCustomContent();
+          refreshCustomCloudUrls();
+          return true;
+        }
+
+        // 클라우드에 아직 없고 이 기기에 예전 IndexedDB 커스텀이 있다면
+        // 자동으로 Storage로 이전 시도
+        const hasLocal=CUSTOM_CONTENT.variants.length||CUSTOM_CONTENT.items.length||CUSTOM_CONTENT.bgm.length||Object.keys(CUSTOM_CONTENT.speech||{}).length;
+        if(hasLocal){
+          await migrateLocalCustomContentToCloud();
+          return true;
+        }
+      }catch(e){
+        console.warn('Custom cloud load failed; local custom content used:',e);
+        await hydrateCustomAssets();
+      }
+      return false;
+    }
+
+    async function migrateLocalCustomContentToCloud(){
+      if(!supabaseClient || !state.user) return false;
+      let changed=false;
+      const groups=[
+        ['variants','characters'],
+        ['items','items'],
+        ['bgm','bgm']
+      ];
+
+      for(const [key,kind] of groups){
+        for(const entry of CUSTOM_CONTENT[key]){
+          if(entry.filePath) continue;
+          if(!entry.assetId) continue;
+          const blob=await getCustomAsset(entry.assetId);
+          if(!blob) continue;
+          try{
+            const pseudoName=`${entry.name||entry.title||entry.id}.${(blob.type||'application/octet-stream').split('/').pop()||'bin'}`;
+            const file=new File([blob],pseudoName,{type:blob.type||'application/octet-stream'});
+            const up=await uploadCustomFileToCloud(file,kind,entry.assetId);
+            entry.filePath=up.path;
+            CUSTOM_ASSET_URLS[entry.assetId]=up.url;
+            changed=true;
+          }catch(e){
+            console.warn('Local custom migration failed:',entry,e);
+          }
+        }
+      }
+      if(changed || Object.keys(CUSTOM_CONTENT.speech||{}).length){
+        await saveCloudCustomContent();
+      }
+      return changed;
+    }
+
+    async function cloudSyncCustomNow(){
+      const el=document.getElementById('custom-cloud-status');
+      if(el)el.textContent='☁️ 동기화 중...';
+      try{
+        await loadCloudCustomContent();
+        refreshCustomCloudUrls();
+        if(el)el.textContent='✅ 클라우드 동기화 완료';
+        render();
+      }catch(e){
+        if(el)el.textContent='⚠️ 동기화 실패';
+        alert(`커스터마이징 동기화에 실패했습니다.\n${e?.message||e}`);
+      }
+    }
 
     const CHAR_META = {
       kageyama: {
@@ -2913,6 +3113,8 @@
       state.variantSelecting = false;
       state.entered = true;
       await loadUserData();
+      await loadCloudCustomContent();
+      refreshCustomCloudUrls();
       loadTimerRuntime();
       const lName = state.lang === 'ja' ? '일본어' : '영어';
       state.speech = getCharSpeech('enter', lName);
@@ -2934,6 +3136,10 @@
           <div>
             <h4 style="font-weight:900;margin:0 0 4px;">🧩 사용자 커스터마이징</h4>
             <div style="font-size:10.5px;color:#64748B;font-weight:700;">기존 캐릭터·사진·아이템·BGM은 그대로 두고, 원하는 파일을 추가할 수 있어요.</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <span id="custom-cloud-status" style="font-size:10.5px;font-weight:900;color:#0F766E;">☁️ 같은 사용자 기기 간 동기화</span>
+            <button class="btn-pixel-white" onclick="cloudSyncCustomNow()">↻ 지금 동기화</button>
           </div>
         </div>
 
@@ -2992,7 +3198,7 @@
         </div>
 
         <div style="margin-top:12px;padding:10px;border:1.5px solid #C4B5FD;border-radius:10px;background:#FAF5FF;font-size:10.5px;color:#6D28D9;font-weight:800;">
-          📌 사용자 업로드 파일은 GitHub 저장소에 올라가는 것이 아니라 이 브라우저에 저장됩니다. 다른 기기에서는 자동으로 보이지 않습니다.
+          ☁️ 사용자 업로드 파일은 Supabase Storage에 저장됩니다. 같은 사용자 이름으로 접속하면 노트북·아이패드·휴대폰에서 같은 커스텀 BGM/캐릭터 버전/아이템/대사를 불러옵니다. 오프라인이나 Storage 설정 오류 때만 로컬 저장으로 대체됩니다.
         </div>
       `;
     }
@@ -3002,9 +3208,19 @@
       const file=document.getElementById('custom-variant-file')?.files?.[0];
       if(!name||!file)return alert('버전 이름과 이미지를 선택해주세요.');
       const id=`custom_variant_${Date.now()}`,assetId=`asset_${Date.now()}_variant`;
-      await putCustomAsset(assetId,file);
-      CUSTOM_CONTENT.variants.push({id,name,charKey:state.char,assetId});
-      saveCustomContent();
+
+      let filePath='';
+      try{
+        const up=await uploadCustomFileToCloud(file,'characters',assetId);
+        filePath=up.path;CUSTOM_ASSET_URLS[assetId]=up.url;
+      }catch(e){
+        console.warn('Cloud upload failed; saving locally:',e);
+        await putCustomAsset(assetId,file);
+        alert('클라우드 업로드에 실패해서 이 기기에만 저장했습니다. Supabase Storage의 custom-assets bucket/정책을 확인해주세요.');
+      }
+
+      CUSTOM_CONTENT.variants.push({id,name,charKey:state.char,assetId,filePath});
+      await saveCloudCustomContent();
       state.charVariant=id;
       render();
     }
@@ -3015,20 +3231,31 @@
       if(!name||!file)return alert('아이템 이름과 이미지를 선택해주세요.');
       const type=document.getElementById('custom-item-type').value;
       const id=`custom_item_${Date.now()}`,assetId=`asset_${Date.now()}_item`;
+      let filePath='';
+
+      try{
+        const up=await uploadCustomFileToCloud(file,type==='background'?'backgrounds':type==='slogan'?'slogans':type==='frame'?'frames':'accessories',assetId);
+        filePath=up.path;CUSTOM_ASSET_URLS[assetId]=up.url;
+      }catch(e){
+        console.warn('Cloud upload failed; saving locally:',e);
+        await putCustomAsset(assetId,file);
+        alert('클라우드 업로드에 실패해서 이 기기에만 저장했습니다. Supabase Storage 설정을 확인해주세요.');
+      }
+
       const item={
         id,name,type,
         slot:type==='accessory'?document.getElementById('custom-item-slot').value:null,
         school:document.getElementById('custom-item-school').value||'all',
         price:Math.max(0,Number(document.getElementById('custom-item-price').value)||0),
-        assetId,custom:true
+        assetId,filePath,custom:true
       };
-      await putCustomAsset(assetId,file);
-      CUSTOM_CONTENT.items.push(item);saveCustomContent();
+      CUSTOM_CONTENT.items.push(item);
+      await saveCloudCustomContent();
 
       if(item.price===0){
         const charShop=getCharacterShopData();
         if(!charShop.ownedItems.includes(id))charShop.ownedItems.push(id);
-        await saveUserData();
+        await saveUserDataToCloud(state.user,state.lang,state.char,state.userData);
       }
       alert(item.price===0?'아이템을 추가하고 현재 캐릭터 인벤토리에 넣었습니다.':'아이템을 상점에 추가했습니다.');
       render();
@@ -3039,44 +3266,56 @@
       const file=document.getElementById('custom-bgm-file')?.files?.[0];
       if(!title||!file)return alert('곡 이름과 MP3/오디오 파일을 선택해주세요.');
       const id=`custom_bgm_${Date.now()}`,assetId=`asset_${Date.now()}_bgm`;
-      await putCustomAsset(assetId,file);
-      CUSTOM_CONTENT.bgm.push({id,title,assetId,custom:true});
-      saveCustomContent();
+      let filePath='';
+
+      try{
+        const up=await uploadCustomFileToCloud(file,'bgm',assetId);
+        filePath=up.path;CUSTOM_ASSET_URLS[assetId]=up.url;
+      }catch(e){
+        console.warn('Cloud BGM upload failed; saving locally:',e);
+        await putCustomAsset(assetId,file);
+        alert('클라우드 업로드에 실패해서 이 기기에만 저장했습니다. Supabase Storage의 custom-assets bucket/정책을 확인해주세요.');
+      }
+
+      CUSTOM_CONTENT.bgm.push({id,title,assetId,filePath,custom:true});
+      await saveCloudCustomContent();
       selectedBgmId=id;
       localStorage.setItem('haikyu_bgm_track',id);
       syncBgmSource(false);
       render();
     }
 
-    function saveExtraSpeech(){
+    async function saveExtraSpeech(){
       CUSTOM_CONTENT.speech[state.char]=CUSTOM_CONTENT.speech[state.char]||{};
       ['enter','quizCorrect','quizWrong','hardCorrect','hardWrong','spellCorrect','spellWrong','food','train','saved'].forEach(k=>{
         CUSTOM_CONTENT.speech[state.char][k]=document.getElementById(`speech-${k}`)?.value.trim()||'';
       });
-      saveCustomContent();
+      await saveCloudCustomContent();
       state.speech=getCharSpeech('enter',state.lang==='ja'?'일본어':'영어');
-      alert('현재 캐릭터의 사용자 대사를 저장했습니다.');
+      alert('현재 캐릭터의 사용자 대사를 클라우드에 저장했습니다.');
       render();
     }
 
     async function deleteExtraVariant(id){
       const v=CUSTOM_CONTENT.variants.find(x=>x.id===id);if(!v)return;
       if(!confirm(`${v.name} 버전을 삭제할까요?`))return;
-      await deleteCustomAsset(v.assetId);
+      if(v.filePath)await deleteCustomFileFromCloud(v.filePath);
+      await deleteCustomAsset(v.assetId).catch(()=>{});
       CUSTOM_CONTENT.variants=CUSTOM_CONTENT.variants.filter(x=>x.id!==id);
       if(state.charVariant===id)state.charVariant='default';
-      saveCustomContent();render();
+      await saveCloudCustomContent();render();
     }
 
     async function deleteExtraBgm(id){
       const b=CUSTOM_CONTENT.bgm.find(x=>x.id===id);if(!b)return;
       if(!confirm(`${b.title} BGM을 삭제할까요?`))return;
       bgmAudio.pause();isBgmPlaying=false;
-      await deleteCustomAsset(b.assetId);
+      if(b.filePath)await deleteCustomFileFromCloud(b.filePath);
+      await deleteCustomAsset(b.assetId).catch(()=>{});
       CUSTOM_CONTENT.bgm=CUSTOM_CONTENT.bgm.filter(x=>x.id!==id);
       if(selectedBgmId===id)selectedBgmId=BGM_TRACKS[0].id;
       localStorage.setItem('haikyu_bgm_track',selectedBgmId);
-      saveCustomContent();syncBgmSource(false);render();
+      await saveCloudCustomContent();syncBgmSource(false);render();
     }
 
     function switchTab(t) {
