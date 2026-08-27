@@ -581,6 +581,10 @@
     const CUSTOM_STORAGE_BUCKET = 'custom-assets';
     const CUSTOM_CLOUD_CHARACTER = '__custom_content__';
 
+    // 같은 사용자 + 같은 언어에서는 어떤 캐릭터를 선택해도 공부 데이터가 공유됩니다.
+    // 지연/경민은 user_name이 다르므로 서로 완전히 분리됩니다.
+    const SHARED_STUDY_CHARACTER = '__shared_study__';
+
     function safeCloudPart(v){
       return String(v||'guest')
         .normalize('NFKC')
@@ -1613,7 +1617,7 @@
     function getDefaultTimerData(){return {totalStudySeconds:0,completedPomodoros:0,history:[]}}
     function normalizeTimerData(v){const s=v&&typeof v==='object'?v:{};return {totalStudySeconds:Math.max(0,Number(s.totalStudySeconds||0)),completedPomodoros:Math.max(0,Number(s.completedPomodoros||0)),history:Array.isArray(s.history)?s.history:[]}}
     function getDefaultTimerRuntime(){return {mode:'pomodoro',studyMinutes:25,restMinutes:5,countdownMinutes:60,phase:'focus',remainingSec:1500,elapsedSec:0,running:false,sessionFocusSec:0,completedFocusBlocks:0,lastTickAt:null}}
-    function getTimerStorageKey(){return `haikyu_study_timer_${state.user||'guest'}_${state.lang||'en'}_${state.char||'kageyama'}`}
+    function getTimerStorageKey(){return `haikyu_study_timer_shared_${state.user||'guest'}_${state.lang||'en'}`}
     function stopStudyTimerInterval(){if(studyTimerInterval){clearInterval(studyTimerInterval);studyTimerInterval=null}}
     function formatStudyTime(seconds){const s=Math.max(0,Math.floor(Number(seconds||0))),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;if(h>0)return `${h}시간 ${m}분`;if(m>0)return `${m}분 ${sec}초`;return `${sec}초`}
     function formatTimerClock(seconds){const s=Math.max(0,Math.ceil(Number(seconds||0))),m=Math.floor(s/60),sec=s%60;return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`}
@@ -1696,7 +1700,8 @@
     };
 
     function getUserKey() {
-      return `toeic_voca_${state.user || 'guest'}_${state.lang || 'en'}_${state.char || 'kageyama'}`;
+      // 캐릭터별이 아니라 사용자 + 언어별로 공부 데이터를 공유
+      return `toeic_voca_shared_${state.user || 'guest'}_${state.lang || 'en'}`;
     }
 
     function getUserDisplayName() {
@@ -1780,15 +1785,95 @@
       }
     }
 
+
+    function uniqueByJson(list){
+      const out=[], seen=new Set();
+      (Array.isArray(list)?list:[]).forEach(v=>{
+        const key=JSON.stringify(v);
+        if(!seen.has(key)){seen.add(key);out.push(v);}
+      });
+      return out;
+    }
+
+    function mergeCharacterShopData(target={}, source={}){
+      const out={...(target&&typeof target==='object'?target:{})};
+      Object.entries(source&&typeof source==='object'?source:{}).forEach(([charKey,src])=>{
+        if(!out[charKey]){
+          out[charKey]=JSON.parse(JSON.stringify(src));
+          return;
+        }
+        const dst=out[charKey];
+        dst.ownedItems=Array.from(new Set([...(dst.ownedItems||[]),...(src.ownedItems||[])]));
+        dst.variantData={...(dst.variantData||{})};
+        Object.entries(src.variantData||{}).forEach(([variantId,sv])=>{
+          if(!dst.variantData[variantId]){
+            dst.variantData[variantId]=JSON.parse(JSON.stringify(sv));
+            return;
+          }
+          const dv=dst.variantData[variantId];
+          dv.equipped={...(dv.equipped||{}),...(sv.equipped||{})};
+          dv.transforms={...(dv.transforms||{}),...(sv.transforms||{})};
+          if(sv.characterTransform) dv.characterTransform={...(dv.characterTransform||{}),...sv.characterTransform};
+        });
+      });
+      return out;
+    }
+
+    function mergeUserDataRows(rows){
+      const base=getDefaultUserData();
+      if(!Array.isArray(rows)||!rows.length) return base;
+
+      let result=getDefaultUserData();
+      let newest=null;
+
+      rows.forEach(raw=>{
+        const d=normalizeUserData(raw);
+
+        // 숫자 보상은 여러 캐릭터 데이터를 합산하면 중복 지급이 될 수 있어 최대값을 사용
+        result.exp=Math.max(result.exp,Number(d.exp||0));
+        result.coins=Math.max(result.coins,Number(d.coins||0));
+        result.satisfaction=Math.max(result.satisfaction,Number(d.satisfaction||0));
+        result.stamina=Math.max(result.stamina,Number(d.stamina||0));
+
+        result.myVocabIds=Array.from(new Set([...(result.myVocabIds||[]),...(d.myVocabIds||[])]));
+        result.attendanceDates=Array.from(new Set([...(result.attendanceDates||[]),...(d.attendanceDates||[])]));
+        result.studyHistory=uniqueByJson([...(result.studyHistory||[]),...(d.studyHistory||[])]);
+        result.customWords=uniqueByJson([...(result.customWords||[]),...(d.customWords||[])]);
+
+        result.spacedRepData={...(result.spacedRepData||{}),...(d.spacedRepData||{})};
+
+        result.shop=normalizeShopData(result.shop);
+        const s=normalizeShopData(d.shop);
+        result.shop.tickets=Math.max(Number(result.shop.tickets||0),Number(s.tickets||0));
+        result.shop.ticketClaims={...(result.shop.ticketClaims||{}),...(s.ticketClaims||{})};
+        result.shop.ownedItems=Array.from(new Set([...(result.shop.ownedItems||[]),...(s.ownedItems||[])]));
+        result.shop.characterData=mergeCharacterShopData(result.shop.characterData,s.characterData);
+
+        const rt=normalizeTimerData(result.timerData), st=normalizeTimerData(d.timerData);
+        result.timerData={
+          totalStudySeconds:Math.max(rt.totalStudySeconds,st.totalStudySeconds),
+          completedPomodoros:Math.max(rt.completedPomodoros,st.completedPomodoros),
+          history:uniqueByJson([...(rt.history||[]),...(st.history||[])])
+        };
+
+        if(!newest || String(raw.updated_at||'')>String(newest.updated_at||'')) newest=raw;
+      });
+
+      // 가장 최근 행의 현재 컨디션 값은 우선 유지
+      if(newest){
+        const nd=normalizeUserData(newest);
+        result.satisfaction=nd.satisfaction;
+        result.stamina=nd.stamina;
+      }
+      return normalizeUserData(result);
+    }
+
     async function loadUserData() {
       const requestedUser = state.user;
       const requestedLang = state.lang;
-      const requestedChar = state.char;
       const userKey = getUserKey();
-
       const localBackup = loadLocalBackup(userKey);
 
-      // Supabase가 로드되지 않았거나 네트워크 연결이 실패하면 로컬 백업 사용
       if (!supabaseClient) {
         state.userData = localBackup || getDefaultUserData();
         recordAttendance();
@@ -1796,39 +1881,45 @@
       }
 
       try {
-        const { data, error } = await supabaseClient
+        // 1) 새 공유 행이 있으면 그것을 사용
+        const { data: sharedRow, error: sharedError } = await supabaseClient
           .from('haikyu_voca_data')
           .select('*')
           .eq('user_name', requestedUser)
           .eq('lang', requestedLang)
-          .eq('character', requestedChar)
+          .eq('character', SHARED_STUDY_CHARACTER)
           .maybeSingle();
 
-        // 기다리는 동안 사용자가 다른 계정/언어/캐릭터로 이동했다면 결과 무시
-        if (
-          state.user !== requestedUser ||
-          state.lang !== requestedLang ||
-          state.char !== requestedChar
-        ) {
-          return;
-        }
+        if (sharedError) throw sharedError;
 
-        if (error) throw error;
+        if (state.user !== requestedUser || state.lang !== requestedLang) return;
 
-        if (data) {
-          state.userData = normalizeUserData(data);
+        if (sharedRow) {
+          state.userData = normalizeUserData(sharedRow);
           saveLocalBackup(userKey, state.userData);
-
-          // 기본 50장 제거 마이그레이션 결과를 Supabase에도 바로 동기화
-          await saveUserDataToCloud(requestedUser, requestedLang, requestedChar, state.userData);
         } else {
-          // Supabase에 아직 데이터가 없으면 기존 기기의 localStorage 데이터를
-          // 첫 클라우드 데이터로 자동 이전한다.
-          state.userData = localBackup || getDefaultUserData();
-          await saveUserDataToCloud(requestedUser, requestedLang, requestedChar, state.userData);
+          // 2) 예전에 캐릭터별로 나뉘어 있던 데이터를 한 번 모아서 공유 데이터로 이전
+          const { data: legacyRows, error: legacyError } = await supabaseClient
+            .from('haikyu_voca_data')
+            .select('*')
+            .eq('user_name', requestedUser)
+            .eq('lang', requestedLang)
+            .neq('character', CUSTOM_CLOUD_CHARACTER)
+            .neq('character', SHARED_STUDY_CHARACTER);
+
+          if (legacyError) throw legacyError;
+
+          if (Array.isArray(legacyRows) && legacyRows.length) {
+            state.userData = mergeUserDataRows(legacyRows);
+          } else {
+            state.userData = localBackup || getDefaultUserData();
+          }
+
+          saveLocalBackup(userKey, state.userData);
+          await saveUserDataToCloud(requestedUser, requestedLang, SHARED_STUDY_CHARACTER, state.userData);
         }
       } catch (e) {
-        console.warn('Supabase load failed. Using local backup:', e);
+        console.warn('Supabase shared-study load failed. Using local backup:', e);
         state.userData = localBackup || getDefaultUserData();
       }
 
@@ -1836,12 +1927,17 @@
     }
 
     async function saveUserDataToCloud(userName, lang, character, data) {
-      if (!supabaseClient || !userName || !lang || !character) return false;
+      if (!supabaseClient || !userName || !lang) return false;
+
+      // 일반 공부 데이터는 캐릭터와 무관하게 사용자+언어 공유 행에 저장
+      const targetCharacter = character === CUSTOM_CLOUD_CHARACTER
+        ? CUSTOM_CLOUD_CHARACTER
+        : SHARED_STUDY_CHARACTER;
 
       const payload = {
         user_name: userName,
         lang,
-        character,
+        character: targetCharacter,
         exp: Number(data.exp || 0),
         coins: Number(data.coins ?? 200),
         satisfaction: Number(data.satisfaction ?? 3),
@@ -1849,19 +1945,21 @@
         my_vocab_ids: Array.isArray(data.myVocabIds) ? data.myVocabIds : [],
         attendance_dates: Array.isArray(data.attendanceDates) ? data.attendanceDates : [],
         study_history: Array.isArray(data.studyHistory) ? data.studyHistory : [],
-        spaced_rep_data: { ...(data.spacedRepData && typeof data.spacedRepData === 'object' ? data.spacedRepData : {}), __shop: normalizeShopData(data.shop), __timer: normalizeTimerData(data.timerData) },
+        spaced_rep_data: {
+          ...(data.spacedRepData && typeof data.spacedRepData === 'object' ? data.spacedRepData : {}),
+          __shop: normalizeShopData(data.shop),
+          __timer: normalizeTimerData(data.timerData)
+        },
         custom_words: Array.isArray(data.customWords) ? data.customWords : [],
         updated_at: new Date().toISOString()
       };
 
       const { error } = await supabaseClient
         .from('haikyu_voca_data')
-        .upsert(payload, {
-          onConflict: 'user_name,lang,character'
-        });
+        .upsert(payload, { onConflict: 'user_name,lang,character' });
 
       if (error) {
-        console.warn('Supabase save failed:', error);
+        console.warn('Supabase shared-study save failed:', error);
         return false;
       }
       return true;
@@ -1872,7 +1970,7 @@
       // localStorage는 즉시 저장하고 Supabase는 비동기로 동기화한다.
       const userName = state.user;
       const lang = state.lang;
-      const character = state.char;
+      const character = SHARED_STUDY_CHARACTER;
       const userKey = getUserKey();
       const snapshot = normalizeUserData(JSON.parse(JSON.stringify(state.userData)));
 
@@ -2405,6 +2503,9 @@
             <div style="margin-bottom: 6px;">${renderMikasaBall(48)}</div>
             <h3 style="font-weight: 900; color: #1E293B; margin-top:0;">파트너 선수 선택</h3>
             <p style="color: #64748B; font-size: 13.5px; font-weight: 700; margin-bottom: 20px;">훈련을 함께할 파트너 선수를 선택하세요!</p>
+            <div style="margin:-8px 0 14px;padding:8px 10px;border:1.5px solid #BFDBFE;border-radius:9px;background:#EFF6FF;color:#1E40AF;font-size:11px;font-weight:800;">
+              ☁ 같은 사용자 안에서는 캐릭터를 바꿔도 EXP · 코인 · 단어장 · 오답/복습 · 시험 기록 · 타이머 기록이 이어집니다.
+            </div>
             <div class="char-select-grid">
               ${Object.keys(CHAR_META).map(k => `
                 <div class="char-radio-card ${state.char === k ? 'active' : ''}" onclick="selectChar('${k}')">
@@ -2490,7 +2591,7 @@
       app.innerHTML = `
         <div class="minihompy-window">
           <div class="window-top-bar">
-            <span style="display:flex; align-items:center; gap:6px;">飛べ 카라스노 고교 체육관 · ${getUserDisplayName()} [${state.lang === 'ja' ? '🇯🇵 일본어' : '🇺🇸 영어'}] : ${charInfo.name} · ${charInfo.variantName || '기본'} ${renderMikasaBall(17)} <span title="Supabase + localStorage 백업" style="font-size:10px; opacity:.72;">☁ 저장</span></span>
+            <span style="display:flex; align-items:center; gap:6px;">飛べ 카라스노 고교 체육관 · ${getUserDisplayName()} [${state.lang === 'ja' ? '🇯🇵 일본어' : '🇺🇸 영어'}] : ${charInfo.name} · ${charInfo.variantName || '기본'} ${renderMikasaBall(17)} <span title="같은 사용자·언어의 모든 캐릭터가 공부 데이터를 공유합니다." style="font-size:10px; opacity:.72;">☁ 캐릭터 공용 저장</span></span>
             <div style="display: flex; gap: 6px;">
               <div style="width: 12px; height: 12px; background: #FFFFFF; border-radius: 3px;"></div>
               <div style="width: 12px; height: 12px; background: #FFFFFF; border-radius: 3px;"></div>
