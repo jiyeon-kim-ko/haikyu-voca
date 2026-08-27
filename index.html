@@ -350,6 +350,76 @@
       background: #1E293B; color: #FFFFFF;
     }
 
+    .test-scope-box{
+      border:1.5px solid #CBD5E1;
+      border-radius:12px;
+      background:#F8FAFC;
+      padding:10px;
+      margin-bottom:12px;
+    }
+    .test-source-tabs{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      margin-bottom:9px;
+    }
+    .test-source-btn{
+      border:2px solid #CBD5E1;
+      border-radius:8px;
+      background:#FFF;
+      color:#334155;
+      padding:6px 9px;
+      font-size:11px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .test-source-btn.active{
+      background:#1E293B;
+      border-color:#1E293B;
+      color:#FFF;
+    }
+    .test-day-list{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      align-items:center;
+    }
+    .test-day-chip{
+      border:2px solid #CBD5E1;
+      border-radius:999px;
+      background:#FFF;
+      color:#475569;
+      padding:5px 9px;
+      font-size:10.5px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .test-day-chip.active{
+      background:#EA580C;
+      border-color:#EA580C;
+      color:#FFF;
+    }
+
+    .multi-day-dropdown{position:relative;width:190px;}
+    .multi-day-dropdown summary{
+      list-style:none;border:2px solid #CBD5E1;border-radius:8px;background:#FFF;
+      padding:7px 10px;font-size:12px;font-weight:800;cursor:pointer;
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .multi-day-dropdown summary::-webkit-details-marker{display:none}
+    .multi-day-menu{
+      position:absolute;z-index:50;left:0;top:39px;width:190px;max-height:250px;overflow-y:auto;
+      border:2px solid #CBD5E1;border-radius:8px;background:#FFF;box-shadow:0 8px 20px rgba(15,23,42,.15);
+      padding:5px;
+    }
+    .multi-day-option{
+      display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;
+      font-size:12px;font-weight:750;cursor:pointer;
+    }
+    .multi-day-option:hover{background:#F1F5F9}
+    .multi-day-option input{accent-color:#EA580C}
+    .multi-day-option.all-option{border-bottom:1px solid #E2E8F0;margin-bottom:4px}
+
     .study-timer-wrap{display:flex;flex-direction:column;gap:12px;height:100%}
     .study-timer-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
     .study-timer-setting-card{border:1.5px solid #CBD5E1;border-radius:11px;background:#F8FAFC;padding:10px}
@@ -415,6 +485,83 @@
       tsumu: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="50" fill="#CA8A04"/><circle cx="50" cy="55" r="28" fill="#FDDFB7"/><path d="M22 45 C25 18 75 18 78 45 C65 30 55 32 50 30 C45 32 35 30 22 45 Z" fill="#EAB308"/><path d="M45 25 L75 35 L65 45 Z" fill="#CA8A04"/><ellipse cx="38" cy="52" rx="4" ry="5" fill="#1E293B"/><ellipse cx="62" cy="52" rx="4" ry="5" fill="#1E293B"/><circle cx="39" cy="50" r="1.5" fill="#FFF"/><circle cx="63" cy="50" r="1.5" fill="#FFF"/><path d="M34 46 L44 45" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M66 46 L56 45" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M44 66 Q50 70 56 66" stroke="#1E293B" stroke-width="2" fill="none"/><path d="M30 82 L70 82 L65 100 L35 100 Z" fill="#18181B"/></svg>`,
       osamu: `<svg viewBox="0 0 100 100" width="100%" height="100%"><circle cx="50" cy="50" r="50" fill="#475569"/><circle cx="50" cy="55" r="28" fill="#FDDFB7"/><path d="M22 45 C25 18 75 18 78 45 C65 30 55 32 50 30 C45 32 35 30 22 45 Z" fill="#64748B"/><ellipse cx="38" cy="52" rx="4" ry="5" fill="#1E293B"/><ellipse cx="62" cy="52" rx="4" ry="5" fill="#1E293B"/><circle cx="39" cy="50" r="1.5" fill="#FFF"/><circle cx="63" cy="50" r="1.5" fill="#FFF"/><path d="M34 47 L44 47" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M66 47 L56 47" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M45 67 L55 67" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/><path d="M30 82 L70 82 L65 100 L35 100 Z" fill="#18181B"/></svg>`
     };
+
+
+    // --------------------------------------------------------------
+    // 사용자 추가 커스터마이징
+    // 기존 캐릭터/아이템/BGM은 그대로 유지하고 사용자 파일을 추가로 합칩니다.
+    // 업로드 파일은 현재 브라우저 IndexedDB에 저장됩니다.
+    // --------------------------------------------------------------
+    const CUSTOM_META_KEY = 'haikyu_extra_custom_content_v1';
+    const CUSTOM_DB_NAME = 'haikyu_extra_custom_assets_v1';
+    const CUSTOM_STORE = 'assets';
+    let CUSTOM_CONTENT = loadCustomContent();
+    const CUSTOM_ASSET_URLS = {};
+
+    function loadCustomContent(){
+      try{
+        const v=JSON.parse(localStorage.getItem(CUSTOM_META_KEY)||'null');
+        return {
+          variants:Array.isArray(v?.variants)?v.variants:[],
+          items:Array.isArray(v?.items)?v.items:[],
+          bgm:Array.isArray(v?.bgm)?v.bgm:[],
+          speech:v?.speech&&typeof v.speech==='object'?v.speech:{}
+        };
+      }catch(e){
+        return {variants:[],items:[],bgm:[],speech:{}};
+      }
+    }
+    function saveCustomContent(){
+      localStorage.setItem(CUSTOM_META_KEY,JSON.stringify(CUSTOM_CONTENT));
+    }
+    function openCustomDB(){
+      return new Promise((resolve,reject)=>{
+        const req=indexedDB.open(CUSTOM_DB_NAME,1);
+        req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(CUSTOM_STORE))req.result.createObjectStore(CUSTOM_STORE)};
+        req.onsuccess=()=>resolve(req.result);
+        req.onerror=()=>reject(req.error);
+      });
+    }
+    async function putCustomAsset(id,file){
+      const db=await openCustomDB();
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction(CUSTOM_STORE,'readwrite');
+        tx.objectStore(CUSTOM_STORE).put(file,id);
+        tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
+      });
+      await hydrateCustomAsset(id);
+    }
+    async function getCustomAsset(id){
+      const db=await openCustomDB();
+      return new Promise((resolve,reject)=>{
+        const req=db.transaction(CUSTOM_STORE).objectStore(CUSTOM_STORE).get(id);
+        req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+      });
+    }
+    async function deleteCustomAsset(id){
+      const db=await openCustomDB();
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction(CUSTOM_STORE,'readwrite');
+        tx.objectStore(CUSTOM_STORE).delete(id);
+        tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
+      });
+      if(CUSTOM_ASSET_URLS[id])URL.revokeObjectURL(CUSTOM_ASSET_URLS[id]);
+      delete CUSTOM_ASSET_URLS[id];
+    }
+    async function hydrateCustomAsset(id){
+      const blob=await getCustomAsset(id);
+      if(!blob)return;
+      if(CUSTOM_ASSET_URLS[id])URL.revokeObjectURL(CUSTOM_ASSET_URLS[id]);
+      CUSTOM_ASSET_URLS[id]=URL.createObjectURL(blob);
+    }
+    async function hydrateCustomAssets(){
+      const ids=new Set();
+      CUSTOM_CONTENT.variants.forEach(v=>ids.add(v.assetId));
+      CUSTOM_CONTENT.items.forEach(v=>ids.add(v.assetId));
+      CUSTOM_CONTENT.bgm.forEach(v=>ids.add(v.assetId));
+      for(const id of ids)if(id)await hydrateCustomAsset(id);
+    }
+    function customAssetUrl(assetId){return CUSTOM_ASSET_URLS[assetId]||''}
 
     const CHAR_META = {
       kageyama: {
@@ -494,7 +641,11 @@
 
     function getCharacterVariants(charKey=state.char){
       const meta=CHAR_META[charKey]||CHAR_META.kageyama;
-      return CHAR_VARIANTS[charKey] || [{id:"default",name:`기본 ${meta.name}`,file:meta.imgFile}];
+      const base=CHAR_VARIANTS[charKey] || [{id:"default",name:`기본 ${meta.name}`,file:meta.imgFile}];
+      const extra=CUSTOM_CONTENT.variants
+        .filter(v=>v.charKey===charKey)
+        .map(v=>({...v,file:customAssetUrl(v.assetId)}));
+      return [...base,...extra];
     }
 
     function getSelectedVariant(charKey=state.char){
@@ -652,7 +803,10 @@
       {id:"frame_shiratorizawa",type:"frame",name:"시라토리자와 프레임",price:7,school:"shiratorizawa",file:"assets/shop/frames/Shiratorizawa frame.png"}
     ];
     function getCharSchoolId(charKey=state.char){const meta=CHAR_META[charKey]||CHAR_META.kageyama;return SCHOOL_IDS[meta.school]||"all"}
-    function getShopItem(id){return SHOP_ITEMS.find(x=>x.id===id)||null}
+    function getAllShopItems(){
+      return [...SHOP_ITEMS,...CUSTOM_CONTENT.items.map(i=>({...i,file:customAssetUrl(i.assetId)}))];
+    }
+    function getShopItem(id){return getAllShopItems().find(x=>x.id===id)||null}
     function getCharacterShopData(charKey=state.char){
       const shop=state.userData.shop;
       shop.characterData=shop.characterData||{};
@@ -765,7 +919,7 @@
       }
     }
     function getTicketTier(correct,total){if(!total)return 0;const p=correct/total*100;if(p>=99.999)return 3;if(p>=80)return 2;if(p>=60)return 1;return 0}
-    function awardCheerTickets(testType,correct,total){const tier=getTicketTier(correct,total),key=`${testType}:${String(state.selectedDay||'all')}`,prev=Number(state.userData.shop.ticketClaims[key]||0),delta=Math.max(0,tier-prev);if(tier>prev)state.userData.shop.ticketClaims[key]=tier;if(delta>0)state.userData.shop.tickets+=delta;return delta}
+    function awardCheerTickets(testType,correct,total){const tier=getTicketTier(correct,total),key=`${testType}:${getTestScopeKey()}`,prev=Number(state.userData.shop.ticketClaims[key]||0),delta=Math.max(0,tier-prev);if(tier>prev)state.userData.shop.ticketClaims[key]=tier;if(delta>0)state.userData.shop.tickets+=delta;return delta}
 
     function renderCharacterAvatar(charKey) {
       const meta = getActiveCharacterMeta(charKey);
@@ -1073,6 +1227,8 @@
     };
 
     function getCharSpeech(type, subject='') {
+      const custom=CUSTOM_CONTENT.speech?.[state.char]?.[type];
+      if(typeof custom==='string' && custom.trim()) return custom.replaceAll('{subject}',subject||'');
       const set = CHAR_SPEECH[state.char] || CHAR_SPEECH.kageyama;
       const value = set[type];
       return typeof value === 'function' ? value(subject) : (value || '');
@@ -1186,11 +1342,15 @@
     const BGM_FIXED_VOLUME = 0.35;
     let isBgmPlaying = false;
 
+    function getAllBgmTracks(){
+      return [...BGM_TRACKS,...CUSTOM_CONTENT.bgm.map(b=>({...b,file:customAssetUrl(b.assetId)}))];
+    }
     function getSelectedBgmTrack() {
-      return BGM_TRACKS.find(t => t.id === selectedBgmId) || BGM_TRACKS[0];
+      const all=getAllBgmTracks();
+      return all.find(t => t.id === selectedBgmId) || all[0];
     }
 
-    let bgmAudio = new Audio(getSelectedBgmTrack().file);
+    let bgmAudio = new Audio(BGM_TRACKS[0].file);
     bgmAudio.loop = true;
     bgmAudio.volume = BGM_FIXED_VOLUME;
 
@@ -1291,6 +1451,8 @@
       speech: "...뭐하냐? 멍때리지 말고 얼른 단어 외워라.",
       mood: 'normal',
       selectedDay: 'all',
+      testSource: 'days', // 'days' | 'myvocab' | 'review'
+      selectedTestDays: [], // 여러 DAY를 섞어서 시험 볼 때 사용
       selectedAccent: 'US', // US, UK
       blindMode: localStorage.getItem('haikyu_blind_mode') === 'true',
       blindOpacity: Math.min(1, Math.max(0, Number(localStorage.getItem('haikyu_blind_opacity') ?? 0))),
@@ -1339,6 +1501,8 @@
       state.entered = false;
       state.variantSelecting = false;
       state.selectedDay = 'all';
+      state.testSource = 'days';
+      state.selectedTestDays = [];
       state.tab = 'practice';
       render();
     }
@@ -1348,6 +1512,8 @@
       state.entered = false;
       state.variantSelecting = false;
       state.selectedDay = 'all';
+      state.testSource = 'days';
+      state.selectedTestDays = [];
       state.tab = 'practice';
       render();
     }
@@ -1536,6 +1702,129 @@
       return db.filter(d => String(d.day) === String(state.selectedDay));
     }
 
+
+    function getReviewWordIds() {
+      const sData = state.userData.spacedRepData || {};
+      const todayStr = new Date().toISOString().split('T')[0];
+      return Object.keys(sData).filter(k =>
+        !k.startsWith('__') &&
+        sData[k] &&
+        sData[k].nextDate &&
+        sData[k].nextDate <= todayStr
+      );
+    }
+
+    function getTestVocab() {
+      const db = getCombinedVocab();
+
+      if (state.testSource === 'myvocab') {
+        const ids = new Set(state.userData.myVocabIds || []);
+        return db.filter(d => ids.has(d.id));
+      }
+
+      if (state.testSource === 'review') {
+        const ids = new Set(getReviewWordIds());
+        return db.filter(d => ids.has(d.id));
+      }
+
+      const selected = Array.isArray(state.selectedTestDays) ? state.selectedTestDays : [];
+      if (selected.length === 0) return db; // 아무 DAY도 고르지 않으면 전체
+      const daySet = new Set(selected.map(String));
+      return db.filter(d => daySet.has(String(d.day)));
+    }
+
+    function getTestScopeKey() {
+      if (state.testSource === 'myvocab') return 'myvocab';
+      if (state.testSource === 'review') return 'review';
+      const days = (state.selectedTestDays || []).map(String).sort((a,b) => {
+        const na=Number(a), nb=Number(b);
+        if(!isNaN(na) && !isNaN(nb)) return na-nb;
+        return a.localeCompare(b);
+      });
+      return days.length ? `days:${days.join('+')}` : 'days:all';
+    }
+
+    function resetCurrentTest() {
+      if (state.tab === 'quiz') generateQuiz();
+      if (state.tab === 'hard') generateHardQuiz();
+      if (state.tab === 'spell') generateSpellQuiz();
+      render();
+    }
+
+    function setTestSource(source) {
+      if (!['days','myvocab','review'].includes(source)) return;
+      state.testSource = source;
+      resetCurrentTest();
+    }
+
+    function toggleTestDay(day) {
+      const key = String(day);
+      const list = Array.isArray(state.selectedTestDays) ? [...state.selectedTestDays.map(String)] : [];
+      const idx = list.indexOf(key);
+      if (idx >= 0) list.splice(idx, 1);
+      else list.push(key);
+      state.selectedTestDays = list;
+      state.testSource = 'days';
+      resetCurrentTest();
+    }
+
+    function selectAllTestDays() {
+      state.selectedTestDays = [];
+      state.testSource = 'days';
+      resetCurrentTest();
+    }
+
+    function getSelectedTestDaysLabel(){
+      const days=(state.selectedTestDays||[]).map(String);
+      if(!days.length) return '전체 범위';
+      if(days.length===1) return `Day ${days[0]}`;
+      if(days.length<=3) return days.map(d=>`Day ${d}`).join(', ');
+      return `${days.length}개 DAY 선택`;
+    }
+
+    function renderTestScopeSelector() {
+      const days = getDaysList().filter(d => d !== 'all');
+      const selected = new Set((state.selectedTestDays || []).map(String));
+      const count = getTestVocab().length;
+
+      return `
+        <div class="test-scope-box">
+          <div class="test-source-tabs">
+            <button class="test-source-btn ${state.testSource==='days'?'active':''}" onclick="setTestSource('days')">📅 DAY</button>
+            <button class="test-source-btn ${state.testSource==='myvocab'?'active':''}" onclick="setTestSource('myvocab')">📑 단어장</button>
+            <button class="test-source-btn ${state.testSource==='review'?'active':''}" onclick="setTestSource('review')">🧠 복습</button>
+            <span style="margin-left:auto;font-size:10.5px;font-weight:900;color:#64748B;align-self:center;">시험 범위 ${count}개</span>
+          </div>
+
+          ${state.testSource==='days' ? `
+            <details class="multi-day-dropdown">
+              <summary>${getSelectedTestDaysLabel()} <span>▾</span></summary>
+              <div class="multi-day-menu">
+                <label class="multi-day-option all-option">
+                  <input type="checkbox" ${selected.size===0?'checked':''} onchange="selectAllTestDays()">
+                  <span>전체 범위</span>
+                </label>
+                ${days.map(d=>`
+                  <label class="multi-day-option">
+                    <input type="checkbox" ${selected.has(String(d))?'checked':''}
+                      onchange="toggleTestDay('${String(d).replace(/'/g,"\\'")}')">
+                    <span>${isNaN(d)?d:`Day ${d}`}</span>
+                  </label>
+                `).join('')}
+              </div>
+            </details>
+            <div style="font-size:10px;color:#94A3B8;margin-top:5px;">
+              드롭다운 안에서 여러 DAY를 체크할 수 있어요.
+            </div>
+          ` : state.testSource==='myvocab' ? `
+            <div style="font-size:10.5px;color:#64748B;font-weight:800;">단어장에 저장한 단어 ${count}개로 시험을 봅니다.</div>
+          ` : `
+            <div style="font-size:10.5px;color:#64748B;font-weight:800;">오늘 복습 예정인 단어 ${count}개로 시험을 봅니다.</div>
+          `}
+        </div>
+      `;
+    }
+
     function getCharInfo() {
       const exp = state.userData.exp;
       let lvl = 1;
@@ -1594,7 +1883,7 @@
     }
 
     function selectBgm(trackId) {
-      if (!BGM_TRACKS.some(t => t.id === trackId)) return;
+      if (!getAllBgmTracks().some(t => t.id === trackId)) return;
       const shouldResume = isBgmPlaying;
       selectedBgmId = trackId;
       localStorage.setItem('haikyu_bgm_track', selectedBgmId);
@@ -1603,9 +1892,10 @@
     }
 
     function changeBgmBy(step) {
-      const idx = Math.max(0, BGM_TRACKS.findIndex(t => t.id === selectedBgmId));
-      const next = (idx + step + BGM_TRACKS.length) % BGM_TRACKS.length;
-      selectBgm(BGM_TRACKS[next].id);
+      const all=getAllBgmTracks();
+      const idx = Math.max(0, all.findIndex(t => t.id === selectedBgmId));
+      const next = (idx + step + all.length) % all.length;
+      selectBgm(all[next].id);
     }
 
 
@@ -1781,7 +2071,7 @@
     }
 
     function generateQuiz() {
-      const db = getFilteredVocab();
+      const db = getTestVocab();
       if (db.length < 4) {
         state.quizQuestions = [];
         return;
@@ -1801,7 +2091,7 @@
     }
 
     function generateHardQuiz() {
-      const db = getFilteredVocab();
+      const db = getTestVocab();
       if (db.length === 0) {
         state.hardQuestions = [];
         return;
@@ -1818,7 +2108,7 @@
 
     function generateSpellQuiz() {
       if (state.lang === 'ja') return;
-      const db = getFilteredVocab();
+      const db = getTestVocab();
       if (db.length === 0) {
         state.spellQuestions = [];
         return;
@@ -2031,7 +2321,7 @@
                 </div>
 
                 <select class="bgm-select" onchange="selectBgm(this.value)" aria-label="BGM 선택">
-                  ${BGM_TRACKS.map(track => `
+                  ${getAllBgmTracks().map(track => `
                     <option value="${track.id}" ${selectedBgmId === track.id ? 'selected' : ''}>${track.title}</option>
                   `).join('')}
                 </select>
@@ -2098,6 +2388,7 @@
               <button class="btn-tab-menu ${state.tab === 'spaced' ? 'active' : ''}" onclick="switchTab('spaced')">복습</button>
               <button class="btn-tab-menu ${state.tab === 'shop' ? 'active' : ''}" onclick="switchTab('shop')">상점</button>
               <button class="btn-tab-menu ${state.tab === 'inventory' ? 'active' : ''}" onclick="switchTab('inventory')">인벤토리</button>
+              <button class="btn-tab-menu ${state.tab === 'customize' ? 'active' : ''}" onclick="switchTab('customize')">커스텀</button>
               <button class="btn-tab-menu ${state.tab === 'history' ? 'active' : ''}" onclick="switchTab('history')">기록</button>
               <button class="btn-tab-menu ${state.tab === 'timer' ? 'active' : ''}" onclick="switchTab('timer')">공부<br>타이머</button>
             </div>
@@ -2128,6 +2419,7 @@
     }
 
     function renderTabContent() {
+      if (state.tab === 'customize') return renderExtraCustomization();
       if (state.tab === 'practice') {
         const list = getFilteredVocab();
         if (list.length === 0) {
@@ -2178,6 +2470,7 @@
         if (sc.finished) {
           const rate = sc.total > 0 ? ((sc.correct / sc.total) * 100).toFixed(1) : 100;
           return `
+            ${renderTestScopeSelector()}
             <div style="text-align: center; padding: 40px 20px;">
               <h3 style="font-weight: 900; display:flex; justify-content:center; align-items:center; gap:7px;">${renderMikasaBall(22)} 1세트 객관식 결과</h3>
               <p style="font-size: 16px; color: #4B5563;">성공률: ${rate}% (${sc.correct}/${sc.total})</p>
@@ -2187,11 +2480,11 @@
             </div>
           `;
         }
-        if (state.quizQuestions.length === 0) return `<p style="padding:20px;">문제를 생성 중이거나 단어가 부족합니다 (최소 4개 필요).</p>`;
+        if (state.quizQuestions.length === 0) return `${renderTestScopeSelector()}<p style="padding:20px;">선택한 시험 범위에 객관식 문제를 만들 단어가 부족합니다. (최소 4개 필요)</p>`;
         const q = state.quizQuestions[state.quizIdx];
         return `
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            ${renderDaySelect('onDayChange')}
+          ${renderTestScopeSelector()}
+          <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:10px;">
             <span style="font-weight: 800;">문제: ${state.quizIdx + 1} / ${state.quizQuestions.length}</span>
           </div>
           <div style="text-align: center; padding: 10px 0;">
@@ -2221,6 +2514,7 @@
         const sc = state.hardScore;
         if (sc.finished) {
           return `
+            ${renderTestScopeSelector()}
             <div style="text-align: center; padding: 40px 20px;">
               <h3 style="font-weight: 900;">🔥 주관식 Hard 세트 완료!</h3>
               <p style="font-size: 16px; color: #4B5563;">적중: ${sc.correct} / ${sc.total}</p>
@@ -2230,11 +2524,11 @@
             </div>
           `;
         }
-        if (state.hardQuestions.length === 0) return `<p style="padding:20px;">단어가 없습니다.</p>`;
+        if (state.hardQuestions.length === 0) return `${renderTestScopeSelector()}<p style="padding:20px;">선택한 시험 범위에 단어가 없습니다.</p>`;
         const q = state.hardQuestions[state.hardIdx];
         return `
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            ${renderDaySelect('onDayChange')}
+          ${renderTestScopeSelector()}
+          <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:10px;">
             <span style="font-weight: 800;">문제: ${state.hardIdx + 1} / ${state.hardQuestions.length}</span>
           </div>
           <div style="text-align: center; padding: 15px 0;">
@@ -2263,6 +2557,7 @@
         const sc = state.spellScore;
         if (sc.finished) {
           return `
+            ${renderTestScopeSelector()}
             <div style="text-align: center; padding: 40px 20px;">
               <h3 style="font-weight: 900;">🔤 스펠링 게임 완료!</h3>
               <p style="font-size: 16px; color: #4B5563;">적중: ${sc.correct} / ${sc.total}</p>
@@ -2272,11 +2567,11 @@
             </div>
           `;
         }
-        if (state.spellQuestions.length === 0) return `<p style="padding:20px;">단어가 없습니다.</p>`;
+        if (state.spellQuestions.length === 0) return `${renderTestScopeSelector()}<p style="padding:20px;">선택한 시험 범위에 단어가 없습니다.</p>`;
         const q = state.spellQuestions[state.spellIdx];
         return `
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            ${renderDaySelect('onDayChange')}
+          ${renderTestScopeSelector()}
+          <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:10px;">
             <span style="font-weight: 800;">문제: ${state.spellIdx + 1} / ${state.spellQuestions.length}</span>
           </div>
           <div style="text-align: center; padding: 10px 0;">
@@ -2376,14 +2671,14 @@
       }
 
       if (state.tab === 'shop') {
-        const schoolId=getCharSchoolId(),charShop=getCharacterShopData(),variantShop=getCharacterVariantData(),visibleItems=SHOP_ITEMS.filter(item=>item.type===state.shopCategory&&(item.school==='all'||item.school===schoolId));
+        const schoolId=getCharSchoolId(),charShop=getCharacterShopData(),variantShop=getCharacterVariantData(),visibleItems=getAllShopItems().filter(item=>item.type===state.shopCategory&&(item.school==='all'||item.school===schoolId));
         const labels={accessory:'🎀 액세서리',background:'🖼️ 배경',slogan:'🏳️ 슬로건',frame:'🖼️ 프레임'};
         const previewItem=getShopItem(state.shopPreviewItemId);
         return `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h4 style="font-weight:900;margin:0 0 4px">🛍️ 꾸미기 상점</h4><div style="font-size:11.5px;color:#64748B;font-weight:700">${CHAR_META[state.char].name} · ${SCHOOL_LABELS[schoolId]||CHAR_META[state.char].school}</div></div><div style="font-weight:900;color:#7C3AED;background:#F5F3FF;border:1.5px solid #C4B5FD;border-radius:9px;padding:7px 10px">🎟️ ${state.userData.shop.tickets}장</div></div>
         <div class="shop-category-tabs" style="margin-top:12px">${Object.keys(labels).map(cat=>`<button class="shop-category-btn ${state.shopCategory===cat?'active':''}" onclick="setShopCategory('${cat}')">${labels[cat]}</button>`).join('')}</div>
         <div style="font-size:10.5px;color:#94A3B8;margin-top:8px">모든 아이템은 구매 전에 미리보기할 수 있습니다. 액세서리와 슬로건은 위치·크기·투명도·각도를 조정할 수 있고, 프레임은 프로필 테두리에 자동으로 맞춰집니다.</div><div style="margin-top:10px;padding:10px;border:1.5px solid #FCD34D;border-radius:10px;background:#FFFBEB"><div style="font-size:11px;font-weight:900;color:#92400E;margin-bottom:6px">🪙 코인으로 응원 티켓 구매 · 보유 ${state.userData.coins}🪙</div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn-pixel-white" onclick="buyCheerTickets(1)">20🪙 → 🎟️1</button><button class="btn-pixel-white" onclick="buyCheerTickets(3)">50🪙 → 🎟️3</button><button class="btn-pixel-black" onclick="buyCheerTickets(5)">75🪙 → 🎟️5</button></div></div>
         ${previewItem?renderShopItemPreview(previewItem):''}
-        <div class="shop-grid">${visibleItems.map(item=>{const owned=charShop.ownedItems.includes(item.id),slot=item.type==='accessory'?item.slot:item.type,equipped=variantShop.equipped[slot]===item.id,canBuy=state.userData.shop.tickets>=item.price,previewing=state.shopPreviewItemId===item.id;return `<div class="shop-card ${equipped?'equipped':''} ${previewing?'previewing':''}"><div class="shop-preview ${item.type==='background'?'bg':item.type==='frame'?'frame':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}</div><div class="shop-item-meta">${item.school==='all'?'전 캐릭터 공용':`${SCHOOL_LABELS[item.school]} 전용`}${item.type==='accessory'?` · ${item.slot==='head'?'머리':item.slot==='face'?'얼굴':item.slot==='effect'?'효과':'주변 소품'}`:item.type==='frame'?' · 프로필 프레임':''}</div><button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">${previewing?'미리보기 닫기':'👀 미리보기'}</button>${owned?`<button class="${equipped?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;padding:7px 4px;font-size:11px" onclick="${equipped?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${equipped?'장착 해제':'장착하기'}</button>`:`<button class="btn-pixel-white" style="width:100%;padding:7px 4px;font-size:11px;${canBuy?'border-color:#7C3AED;color:#6D28D9;':'opacity:.55;'}" onclick="buyShopItem('${item.id}')" ${canBuy?'':'disabled'}>🎟️ ${item.price} · 구매</button>`}</div>`}).join('')}</div>`;
+        <div class="shop-grid">${visibleItems.map(item=>{const owned=charShop.ownedItems.includes(item.id),slot=item.type==='accessory'?item.slot:item.type,equipped=variantShop.equipped[slot]===item.id,canBuy=state.userData.shop.tickets>=item.price,previewing=state.shopPreviewItemId===item.id;return `<div class="shop-card ${equipped?'equipped':''} ${previewing?'previewing':''}"><div class="shop-preview ${item.type==='background'?'bg':item.type==='frame'?'frame':''}"><img src="${item.file}" alt="${item.name}" onerror="this.style.display='none';"></div><div class="shop-item-name">${item.name}</div><div class="shop-item-meta">${item.school==='all'?'전 캐릭터 공용':`${SCHOOL_LABELS[item.school]||'현재 학교'} 전용`}${item.type==='accessory'?` · ${item.slot==='head'?'머리':item.slot==='face'?'얼굴':item.slot==='effect'?'효과':'주변 소품'}`:item.type==='frame'?' · 프로필 프레임':''}</div><button class="btn-pixel-white shop-preview-btn" onclick="previewShopItem('${item.id}')">${previewing?'미리보기 닫기':'👀 미리보기'}</button>${owned?`<button class="${equipped?'btn-pixel-black':'btn-pixel-white'}" style="width:100%;padding:7px 4px;font-size:11px" onclick="${equipped?`unequipShopItem('${item.id}')`:`equipShopItem('${item.id}')`}">${equipped?'장착 해제':'장착하기'}</button>`:`<button class="btn-pixel-white" style="width:100%;padding:7px 4px;font-size:11px;${canBuy?'border-color:#7C3AED;color:#6D28D9;':'opacity:.55;'}" onclick="buyShopItem('${item.id}')" ${canBuy?'':'disabled'}>🎟️ ${item.price} · 구매</button>`}</div>`}).join('')}</div>`;
       }
 
       if (state.tab === 'timer') {
@@ -2599,6 +2894,8 @@
       state.entered = false;
       state.variantSelecting = false;
       state.selectedDay = 'all';
+      state.testSource = 'days';
+      state.selectedTestDays = [];
       state.tab = 'practice';
       render();
     }
@@ -2625,6 +2922,161 @@
       generateHardQuiz();
       generateSpellQuiz();
       render();
+    }
+
+
+    function renderExtraCustomization(){
+      const speech=CUSTOM_CONTENT.speech[state.char]||{};
+      const myVariants=CUSTOM_CONTENT.variants.filter(v=>v.charKey===state.char);
+      const myItems=CUSTOM_CONTENT.items;
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+          <div>
+            <h4 style="font-weight:900;margin:0 0 4px;">🧩 사용자 커스터마이징</h4>
+            <div style="font-size:10.5px;color:#64748B;font-weight:700;">기존 캐릭터·사진·아이템·BGM은 그대로 두고, 원하는 파일을 추가할 수 있어요.</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;">
+          <div class="character-adjust-box">
+            <div class="character-adjust-title">🖼️ 현재 캐릭터 버전 추가</div>
+            <div class="character-adjust-help">${CHAR_META[state.char].name}에 새로운 사진 버전을 추가합니다.</div>
+            <input id="custom-variant-name" class="std-input" placeholder="버전 이름 (예: 사복)" style="width:100%;margin:6px 0;">
+            <input id="custom-variant-file" class="std-input" type="file" accept="image/*" style="width:100%;margin-bottom:6px;">
+            <button class="btn-pixel-black" onclick="addExtraVariant()">＋ 버전 추가</button>
+            ${myVariants.length?`<div style="margin-top:8px;font-size:10.5px;color:#64748B;">${myVariants.map(v=>`<div style="display:flex;justify-content:space-between;gap:6px;padding:4px 0;"><span>${v.name}</span><button class="btn-pixel-white" style="padding:3px 6px;" onclick="deleteExtraVariant('${v.id}')">삭제</button></div>`).join('')}</div>`:''}
+          </div>
+
+          <div class="character-adjust-box">
+            <div class="character-adjust-title">🎀 꾸미기 아이템 추가</div>
+            <div class="character-adjust-help">추가한 아이템은 기존 상점/인벤토리와 같이 사용합니다.</div>
+            <input id="custom-item-name" class="std-input" placeholder="아이템 이름" style="width:100%;margin:6px 0;">
+            <div style="display:flex;gap:5px;">
+              <select id="custom-item-type" class="std-input" style="flex:1;" onchange="document.getElementById('custom-item-slot').style.display=this.value==='accessory'?'block':'none'">
+                <option value="accessory">액세서리</option><option value="background">배경</option><option value="slogan">슬로건</option><option value="frame">프레임</option>
+              </select>
+              <select id="custom-item-slot" class="std-input" style="flex:1;">
+                <option value="head">머리</option><option value="face">얼굴</option><option value="side">주변</option><option value="effect">효과</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:5px;margin-top:6px;">
+              <select id="custom-item-school" class="std-input" style="flex:1;">
+                <option value="all">전 캐릭터 공용</option>
+                <option value="${getCharSchoolId()}">현재 학교 전용</option>
+              </select>
+              <input id="custom-item-price" class="std-input" type="number" min="0" value="0" style="width:90px;" title="티켓 가격">
+            </div>
+            <input id="custom-item-file" class="std-input" type="file" accept="image/*" style="width:100%;margin:6px 0;">
+            <button class="btn-pixel-black" onclick="addExtraItem()">＋ 아이템 추가</button>
+            <div style="font-size:9.5px;color:#94A3B8;margin-top:4px;">가격을 0으로 두면 현재 캐릭터 인벤토리에 바로 추가됩니다.</div>
+          </div>
+
+          <div class="character-adjust-box">
+            <div class="character-adjust-title">🎵 BGM 추가</div>
+            <input id="custom-bgm-title" class="std-input" placeholder="곡 이름" style="width:100%;margin:6px 0;">
+            <input id="custom-bgm-file" class="std-input" type="file" accept="audio/*,.mp3" style="width:100%;margin-bottom:6px;">
+            <button class="btn-pixel-black" onclick="addExtraBgm()">＋ BGM 추가</button>
+            ${CUSTOM_CONTENT.bgm.length?`<div style="margin-top:8px;font-size:10.5px;color:#64748B;">${CUSTOM_CONTENT.bgm.map(b=>`<div style="display:flex;justify-content:space-between;gap:6px;padding:4px 0;"><span>${b.title}</span><button class="btn-pixel-white" style="padding:3px 6px;" onclick="deleteExtraBgm('${b.id}')">삭제</button></div>`).join('')}</div>`:''}
+          </div>
+
+          <div class="character-adjust-box">
+            <div class="character-adjust-title">💬 현재 캐릭터 대사 덮어쓰기</div>
+            <div class="character-adjust-help">비워두면 기존 대사를 그대로 사용합니다.</div>
+            ${[
+              ['enter','입장/시작'],['quizCorrect','객관식 정답'],['quizWrong','객관식 오답'],
+              ['hardCorrect','주관식 정답'],['hardWrong','주관식 오답'],['spellCorrect','스펠링 정답'],
+              ['spellWrong','스펠링 오답'],['food','간식'],['train','훈련'],['saved','단어장 저장']
+            ].map(([k,label])=>`<label style="display:block;font-size:10px;font-weight:900;margin-top:5px;">${label}</label><input id="speech-${k}" class="std-input" style="width:100%;" value="${String(speech[k]||'').replace(/"/g,'&quot;')}" placeholder="기존 대사 사용">`).join('')}
+            <button class="btn-pixel-black" style="margin-top:7px;" onclick="saveExtraSpeech()">💾 대사 저장</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;padding:10px;border:1.5px solid #C4B5FD;border-radius:10px;background:#FAF5FF;font-size:10.5px;color:#6D28D9;font-weight:800;">
+          📌 사용자 업로드 파일은 GitHub 저장소에 올라가는 것이 아니라 이 브라우저에 저장됩니다. 다른 기기에서는 자동으로 보이지 않습니다.
+        </div>
+      `;
+    }
+
+    async function addExtraVariant(){
+      const name=document.getElementById('custom-variant-name')?.value.trim();
+      const file=document.getElementById('custom-variant-file')?.files?.[0];
+      if(!name||!file)return alert('버전 이름과 이미지를 선택해주세요.');
+      const id=`custom_variant_${Date.now()}`,assetId=`asset_${Date.now()}_variant`;
+      await putCustomAsset(assetId,file);
+      CUSTOM_CONTENT.variants.push({id,name,charKey:state.char,assetId});
+      saveCustomContent();
+      state.charVariant=id;
+      render();
+    }
+
+    async function addExtraItem(){
+      const name=document.getElementById('custom-item-name')?.value.trim();
+      const file=document.getElementById('custom-item-file')?.files?.[0];
+      if(!name||!file)return alert('아이템 이름과 이미지를 선택해주세요.');
+      const type=document.getElementById('custom-item-type').value;
+      const id=`custom_item_${Date.now()}`,assetId=`asset_${Date.now()}_item`;
+      const item={
+        id,name,type,
+        slot:type==='accessory'?document.getElementById('custom-item-slot').value:null,
+        school:document.getElementById('custom-item-school').value||'all',
+        price:Math.max(0,Number(document.getElementById('custom-item-price').value)||0),
+        assetId,custom:true
+      };
+      await putCustomAsset(assetId,file);
+      CUSTOM_CONTENT.items.push(item);saveCustomContent();
+
+      if(item.price===0){
+        const charShop=getCharacterShopData();
+        if(!charShop.ownedItems.includes(id))charShop.ownedItems.push(id);
+        await saveUserData();
+      }
+      alert(item.price===0?'아이템을 추가하고 현재 캐릭터 인벤토리에 넣었습니다.':'아이템을 상점에 추가했습니다.');
+      render();
+    }
+
+    async function addExtraBgm(){
+      const title=document.getElementById('custom-bgm-title')?.value.trim();
+      const file=document.getElementById('custom-bgm-file')?.files?.[0];
+      if(!title||!file)return alert('곡 이름과 MP3/오디오 파일을 선택해주세요.');
+      const id=`custom_bgm_${Date.now()}`,assetId=`asset_${Date.now()}_bgm`;
+      await putCustomAsset(assetId,file);
+      CUSTOM_CONTENT.bgm.push({id,title,assetId,custom:true});
+      saveCustomContent();
+      selectedBgmId=id;
+      localStorage.setItem('haikyu_bgm_track',id);
+      syncBgmSource(false);
+      render();
+    }
+
+    function saveExtraSpeech(){
+      CUSTOM_CONTENT.speech[state.char]=CUSTOM_CONTENT.speech[state.char]||{};
+      ['enter','quizCorrect','quizWrong','hardCorrect','hardWrong','spellCorrect','spellWrong','food','train','saved'].forEach(k=>{
+        CUSTOM_CONTENT.speech[state.char][k]=document.getElementById(`speech-${k}`)?.value.trim()||'';
+      });
+      saveCustomContent();
+      state.speech=getCharSpeech('enter',state.lang==='ja'?'일본어':'영어');
+      alert('현재 캐릭터의 사용자 대사를 저장했습니다.');
+      render();
+    }
+
+    async function deleteExtraVariant(id){
+      const v=CUSTOM_CONTENT.variants.find(x=>x.id===id);if(!v)return;
+      if(!confirm(`${v.name} 버전을 삭제할까요?`))return;
+      await deleteCustomAsset(v.assetId);
+      CUSTOM_CONTENT.variants=CUSTOM_CONTENT.variants.filter(x=>x.id!==id);
+      if(state.charVariant===id)state.charVariant='default';
+      saveCustomContent();render();
+    }
+
+    async function deleteExtraBgm(id){
+      const b=CUSTOM_CONTENT.bgm.find(x=>x.id===id);if(!b)return;
+      if(!confirm(`${b.title} BGM을 삭제할까요?`))return;
+      bgmAudio.pause();isBgmPlaying=false;
+      await deleteCustomAsset(b.assetId);
+      CUSTOM_CONTENT.bgm=CUSTOM_CONTENT.bgm.filter(x=>x.id!==id);
+      if(selectedBgmId===id)selectedBgmId=BGM_TRACKS[0].id;
+      localStorage.setItem('haikyu_bgm_track',selectedBgmId);
+      saveCustomContent();syncBgmSource(false);render();
     }
 
     function switchTab(t) {
@@ -2745,6 +3197,8 @@
         }
         state.userData.studyHistory.push({
           date: new Date().toISOString().split('T')[0],
+          type: 'quiz',
+          scope: getTestScopeKey(),
           total: state.quizScore.total,
           correct: state.quizScore.correct
         });
@@ -2788,6 +3242,13 @@
         if (state.hardScore.wrongIds.length > 0) {
           state.userData.myVocabIds = Array.from(new Set([...state.userData.myVocabIds, ...state.hardScore.wrongIds]));
         }
+        state.userData.studyHistory.push({
+          date: new Date().toISOString().split('T')[0],
+          type: 'hard',
+          scope: getTestScopeKey(),
+          total: state.hardScore.total,
+          correct: state.hardScore.correct
+        });
         saveUserData();
       }
       render();
@@ -2827,6 +3288,13 @@
         if (state.spellScore.wrongIds.length > 0) {
           state.userData.myVocabIds = Array.from(new Set([...state.userData.myVocabIds, ...state.spellScore.wrongIds]));
         }
+        state.userData.studyHistory.push({
+          date: new Date().toISOString().split('T')[0],
+          type: 'spell',
+          scope: getTestScopeKey(),
+          total: state.spellScore.total,
+          correct: state.spellScore.correct
+        });
         saveUserData();
       }
       render();
@@ -2864,6 +3332,8 @@
     // 앱 초기화 및 CSV 데이터 자동 로딩
     (async function initApp() {
       await loadAllCSVData();
+      await hydrateCustomAssets();
+      if(getSelectedBgmTrack()?.file) syncBgmSource(false);
       render();
     })();
   </script>
