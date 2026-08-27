@@ -758,9 +758,19 @@
         if(el)el.textContent='✅ 클라우드 동기화 완료';
         render();
       }catch(e){
-        if(el)el.textContent='⚠️ 동기화 실패';
-        alert(`커스터마이징 동기화에 실패했습니다.\n${e?.message||e}`);
+        console.warn('Custom cloud sync failed:',e);
+        if(el){
+          el.textContent='⚠️ 동기화 실패 · 로컬 데이터 사용 중';
+          el.style.color='#B45309';
+        }
       }
+    }
+
+    function setCustomCloudStatus(message, isError=false){
+      const el=document.getElementById('custom-cloud-status');
+      if(!el) return;
+      el.textContent=message;
+      el.style.color=isError?'#B45309':'#0F766E';
     }
 
     const CHAR_META = {
@@ -3198,7 +3208,7 @@
         </div>
 
         <div style="margin-top:12px;padding:10px;border:1.5px solid #C4B5FD;border-radius:10px;background:#FAF5FF;font-size:10.5px;color:#6D28D9;font-weight:800;">
-          ☁️ 사용자 업로드 파일은 Supabase Storage에 저장됩니다. 같은 사용자 이름으로 접속하면 노트북·아이패드·휴대폰에서 같은 커스텀 BGM/캐릭터 버전/아이템/대사를 불러옵니다. 오프라인이나 Storage 설정 오류 때만 로컬 저장으로 대체됩니다.
+          ☁️ 클라우드 연결이 가능하면 사용자 업로드 파일을 여러 기기에서 동기화합니다. 연결이 안 될 때는 현재 기기에 자동 임시 저장하며 팝업 없이 계속 사용할 수 있습니다.
         </div>
       `;
     }
@@ -3213,10 +3223,11 @@
       try{
         const up=await uploadCustomFileToCloud(file,'characters',assetId);
         filePath=up.path;CUSTOM_ASSET_URLS[assetId]=up.url;
+        setCustomCloudStatus('✅ 클라우드에 저장됨');
       }catch(e){
         console.warn('Cloud upload failed; saving locally:',e);
         await putCustomAsset(assetId,file);
-        alert('클라우드 업로드에 실패해서 이 기기에만 저장했습니다. Supabase Storage의 custom-assets bucket/정책을 확인해주세요.');
+        setCustomCloudStatus('⚠️ 클라우드 연결 실패 · 이 기기에 임시 저장됨', true);
       }
 
       CUSTOM_CONTENT.variants.push({id,name,charKey:state.char,assetId,filePath});
@@ -3236,10 +3247,11 @@
       try{
         const up=await uploadCustomFileToCloud(file,type==='background'?'backgrounds':type==='slogan'?'slogans':type==='frame'?'frames':'accessories',assetId);
         filePath=up.path;CUSTOM_ASSET_URLS[assetId]=up.url;
+        setCustomCloudStatus('✅ 클라우드에 저장됨');
       }catch(e){
         console.warn('Cloud upload failed; saving locally:',e);
         await putCustomAsset(assetId,file);
-        alert('클라우드 업로드에 실패해서 이 기기에만 저장했습니다. Supabase Storage 설정을 확인해주세요.');
+        setCustomCloudStatus('⚠️ 클라우드 연결 실패 · 이 기기에 임시 저장됨', true);
       }
 
       const item={
@@ -3271,10 +3283,11 @@
       try{
         const up=await uploadCustomFileToCloud(file,'bgm',assetId);
         filePath=up.path;CUSTOM_ASSET_URLS[assetId]=up.url;
+        setCustomCloudStatus('✅ 클라우드에 저장됨');
       }catch(e){
         console.warn('Cloud BGM upload failed; saving locally:',e);
         await putCustomAsset(assetId,file);
-        alert('클라우드 업로드에 실패해서 이 기기에만 저장했습니다. Supabase Storage의 custom-assets bucket/정책을 확인해주세요.');
+        setCustomCloudStatus('⚠️ 클라우드 연결 실패 · 이 기기에 임시 저장됨', true);
       }
 
       CUSTOM_CONTENT.bgm.push({id,title,assetId,filePath,custom:true});
