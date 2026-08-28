@@ -595,6 +595,10 @@
     .today-mini-empty{font-size:10px;color:#94A3B8;margin-top:5px;font-weight:700}
     @media(max-width:700px){.calendar-form{grid-template-columns:1fr 1fr}.calendar-form label:nth-child(3){grid-column:1/-1}.calendar-form button{grid-column:1/-1}.calendar-day{min-height:58px;padding:4px}.calendar-count{display:none}}
 
+
+    .todo-date-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:5px}
+    .todo-date-input{height:28px;border:1px solid #CBD5E1;border-radius:7px;padding:0 6px;font-size:10px;background:#FFF}
+    .linked-todo-badge{font-size:9px;font-weight:900;color:#6D28D9;background:#F5F3FF;border-radius:999px;padding:3px 6px}
 </style>
 </head>
 <body>
@@ -2993,10 +2997,12 @@
       const value=String(input?.value||'').trim();
       if(!value)return;
       const todos=normalizeTodos();
+      const dueDate=String(document.getElementById('todo-new-date')?.value||'').trim();
       todos.unshift({
         id:`todo_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
         text:value.slice(0,160),
         done:false,
+        dueDate,
         createdAt:new Date().toISOString()
       });
       saveUserData();
@@ -3008,6 +3014,15 @@
       if(!item)return;
       item.done=!item.done;
       item.doneAt=item.done?new Date().toISOString():null;
+      saveUserData();
+      render();
+    }
+
+
+    function setTodoDueDate(id,value){
+      const item=normalizeTodos().find(x=>x.id===id);
+      if(!item)return;
+      item.dueDate=String(value||'').trim();
       saveUserData();
       render();
     }
@@ -3041,11 +3056,13 @@
           <span>완료 ${done}개</span>
         </div>
 
-        <div class="todo-add-box">
+        <div class="todo-add-box" style="flex-wrap:wrap;">
           <input id="todo-new-input" class="std-input" maxlength="160" placeholder="할 일을 입력해주세요"
             onkeydown="if(event.key==='Enter'){event.preventDefault();addTodo()}">
+          <input id="todo-new-date" class="std-input" type="date" style="max-width:155px;" title="날짜 지정 (선택)">
           <button class="btn-pixel-black" onclick="addTodo()">＋ 추가</button>
         </div>
+        <div style="font-size:9.5px;color:#94A3B8;font-weight:700;margin-top:-5px;">날짜를 지정하면 캘린더에도 자동으로 표시돼요. 기존 할 일도 아래에서 날짜를 붙일 수 있어요.</div>
 
         <div class="todo-list">
           ${todos.length?todos.map(item=>`
@@ -3053,7 +3070,12 @@
               <input class="todo-check" type="checkbox" ${item.done?'checked':''} onchange="toggleTodo('${item.id}')">
               <div style="flex:1;min-width:0;">
                 <div class="todo-text">${escHtml(item.text)}</div>
-                <div class="todo-meta">${item.done?'완료됨':'진행 중'}</div>
+                <div class="todo-date-row">
+                  <span class="todo-meta">${item.done?'완료됨':'진행 중'}</span>
+                  ${item.dueDate?`<span class="linked-todo-badge">📅 캘린더 연동</span>`:''}
+                  <input class="todo-date-input" type="date" value="${item.dueDate||''}" onchange="setTodoDueDate('${item.id}',this.value)" title="캘린더 날짜">
+                  ${item.dueDate?`<button class="btn-pixel-white" style="padding:3px 6px;font-size:9px;" onclick="setTodoDueDate('${item.id}','')">날짜 해제</button>`:''}
+                </div>
               </div>
               <button class="todo-delete" title="삭제" onclick="deleteTodo('${item.id}')">×</button>
             </div>`).join(''):`<div style="padding:30px 12px;text-align:center;color:#94A3B8;font-size:12px;font-weight:800;border:1.5px dashed #CBD5E1;border-radius:12px;">아직 등록한 할 일이 없어요.</div>`}
@@ -3073,7 +3095,21 @@
     }
     function dateKeyFromParts(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
     function calendarEntriesFor(dateKey){
-      return normalizeCalendarEvents().filter(x=>x.date===dateKey).sort((a,b)=>String(a.time||'99:99').localeCompare(String(b.time||'99:99')));
+      const events=normalizeCalendarEvents()
+        .filter(x=>x.date===dateKey)
+        .map(x=>({...x,source:'calendar'}));
+      const linkedTodos=normalizeTodos()
+        .filter(x=>x.dueDate===dateKey)
+        .map(x=>({
+          id:x.id,
+          date:x.dueDate,
+          time:'',
+          kind:'todo',
+          title:x.text,
+          done:!!x.done,
+          source:'todo'
+        }));
+      return [...events,...linkedTodos].sort((a,b)=>String(a.time||'99:99').localeCompare(String(b.time||'99:99')));
     }
     function changeCalendarMonth(delta){calendarViewDate=new Date(calendarViewDate.getFullYear(),calendarViewDate.getMonth()+delta,1);render()}
     function goCalendarToday(){calendarViewDate=new Date();calendarSelectedDate=new Date().toISOString().slice(0,10);render()}
@@ -3087,16 +3123,36 @@
       normalizeCalendarEvents().push({id:`cal_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,date,time,kind,title:title.slice(0,160),done:false,createdAt:new Date().toISOString()});
       calendarSelectedDate=date;saveUserData();render();
     }
-    function toggleCalendarEntry(id){
-      const e=normalizeCalendarEvents().find(x=>x.id===id);if(!e)return;e.done=!e.done;saveUserData();render();
+    function toggleCalendarEntry(id,source='calendar'){
+      if(source==='todo'){
+        const t=normalizeTodos().find(x=>x.id===id);
+        if(!t)return;
+        t.done=!t.done;
+      }else{
+        const e=normalizeCalendarEvents().find(x=>x.id===id);
+        if(!e)return;
+        e.done=!e.done;
+      }
+      saveUserData();render();
     }
-    function deleteCalendarEntry(id){state.userData.calendarEvents=normalizeCalendarEvents().filter(x=>x.id!==id);saveUserData();render()}
+    function deleteCalendarEntry(id,source='calendar'){
+      if(source==='todo'){
+        const t=normalizeTodos().find(x=>x.id===id);
+        if(!t)return;
+        // 캘린더에서 삭제 시 할 일 자체는 보존하고 날짜 연동만 해제
+        t.dueDate='';
+      }else{
+        state.userData.calendarEvents=normalizeCalendarEvents().filter(x=>x.id!==id);
+      }
+      saveUserData();render();
+    }
     function renderTodayNearCharacter(){
       const today=new Date().toISOString().slice(0,10);
       const cal=calendarEntriesFor(today).filter(x=>!x.done);
-      const todos=normalizeTodos().filter(x=>!x.done);
+      const linkedTodoIds=new Set(cal.filter(x=>x.source==='todo').map(x=>x.id));
+      const todos=normalizeTodos().filter(x=>!x.done&&!linkedTodoIds.has(x.id));
       const items=[
-        ...cal.slice(0,3).map(x=>`${x.time?x.time+' ':''}${x.title}`),
+        ...cal.slice(0,3).map(x=>`${x.time?x.time+' ':''}${x.source==='todo'?'할 일 · ':''}${x.title}`),
         ...todos.slice(0,Math.max(0,3-cal.length)).map(x=>`할 일 · ${x.text}`)
       ].slice(0,3);
       return `<div class="today-mini-box"><div class="today-mini-head"><span>📅 오늘의 일정 · 할 일</span><button class="btn-pixel-white" style="padding:3px 6px;font-size:9px;" onclick="switchTab('calendar')">열기</button></div>${items.length?items.map(x=>`<div class="today-mini-item">• ${escHtml(x)}</div>`).join(''):`<div class="today-mini-empty">오늘 등록된 일정이나 할 일이 없어요.</div>`}</div>`;
@@ -3130,7 +3186,8 @@
             <button class="btn-pixel-black" onclick="addCalendarEntry()">추가</button>
           </div>
           <div style="font-size:11px;font-weight:900;margin-top:12px;">${calendarSelectedDate} 기록</div>
-          <div class="calendar-entry-list">${selected.length?selected.map(e=>`<div class="calendar-entry ${e.done?'done':''}">${e.kind==='todo'?`<input type="checkbox" ${e.done?'checked':''} onchange="toggleCalendarEntry('${e.id}')">`:''}<span class="calendar-entry-time">${e.time||'종일'}</span><span class="calendar-entry-kind ${e.kind==='todo'?'todo':''}">${e.kind==='todo'?'할 일':'일정'}</span><span class="calendar-entry-title">${escHtml(e.title)}</span>${e.kind==='schedule'?`<button class="btn-pixel-white" style="padding:5px 7px;font-size:9px;" onclick="toggleCalendarEntry('${e.id}')">${e.done?'완료 취소':'완료'}</button>`:''}<button class="todo-delete" onclick="deleteCalendarEntry('${e.id}')">×</button></div>`).join(''):`<div style="padding:18px;text-align:center;color:#94A3B8;font-size:11px;font-weight:800;">이 날짜에는 기록이 없어요.</div>`}</div>
+          <div class="calendar-entry-list">${selected.length?selected.map(e=>`<div class="calendar-entry ${e.done?'done':''}">${e.kind==='todo'?`<input type="checkbox" ${e.done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}')">`:''}<span class="calendar-entry-time">${e.time||'종일'}</span><span class="calendar-entry-kind ${e.kind==='todo'?'todo':''}">${e.kind==='todo'?'할 일':'일정'}</span>${e.source==='todo'?`<span class="linked-todo-badge">할 일 연동</span>`:''}<span class="calendar-entry-title">${escHtml(e.title)}</span>${e.kind==='schedule'?`<button class="btn-pixel-white" style="padding:5px 7px;font-size:9px;" onclick="toggleCalendarEntry('${e.id}','calendar')">${e.done?'완료 취소':'완료'}</button>`:''}<button class="todo-delete" title="${e.source==='todo'?'캘린더 날짜만 해제':'삭제'}" onclick="deleteCalendarEntry('${e.id}','${e.source||'calendar'}')">×</button></div>`).join(''):`<div style="padding:18px;text-align:center;color:#94A3B8;font-size:11px;font-weight:800;">이 날짜에는 기록이 없어요.</div>`}</div>
+          ${normalizeTodos().filter(t=>!t.done&&!t.dueDate).length?`<div style="margin-top:14px;border-top:1px dashed #CBD5E1;padding-top:11px;"><div style="font-size:11px;font-weight:900;color:#475569;margin-bottom:7px;">📌 날짜 미지정 기존 할 일</div><div class="calendar-entry-list">${normalizeTodos().filter(t=>!t.done&&!t.dueDate).map(t=>`<div class="calendar-entry"><span class="calendar-entry-kind todo">할 일</span><span class="calendar-entry-title">${escHtml(t.text)}</span><button class="btn-pixel-white" style="padding:5px 7px;font-size:9px;" onclick="setTodoDueDate('${t.id}','${calendarSelectedDate}')">선택 날짜에 넣기</button></div>`).join('')}</div></div>`:''}
         </div>
       </div>`;
     }
