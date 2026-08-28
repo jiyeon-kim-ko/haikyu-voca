@@ -2533,6 +2533,41 @@
       await playAudioCandidates([audioUrl], () => speakWithBrowserTTS(clean, fallbackLang));
     }
 
+
+    function safeTTSParam(value){
+      return encodeURIComponent(String(value||'')).replace(/'/g,'%27');
+    }
+
+    function playEncodedTTS(encoded,accent){
+      try{
+        playTTS(decodeURIComponent(encoded),accent);
+      }catch(e){
+        console.warn('TTS decode/play failed:',e);
+      }
+    }
+
+    function renderListPronunciationButtons(item){
+      const spoken = state.lang === 'ja'
+        ? (item.speech_word || item.raw_word || item.word || '')
+        : (item.raw_word || item.word || '');
+      const encoded=safeTTSParam(spoken);
+
+      if(state.lang==='ja'){
+        return `<button type="button" class="btn-pixel-white"
+          style="white-space:nowrap;padding:6px 9px;font-size:10px;"
+          onclick="playEncodedTTS('${encoded}','JA')">🔊 발음</button>`;
+      }
+
+      return `<div style="display:flex;gap:4px;flex-wrap:wrap;">
+        <button type="button" class="btn-pixel-white"
+          style="white-space:nowrap;padding:6px 8px;font-size:10px;"
+          onclick="playEncodedTTS('${encoded}','US')">🇺🇸 미국식</button>
+        <button type="button" class="btn-pixel-white"
+          style="white-space:nowrap;padding:6px 8px;font-size:10px;"
+          onclick="playEncodedTTS('${encoded}','UK')">🇬🇧 영국식</button>
+      </div>`;
+    }
+
     function setAccent(acc) {
       state.selectedAccent = acc;
       render();
@@ -3206,14 +3241,18 @@
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <h4 style="font-weight: 900; margin: 0; color: #1E293B;">📑 내 오답 단어장 (${myVocab.length})</h4>
           </div>
+          <div style="font-size:10.5px;color:#64748B;font-weight:700;margin-top:5px;">
+            ${state.lang==='ja'?'각 단어의 🔊 발음 버튼으로 일본어 발음을 들을 수 있어요.':'각 단어에서 🇺🇸 미국식 / 🇬🇧 영국식 발음을 바로 들을 수 있어요.'}
+          </div>
           <div style="max-height: 250px; overflow-y: auto; margin-top: 10px;">
             ${myVocab.length === 0 ? '<p style="color: #94A3B8; text-align: center; padding: 25px;">저장된 오답이 없습니다.</p>' :
               myVocab.map(r => `
-                <div class="word-row">
-                  <div>
+                <div class="word-row" style="gap:8px;flex-wrap:wrap;">
+                  <div style="flex:1;min-width:180px;">
                     <span style="font-weight: 800; color: #1E293B;">${r.word}</span>
                     <span style="color: #64748B; margin-left: 10px;">${r.meaning}</span>
                   </div>
+                  ${renderListPronunciationButtons(r)}
                   <button class="btn-pixel-white" onclick="removeMyVocab('${r.id}')">외웠다 ✔</button>
                 </div>
               `).join('')}
@@ -3233,13 +3272,17 @@
         }
         return `
           <h4 style="font-weight: 900; margin-top: 0;">🧠 오늘의 주기 복습 단어 (${reviewList.length}개)</h4>
+          <div style="font-size:10.5px;color:#64748B;font-weight:700;margin:-4px 0 9px;">
+            ${state.lang==='ja'?'각 단어의 🔊 발음 버튼으로 일본어 발음을 들을 수 있어요.':'각 단어에서 🇺🇸 미국식 / 🇬🇧 영국식 발음을 바로 들을 수 있어요.'}
+          </div>
           <div style="max-height: 380px; overflow-y: auto;">
             ${reviewList.map(r => `
-              <div class="word-row">
-                <div>
+              <div class="word-row" style="gap:8px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:180px;">
                   <span style="font-weight: 800; color: #1E293B;">${r.word}</span>
                   <span style="color: #64748B; margin-left: 10px;">${r.meaning}</span>
                 </div>
+                ${renderListPronunciationButtons(r)}
                 <button class="btn-pixel-black" onclick="passSpacedRep('${r.id}')">복습완료</button>
               </div>
             `).join('')}
