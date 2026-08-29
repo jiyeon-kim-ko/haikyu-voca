@@ -608,6 +608,33 @@
     @media(max-width:520px){
       .merry-card > div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important;}
     }
+
+    /* 오답노트 */
+    .mistake-wrap{display:flex;flex-direction:column;gap:12px}
+    .mistake-form{border:1.5px solid #A7C7B5;border-radius:14px;background:#F7FBF8;padding:13px}
+    .mistake-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:10px}
+    .mistake-field{display:flex;flex-direction:column;gap:5px}
+    .mistake-field label{font-size:10.5px;font-weight:900;color:#315B49}
+    .mistake-field textarea{min-height:82px;resize:vertical;border:1.5px dashed #88B29E;border-radius:9px;padding:9px;font:inherit;background:#FFF}
+    .mistake-field input,.mistake-field select{height:38px;border:1.5px solid #BFD8CC;border-radius:8px;padding:0 9px;background:#FFF;font:inherit}
+    .mistake-image-preview{min-height:160px;border:1.5px dashed #88B29E;border-radius:10px;background:#FFF;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#94A3B8;font-size:11px;font-weight:800}
+    .mistake-image-preview img{width:100%;height:100%;max-height:300px;object-fit:contain}
+    .mistake-card{border:1.5px solid #C9DDD3;border-radius:14px;background:#FFF;padding:12px}
+    .mistake-card-head{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+    .mistake-type{font-size:9px;font-weight:900;background:#E9F5EF;color:#315B49;padding:4px 7px;border-radius:999px}
+    .mistake-card-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:10px;margin-top:9px}
+    .mistake-box{border:1.5px dashed #9ABDAC;border-radius:9px;padding:9px;min-height:65px;background:#FCFFFD}
+    .mistake-box b{display:block;font-size:9.5px;color:#426956;margin-bottom:5px}
+
+    /* 회화 */
+    .conversation-shell{max-width:980px;margin:0 auto;padding:18px}
+    .conversation-hero{border:2px solid #1E293B;border-radius:16px;background:#FFF;padding:18px;box-shadow:5px 5px 0 rgba(30,41,59,.12)}
+    .conversation-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+    .conversation-tab{min-height:50px;border:2px solid #1E293B;border-radius:10px;background:#FFF;font-weight:900;cursor:pointer}
+    .conversation-tab.active{background:#1E293B;color:#FFF}
+    .phrase-card{border:1.5px solid #E2E8F0;border-radius:12px;padding:12px;background:#FFF;margin-bottom:8px}
+    .phrase-target{font-size:18px;font-weight:900;color:#1E293B}.phrase-meaning{font-size:12px;color:#64748B;font-weight:700;margin-top:3px}
+    @media(max-width:700px){.mistake-grid,.mistake-card-grid{grid-template-columns:1fr}.conversation-tabs{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -1851,6 +1878,8 @@
     let state = {
       user: null, // 'jiyeon' | 'gyungmin'
       lang: null,
+      languageStage: 'main',
+      conversationTab: 'today',
       char: 'kageyama',
       charVariant: 'default',
       variantSelecting: false,
@@ -1907,6 +1936,7 @@
     function resetToUserSelect() {
       state.user = null;
       state.lang = null;
+      state.languageStage = 'main';
       state.entered = false;
       state.variantSelecting = false;
       state.selectedDay = 'all';
@@ -1918,6 +1948,7 @@
 
     function changeLanguage() {
       state.lang = null;
+      state.languageStage = 'main';
       state.entered = false;
       state.variantSelecting = false;
       state.selectedDay = 'all';
@@ -1940,6 +1971,8 @@
         customWords: [],
         todos: [],
         calendarEvents: [],
+        mistakeNotes: [],
+        conversationPhrases: [],
         bubbleNotes: {},
         shop: getShopDefaultData(),
         timerData: getDefaultTimerData()
@@ -1957,10 +1990,12 @@
         myVocabIds: Array.isArray(src.myVocabIds ?? src.my_vocab_ids) ? (src.myVocabIds ?? src.my_vocab_ids) : [],
         attendanceDates: Array.isArray(src.attendanceDates ?? src.attendance_dates) ? (src.attendanceDates ?? src.attendance_dates) : [],
         studyHistory: Array.isArray(src.studyHistory ?? src.study_history) ? (src.studyHistory ?? src.study_history) : [],
-        spacedRepData: (() => { const raw=(src.spacedRepData ?? src.spaced_rep_data)&&typeof (src.spacedRepData ?? src.spaced_rep_data)==='object'?{...(src.spacedRepData ?? src.spaced_rep_data)}:{}; delete raw.__shop; delete raw.__timer; delete raw.__todos; delete raw.__calendarEvents; delete raw.__bubbleNotes; return raw; })(),
+        spacedRepData: (() => { const raw=(src.spacedRepData ?? src.spaced_rep_data)&&typeof (src.spacedRepData ?? src.spaced_rep_data)==='object'?{...(src.spacedRepData ?? src.spaced_rep_data)}:{}; delete raw.__shop; delete raw.__timer; delete raw.__todos; delete raw.__calendarEvents; delete raw.__mistakeNotes; delete raw.__conversationPhrases; delete raw.__bubbleNotes; return raw; })(),
         customWords: Array.isArray(src.customWords ?? src.custom_words) ? (src.customWords ?? src.custom_words) : [],
         todos: Array.isArray(src.todos) ? src.todos : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__todos) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__todos : []),
         calendarEvents: Array.isArray(src.calendarEvents) ? src.calendarEvents : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__calendarEvents) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__calendarEvents : []),
+        mistakeNotes: Array.isArray(src.mistakeNotes) ? src.mistakeNotes : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__mistakeNotes) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__mistakeNotes : []),
+        conversationPhrases: Array.isArray(src.conversationPhrases) ? src.conversationPhrases : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__conversationPhrases) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__conversationPhrases : []),
         bubbleNotes: (src.bubbleNotes && typeof src.bubbleNotes==='object') ? src.bubbleNotes : ((((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes && typeof ((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes==='object') ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes : {}),
         shop: normalizeShopData(src.shop || (((src.spacedRepData ?? src.spaced_rep_data)||{}).__shop) || null),
         timerData: normalizeTimerData(src.timerData || (((src.spacedRepData ?? src.spaced_rep_data)||{}).__timer) || null)
@@ -2057,6 +2092,8 @@
           });
           result.calendarEvents=[...calMap.values()];
         }
+        result.mistakeNotes=uniqueByJson([...(result.mistakeNotes||[]),...(d.mistakeNotes||[])]);
+        result.conversationPhrases=uniqueByJson([...(result.conversationPhrases||[]),...(d.conversationPhrases||[])]);
         result.bubbleNotes={...(result.bubbleNotes||{}),...(d.bubbleNotes||{})};
 
         result.spacedRepData={...(result.spacedRepData||{}),...(d.spacedRepData||{})};
@@ -2170,6 +2207,8 @@
           __timer: normalizeTimerData(data.timerData),
           __todos: Array.isArray(data.todos) ? data.todos : [],
           __calendarEvents: Array.isArray(data.calendarEvents) ? data.calendarEvents : [],
+          __mistakeNotes: Array.isArray(data.mistakeNotes) ? data.mistakeNotes : [],
+          __conversationPhrases: Array.isArray(data.conversationPhrases) ? data.conversationPhrases : [],
           __bubbleNotes: data.bubbleNotes && typeof data.bubbleNotes==='object' ? data.bubbleNotes : {}
         },
         custom_words: Array.isArray(data.customWords) ? data.customWords : [],
@@ -2724,6 +2763,22 @@
       }
 
       if (!state.lang) {
+        if(state.languageStage==='conversation'){
+          app.innerHTML = `
+            <div class="login-card-gym">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <span style="font-weight:900;color:#EA580C;font-size:13px;">👤 ${getUserDisplayName()} · 회화</span>
+                <button class="btn-pixel-white" onclick="state.languageStage='main';render();">← 돌아가기</button>
+              </div>
+              <div style="font-size:42px;margin-bottom:6px;">💬</div>
+              <h2 style="font-weight:900;color:#1E293B;margin:0 0 8px;">회화 언어 선택</h2>
+              <p style="color:#64748B;font-size:13px;font-weight:700;margin-bottom:20px;">연습할 회화 언어를 골라주세요.</p>
+              <div class="lang-choice-card" onclick="selectConversationLang('en')"><span>🇺🇸 영어 회화</span><span>➔</span></div>
+              <div class="lang-choice-card" onclick="selectConversationLang('de')"><span>🇩🇪 독일어 회화</span><span>➔</span></div>
+              <div class="lang-choice-card" onclick="selectConversationLang('ja')"><span>🇯🇵 일본어 회화</span><span>➔</span></div>
+            </div>`;
+          return;
+        }
         app.innerHTML = `
           <div class="login-card-gym">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -2741,8 +2796,17 @@
               <span>🇯🇵 일본어 </span>
               <span>➔</span>
             </div>
+            <div class="lang-choice-card" onclick="state.languageStage='conversation'; render();">
+              <span>💬 회화</span>
+              <span>➔</span>
+            </div>
           </div>
         `;
+        return;
+      }
+
+      if (isConversationLang()) {
+        app.innerHTML = renderConversationApp();
         return;
       }
 
@@ -2964,6 +3028,7 @@
               <button class="btn-tab-menu ${state.tab === 'timer' ? 'active' : ''}" onclick="switchTab('timer')">공부<br>타이머</button>
               <button class="btn-tab-menu ${state.tab === 'todo' ? 'active' : ''}" onclick="switchTab('todo')">할 일</button>
               <button class="btn-tab-menu ${state.tab === 'calendar' ? 'active' : ''}" onclick="switchTab('calendar')">캘린더</button>
+              <button class="btn-tab-menu ${state.tab === 'mistakes' ? 'active' : ''}" onclick="switchTab('mistakes')">오답<br>노트</button>
               <button class="btn-tab-menu ${state.tab === 'merryChallenge' ? 'active' : ''}" onclick="switchTab('merryChallenge')">퀴즈</button>
             </div>
 
@@ -3208,6 +3273,144 @@
       </div>`;
     }
 
+
+    function normalizeMistakeNotes(){
+      state.userData.mistakeNotes=Array.isArray(state.userData.mistakeNotes)?state.userData.mistakeNotes:[];
+      return state.userData.mistakeNotes;
+    }
+    function mistakeImageUrl(note){
+      if(note.imageUrl)return note.imageUrl;
+      if(note.assetId)return customAssetUrl(note.assetId);
+      return '';
+    }
+    function previewMistakeImage(input){
+      const box=document.getElementById('mistake-image-preview'),f=input?.files?.[0];
+      if(!box)return;
+      if(!f){box.innerHTML='문제 사진을 선택하면 여기 미리보기가 보여요.';return;}
+      box.innerHTML=`<img src="${URL.createObjectURL(f)}" alt="문제 사진 미리보기">`;
+    }
+    async function addMistakeNote(){
+      const problem=String(document.getElementById('mistake-problem')?.value||'').trim();
+      const reason=String(document.getElementById('mistake-reason')?.value||'').trim();
+      const memory=String(document.getElementById('mistake-memory')?.value||'').trim();
+      const memo=String(document.getElementById('mistake-memo')?.value||'').trim();
+      const type=String(document.getElementById('mistake-type')?.value||'기타');
+      const file=document.getElementById('mistake-image')?.files?.[0]||null;
+      if(!problem&&!file)return alert('문제를 직접 입력하거나 문제 사진을 넣어주세요.');
+
+      let assetId='',filePath='',imageUrl='';
+      if(file){
+        assetId=`mistake_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
+        try{await putCustomAsset(assetId,file)}catch(e){console.warn(e)}
+        try{
+          const up=await uploadCustomFileToCloud(file,'mistakes',assetId);
+          filePath=up.path; imageUrl=up.url;
+        }catch(e){console.warn('오답노트 이미지 클라우드 업로드 실패:',e)}
+      }
+      normalizeMistakeNotes().unshift({
+        id:`mistake_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+        problem:problem.slice(0,1200),reason:reason.slice(0,1000),memory:memory.slice(0,700),memo:memo.slice(0,700),
+        type,assetId,filePath,imageUrl,createdAt:new Date().toISOString()
+      });
+      saveUserData();render();
+    }
+    function deleteMistakeNote(id){
+      state.userData.mistakeNotes=normalizeMistakeNotes().filter(x=>x.id!==id);
+      saveUserData();render();
+    }
+    function renderMistakeNotebook(){
+      const notes=normalizeMistakeNotes();
+      return `<div class="mistake-wrap">
+        <div><h3 style="margin:0 0 4px;font-weight:900;">📝 오답노트</h3><div style="font-size:11px;color:#64748B;font-weight:700;">문제를 직접 입력하거나 사진으로 넣고, 왜 틀렸는지와 기억할 내용을 정리해요.</div></div>
+        <div class="mistake-form">
+          <div class="mistake-grid">
+            <div>
+              <div class="mistake-field"><label>문제 직접 입력</label><textarea id="mistake-problem" placeholder="문제 문장, 보기, 내가 고른 답 등을 자유롭게 적어주세요."></textarea></div>
+              <div class="mistake-field" style="margin-top:8px;"><label>또는 문제 사진</label><input id="mistake-image" type="file" accept="image/*" onchange="previewMistakeImage(this)"></div>
+              <div id="mistake-image-preview" class="mistake-image-preview" style="margin-top:7px;">문제 사진을 선택하면 여기 미리보기가 보여요.</div>
+            </div>
+            <div>
+              <div class="mistake-field"><label>오답 유형</label><select id="mistake-type"><option>단어 부족</option><option>실수</option><option>문법 부족</option><option>해석 오류</option><option>시간 부족</option><option>기타</option></select></div>
+              <div class="mistake-field" style="margin-top:8px;"><label>정답인 이유</label><textarea id="mistake-reason" placeholder="왜 이 답이 정답인지"></textarea></div>
+              <div class="mistake-field" style="margin-top:8px;"><label>기억할 문장 또는 단어</label><textarea id="mistake-memory" placeholder="다음에 꼭 기억할 포인트"></textarea></div>
+              <div class="mistake-field" style="margin-top:8px;"><label>문제 관련 메모</label><textarea id="mistake-memo" placeholder="추가 메모"></textarea></div>
+            </div>
+          </div>
+          <button class="btn-pixel-black" style="width:100%;margin-top:10px;" onclick="addMistakeNote()">＋ 오답노트 저장</button>
+        </div>
+        <div style="font-size:11px;font-weight:900;color:#475569;">저장한 오답 ${notes.length}개</div>
+        ${notes.length?notes.map(n=>`<div class="mistake-card">
+          <div class="mistake-card-head"><span class="mistake-type">${escHtml(n.type||'기타')}</span><button class="todo-delete" onclick="deleteMistakeNote('${n.id}')">×</button></div>
+          <div class="mistake-card-grid">
+            <div><div class="mistake-box"><b>문제</b>${mistakeImageUrl(n)?`<img src="${mistakeImageUrl(n)}" style="width:100%;max-height:280px;object-fit:contain;margin-bottom:7px;border-radius:7px;">`:''}<div style="white-space:pre-wrap;font-weight:750;">${escHtml(n.problem||'')}</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:7px;">
+              <div class="mistake-box"><b>정답인 이유</b><div style="white-space:pre-wrap;">${escHtml(n.reason||'')}</div></div>
+              <div class="mistake-box"><b>기억할 문장 또는 단어</b><div style="white-space:pre-wrap;">${escHtml(n.memory||'')}</div></div>
+              <div class="mistake-box"><b>문제 관련 메모</b><div style="white-space:pre-wrap;">${escHtml(n.memo||'')}</div></div>
+            </div>
+          </div>
+        </div>`).join(''):`<div style="padding:30px;text-align:center;color:#94A3B8;font-size:11px;font-weight:800;border:1.5px dashed #CBD5E1;border-radius:12px;">아직 저장한 오답이 없어요.</div>`}
+      </div>`;
+    }
+
+    function isConversationLang(){return String(state.lang||'').startsWith('conv-')}
+    function conversationLangCode(){return String(state.lang||'').replace('conv-','')}
+    function conversationLangLabel(){return conversationLangCode()==='en'?'🇺🇸 영어 회화':conversationLangCode()==='de'?'🇩🇪 독일어 회화':'🇯🇵 일본어 회화'}
+    function conversationTTSLang(){return conversationLangCode()==='de'?'de-DE':conversationLangCode()==='ja'?'ja-JP':'en-US'}
+    function playConversationTTS(text){
+      if(!('speechSynthesis' in window))return;
+      speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=conversationTTSLang();speechSynthesis.speak(u);
+    }
+    function encodeInlineText(v){return encodeURIComponent(String(v||'')).replace(/'/g,'%27')}
+    function playConversationEncoded(v){try{playConversationTTS(decodeURIComponent(v))}catch(e){}}
+    async function selectConversationLang(code){
+      state.lang='conv-'+code;state.entered=true;state.conversationTab='today';
+      await loadUserData();render();
+    }
+    function normalizeConversationPhrases(){
+      state.userData.conversationPhrases=Array.isArray(state.userData.conversationPhrases)?state.userData.conversationPhrases:[];
+      return state.userData.conversationPhrases;
+    }
+    function addConversationPhrase(){
+      const target=String(document.getElementById('conv-target')?.value||'').trim();
+      const meaning=String(document.getElementById('conv-meaning')?.value||'').trim();
+      const category=String(document.getElementById('conv-category')?.value||'일상');
+      if(!target)return;
+      normalizeConversationPhrases().unshift({id:`phrase_${Date.now()}_${Math.random().toString(36).slice(2,5)}`,target,meaning,category,createdAt:new Date().toISOString()});
+      saveUserData();render();
+    }
+    function deleteConversationPhrase(id){state.userData.conversationPhrases=normalizeConversationPhrases().filter(x=>x.id!==id);saveUserData();render()}
+    function renderConversationApp(){
+      const phrases=normalizeConversationPhrases();
+      const tabs=[['today','오늘 회화'],['phrases','표현장'],['shadow','쉐도잉'],['make','문장 연습'],['review','복습'],['record','기록']];
+      let body='';
+      if(state.conversationTab==='phrases'){
+        body=`<div class="conversation-hero"><h3 style="margin-top:0;">📚 나만의 회화 표현장</h3>
+          <div style="display:grid;grid-template-columns:130px 1fr 1fr auto;gap:7px;align-items:end;">
+            <select id="conv-category" class="std-input"><option>일상</option><option>여행</option><option>학교/직장</option><option>식당/쇼핑</option><option>전화</option><option>기타</option></select>
+            <input id="conv-target" class="std-input" placeholder="외국어 표현">
+            <input id="conv-meaning" class="std-input" placeholder="한국어 뜻">
+            <button class="btn-pixel-black" onclick="addConversationPhrase()">추가</button>
+          </div>
+          <div style="margin-top:12px;">${phrases.length?phrases.map(p=>`<div class="phrase-card"><div style="display:flex;justify-content:space-between;gap:8px;"><div><span class="mistake-type">${escHtml(p.category)}</span><div class="phrase-target">${escHtml(p.target)}</div><div class="phrase-meaning">${escHtml(p.meaning)}</div></div><div style="display:flex;gap:5px;"><button class="btn-pixel-white" onclick="playConversationEncoded('${encodeInlineText(p.target)}')">🔊</button><button class="todo-delete" onclick="deleteConversationPhrase('${p.id}')">×</button></div></div></div>`).join(''):`<div style="padding:25px;text-align:center;color:#94A3B8;">아직 저장한 표현이 없어요.</div>`}</div>
+        </div>`;
+      }else{
+        const descriptions={
+          today:'오늘 외울 표현이나 상황별 회화 세트를 모아두는 공간이에요.',
+          shadow:'저장한 표현을 듣고 따라 말하는 쉐도잉 연습 공간이에요.',
+          make:'한국어 뜻을 보고 직접 문장을 만들어보는 연습 공간이에요.',
+          review:'헷갈리거나 틀린 회화 표현을 다시 보는 공간이에요.',
+          record:'회화 공부 날짜와 학습량을 모아보는 공간이에요.'
+        };
+        body=`<div class="conversation-hero"><h3 style="margin-top:0;">${conversationLangLabel()} · ${tabs.find(x=>x[0]===state.conversationTab)?.[1]}</h3><p style="color:#64748B;font-weight:750;line-height:1.65;">${descriptions[state.conversationTab]}</p><div style="padding:14px;border:1.5px dashed #CBD5E1;border-radius:11px;color:#94A3B8;font-weight:800;text-align:center;">회화 자료를 넣으면 이 메뉴에 맞춰 문제/쉐도잉 기능을 더 확장할 수 있어요.</div></div>`;
+      }
+      return `<div class="conversation-shell">
+        <div class="conversation-hero"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;"><div><div style="font-size:11px;color:#EA580C;font-weight:900;">👤 ${getUserDisplayName()}</div><h2 style="margin:3px 0 0;">💬 ${conversationLangLabel()}</h2></div><div style="display:flex;gap:6px;"><button class="btn-pixel-white" onclick="changeLanguage()">🌐 언어 선택</button><button class="btn-pixel-white" onclick="resetToUserSelect()">👥 사용자 변경</button></div></div></div>
+        <div class="conversation-tabs">${tabs.map(([id,label])=>`<button class="conversation-tab ${state.conversationTab===id?'active':''}" onclick="state.conversationTab='${id}';render();">${label}</button>`).join('')}</div>
+        ${body}
+      </div>`;
+    }
+
     function renderDaySelect(changeHandler) {
       const days = getDaysList();
       return `
@@ -3223,6 +3426,7 @@
     }
 
     function renderTabContent() {
+      if (state.tab === 'mistakes') return renderMistakeNotebook();
       if (state.tab === 'calendar') return renderCalendar();
       if (state.tab === 'shopManage') return renderShopManager();
       if (state.tab === 'todo') return renderTodoList();
@@ -3706,7 +3910,7 @@
       render();
     }
 
-    function selectLang(l) { state.lang = l; render(); }
+    function selectLang(l) { state.languageStage='main'; state.lang = l; render(); }
     function selectChar(c) {
       state.char = c;
       state.charVariant = 'default';
