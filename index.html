@@ -570,6 +570,26 @@
     .shop-manage-actions{display:flex;gap:5px;margin-top:8px}.shop-manage-actions button{flex:1}
     @media(max-width:620px){.shop-manage-grid{grid-template-columns:1fr}.equipped-instance-row{flex-wrap:wrap}}
 
+
+    /* 내 퀴즈 만들기 */
+    .cq-shell{display:flex;flex-direction:column;gap:12px}
+    .cq-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+    .cq-card{border:1.5px solid #D8E0EA;border-radius:14px;background:#FFF;padding:14px}
+    .cq-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .cq-grid .full{grid-column:1/-1}
+    .cq-label{font-size:11px;font-weight:900;color:#334155;display:flex;flex-direction:column;gap:5px}
+    .cq-input,.cq-select,.cq-textarea{width:100%;box-sizing:border-box;border:1.5px solid #CBD5E1;border-radius:9px;background:#FFF;padding:10px;font:inherit;color:#0F172A}
+    .cq-input,.cq-select{height:42px}.cq-textarea{min-height:92px;resize:vertical;line-height:1.55}
+    .cq-type-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
+    .cq-list{display:flex;flex-direction:column;gap:8px}
+    .cq-list-item{border:1.5px solid #E2E8F0;border-radius:11px;padding:11px;background:#F8FAFC}
+    .cq-question-card{border:1.5px solid #E2E8F0;border-radius:11px;padding:11px;background:#FFF;margin-top:8px}
+    .cq-badge{display:inline-flex;padding:3px 7px;border-radius:999px;background:#EFF6FF;color:#1D4ED8;font-size:9.5px;font-weight:900}
+    .cq-run-question{font-size:19px;font-weight:900;line-height:1.65;color:#172033;white-space:pre-wrap}
+    .cq-answer-box{margin-top:12px;padding:12px;border-radius:10px;font-size:12px;font-weight:850;line-height:1.65}
+    .cq-answer-box.correct{background:#ECFDF5;color:#166534}.cq-answer-box.wrong{background:#FEF2F2;color:#991B1B}
+    @media(max-width:700px){.cq-grid{grid-template-columns:1fr}.cq-grid .full{grid-column:auto}}
+
     /* 캘린더 / 오늘 일정 */
     .calendar-shell{display:flex;flex-direction:column;gap:12px}
     .calendar-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
@@ -1953,6 +1973,10 @@
       fcShowMeaning: false,
       practiceShuffleIds: [],
       todayWrongMode: 'all',
+      customQuizScreen: 'list',
+      customQuizDraft: null,
+      customQuizQuestionType: 'choice',
+      customQuizRun: null,
       quizIdx: 0,
       quizAnswered: false,
       quizSelectedOpt: null,
@@ -1972,7 +1996,7 @@
       userData: {
         exp: 0, coins: 200, satisfaction: 3, stamina: 3,
         myVocabIds: [], attendanceDates: [], studyHistory: [],
-        spacedRepData: {}, customWords: [], todayWrongAnswers: [], customQuizSets: [], shop: getShopDefaultData(), todayWrongAnswers: [],
+        spacedRepData: {}, customWords: [], todayWrongAnswers: [], shop: getShopDefaultData(), todayWrongAnswers: [],
         timerData: getDefaultTimerData()
       }
     };
@@ -2030,7 +2054,7 @@
         calendarEvents: [],
         mistakeNotes: [],
         conversationPhrases: [],
-        customQuizSets: [],
+        customQuizzes: [],
         bubbleNotes: {},
         shop: getShopDefaultData(),
         timerData: getDefaultTimerData()
@@ -2048,13 +2072,13 @@
         myVocabIds: Array.isArray(src.myVocabIds ?? src.my_vocab_ids) ? (src.myVocabIds ?? src.my_vocab_ids) : [],
         attendanceDates: Array.isArray(src.attendanceDates ?? src.attendance_dates) ? (src.attendanceDates ?? src.attendance_dates) : [],
         studyHistory: Array.isArray(src.studyHistory ?? src.study_history) ? (src.studyHistory ?? src.study_history) : [],
-        spacedRepData: (() => { const raw=(src.spacedRepData ?? src.spaced_rep_data)&&typeof (src.spacedRepData ?? src.spaced_rep_data)==='object'?{...(src.spacedRepData ?? src.spaced_rep_data)}:{}; delete raw.__shop; delete raw.__timer; delete raw.__todos; delete raw.__calendarEvents; delete raw.__mistakeNotes; delete raw.__conversationPhrases; delete raw.__customQuizSets; delete raw.__bubbleNotes; return raw; })(),
+        spacedRepData: (() => { const raw=(src.spacedRepData ?? src.spaced_rep_data)&&typeof (src.spacedRepData ?? src.spaced_rep_data)==='object'?{...(src.spacedRepData ?? src.spaced_rep_data)}:{}; delete raw.__shop; delete raw.__timer; delete raw.__todos; delete raw.__calendarEvents; delete raw.__mistakeNotes; delete raw.__conversationPhrases; delete raw.__customQuizzes; delete raw.__bubbleNotes; return raw; })(),
         customWords: Array.isArray(src.customWords ?? src.custom_words) ? (src.customWords ?? src.custom_words) : [],
         todos: Array.isArray(src.todos) ? src.todos : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__todos) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__todos : []),
         calendarEvents: Array.isArray(src.calendarEvents) ? src.calendarEvents : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__calendarEvents) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__calendarEvents : []),
         mistakeNotes: Array.isArray(src.mistakeNotes) ? src.mistakeNotes : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__mistakeNotes) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__mistakeNotes : []),
         conversationPhrases: Array.isArray(src.conversationPhrases) ? src.conversationPhrases : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__conversationPhrases) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__conversationPhrases : []),
-        customQuizSets: Array.isArray(src.customQuizSets) ? src.customQuizSets : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__customQuizSets) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__customQuizSets : []),
+        customQuizzes: Array.isArray(src.customQuizzes) ? src.customQuizzes : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__customQuizzes) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__customQuizzes : []),
         bubbleNotes: (src.bubbleNotes && typeof src.bubbleNotes==='object') ? src.bubbleNotes : ((((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes && typeof ((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes==='object') ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes : {}),
         shop: normalizeShopData(src.shop || (((src.spacedRepData ?? src.spaced_rep_data)||{}).__shop) || null),
         todayWrongAnswers: Array.isArray(src.todayWrongAnswers) ? src.todayWrongAnswers : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__todayWrongAnswers) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__todayWrongAnswers : []),
@@ -2155,9 +2179,9 @@
         result.mistakeNotes=uniqueByJson([...(result.mistakeNotes||[]),...(d.mistakeNotes||[])]);
         result.conversationPhrases=uniqueByJson([...(result.conversationPhrases||[]),...(d.conversationPhrases||[])]);
         {
-          const quizMap=new Map((result.customQuizSets||[]).map(x=>[x.id,x]));
-          (d.customQuizSets||[]).forEach(x=>{if(x&&x.id)quizMap.set(x.id,{...(quizMap.get(x.id)||{}),...x});});
-          result.customQuizSets=[...quizMap.values()];
+          const quizMap=new Map((result.customQuizzes||[]).map(x=>[x.id,x]));
+          (d.customQuizzes||[]).forEach(x=>{if(x&&x.id)quizMap.set(x.id,{...(quizMap.get(x.id)||{}),...x})});
+          result.customQuizzes=[...quizMap.values()];
         }
         result.todayWrongAnswers=uniqueByJson([...(result.todayWrongAnswers||[]),...(d.todayWrongAnswers||[])]).slice(-500);
         result.bubbleNotes={...(result.bubbleNotes||{}),...(d.bubbleNotes||{})};
@@ -2275,7 +2299,7 @@
           __calendarEvents: Array.isArray(data.calendarEvents) ? data.calendarEvents : [],
           __mistakeNotes: Array.isArray(data.mistakeNotes) ? data.mistakeNotes : [],
           __conversationPhrases: Array.isArray(data.conversationPhrases) ? data.conversationPhrases : [],
-          __customQuizSets: Array.isArray(data.customQuizSets) ? data.customQuizSets : [],
+          __customQuizzes: Array.isArray(data.customQuizzes) ? data.customQuizzes : [],
           __todayWrongAnswers: Array.isArray(data.todayWrongAnswers) ? data.todayWrongAnswers.slice(-500) : [],
           __bubbleNotes: data.bubbleNotes && typeof data.bubbleNotes==='object' ? data.bubbleNotes : {}
         },
@@ -4357,79 +4381,18 @@
     ];
 
     let merryStandalone={mode:'hub',set:null,deck:[],idx:0,score:0,correct:0,wrong:[],locked:false,selected:null};
-    let merryCustomDraft={title:'',questions:[]};
-
-    function normalizeCustomQuizSets(){
-      state.userData.customQuizSets=Array.isArray(state.userData.customQuizSets)?state.userData.customQuizSets:[];
-      return state.userData.customQuizSets;
-    }
-    function merryOpenCustomBuilder(){
-      merryStopTimers();
-      merryCustomDraft={title:'',questions:[]};
-      merryState.screen='customBuilder';
-      merryRenderOnly();
-    }
-    function merryAddCustomQuestion(){
-      const q=String(document.getElementById('merry-custom-q')?.value||'').trim();
-      const opts=[0,1,2,3].map(i=>String(document.getElementById(`merry-custom-o${i}`)?.value||'').trim());
-      const a=Math.max(0,Math.min(3,Number(document.getElementById('merry-custom-a')?.value||0)));
-      const e=String(document.getElementById('merry-custom-e')?.value||'').trim();
-      const title=String(document.getElementById('merry-custom-title')?.value||'').trim();
-      if(!q||opts.some(x=>!x))return alert('문제와 보기 4개를 모두 입력해주세요.');
-      if(new Set(opts.map(x=>x.toLowerCase())).size<4)return alert('보기 4개는 서로 다르게 입력해주세요.');
-      merryCustomDraft.title=title||merryCustomDraft.title||'내 퀴즈';
-      merryCustomDraft.questions.push({q,o:opts,a,e});
-      merryRenderOnly();
-    }
-    function merryDeleteDraftQuestion(index){
-      merryCustomDraft.questions.splice(Number(index),1);
-      merryRenderOnly();
-    }
-    function merrySaveCustomQuiz(){
-      const title=String(document.getElementById('merry-custom-title')?.value||merryCustomDraft.title||'').trim();
-      if(!title)return alert('퀴즈 제목을 입력해주세요.');
-      if(!merryCustomDraft.questions.length)return alert('문제를 1개 이상 추가해주세요.');
-      const sets=normalizeCustomQuizSets();
-      sets.unshift({
-        id:`customquiz_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
-        title:title.slice(0,80),
-        questions:merryCustomDraft.questions.map(x=>({q:x.q,o:[...x.o],a:x.a,e:x.e||''})),
-        createdAt:new Date().toISOString()
-      });
-      state.userData.customQuizSets=sets.slice(0,100);
-      saveUserData();
-      merryCustomDraft={title:'',questions:[]};
-      merryState.screen='start';
-      merryRenderOnly();
-    }
-    function merryDeleteCustomQuiz(id){
-      if(!confirm('이 직접 만든 퀴즈를 삭제할까요?'))return;
-      state.userData.customQuizSets=normalizeCustomQuizSets().filter(x=>x.id!==id);
-      saveUserData();
-      merryRenderOnly();
-    }
-    function merryStartCustomQuiz(id){
-      const set=normalizeCustomQuizSets().find(x=>x.id===id);
-      if(!set||!Array.isArray(set.questions)||!set.questions.length)return alert('문제가 없는 퀴즈입니다.');
-      merryStartStandalone(`custom:${id}`);
-    }
-
 
     function merryStartStandalone(set){
       merryStopTimers();
-      const customId=String(set||'').startsWith('custom:')?String(set).slice(7):null;
-      const customSet=customId?normalizeCustomQuizSets().find(x=>x.id===customId):null;
-      const source=customSet
-        ? customSet.questions
-        : set==='intransitive'
-          ? MERRY_INTRANSITIVE
-          : set==='collocation'
-            ? MERRY_COLLOCATIONS
-            : set==='collocationUpload'
-              ? MERRY_COLLOCATION_UPLOAD
-              : set==='partsOfSpeech'
-                ? MERRY_PARTS_OF_SPEECH
-                : MERRY_PREP_NOUN_PREP;
+      const source=set==='intransitive'
+        ? MERRY_INTRANSITIVE
+        : set==='collocation'
+          ? MERRY_COLLOCATIONS
+          : set==='collocationUpload'
+            ? MERRY_COLLOCATION_UPLOAD
+            : set==='partsOfSpeech'
+              ? MERRY_PARTS_OF_SPEECH
+              : MERRY_PREP_NOUN_PREP;
 
       // 자료에 들어 있는 항목을 하나도 빼지 않고 전부 출제합니다.
       // 랜덤 10문제 제한 없이 원본 자료 순서를 그대로 유지합니다.
@@ -4460,10 +4423,7 @@
       const item=entry.x;
       let q=null;
 
-      if(String(merryStandalone.set||'').startsWith('custom:')){
-        const answer=item.o[item.a];
-        q={stem:item.q,sub:'직접 만든 퀴즈',answer,options:[...item.o],explain:item.e||`정답: ${answer}`};
-      }else if(merryStandalone.set==='intransitive'){
+      if(merryStandalone.set==='intransitive'){
         const [base,answer,meaning]=item;
         const distract=merryShuffle([...new Set(MERRY_INTRANSITIVE.map(x=>x[1]).filter(x=>x!==answer))]).slice(0,3);
         q={stem:`${base} ( □ )`,sub:meaning,answer,options:merryShuffle([answer,...distract])};
@@ -4532,10 +4492,6 @@
     }
 
     function merryStandaloneTitle(){
-      if(String(merryStandalone.set||'').startsWith('custom:')){
-        const id=String(merryStandalone.set).slice(7);
-        return normalizeCustomQuizSets().find(x=>x.id===id)?.title||'직접 만든 퀴즈';
-      }
       return merryStandalone.set==='intransitive'?'빈출 자동사'
         :merryStandalone.set==='collocation'?'연어 + 고급어휘'
         :merryStandalone.set==='collocationUpload'?'연어[고급어휘]'
@@ -4636,34 +4592,175 @@
     function merryTypeHint(type){return type==='전치사'?'뒤에 명사':type==='접속사'?'뒤에 주어+동사':'앞 문장이 끝난 뒤'}
     function merryLevel(){const total=merryState.round1Score+merryState.round2Score,acc=merryState.r2Correct;if(total>=500&&acc>=9)return{t:'👑 전접부 마스터',m:'900+ 각 나왔어요 🔥 빈칸 뒤만 보는 눈이 생겼네요'};if(total>=500&&acc<9)return{t:'마스터급 점수',m:'점수는 마스터급인데 실전 정답률이 아쉬워요! 9개 이상 맞히면 왕관이에요 👑'};if(total>=380)return{t:'800점대 감각',m:'거의 다 왔어요! 겸용 단어(before/after/since/until/except)만 잡으면 마스터예요'};if(total>=250)return{t:'700점대 진입',m:'감 잡았어요. 접속부사는 문장이 끝난 뒤에만 온다는 것, 기억하세요'};return{t:'새싹',m:'괜찮아요, 지금 알았으니 된 거예요 😊 전치사 뒤엔 명사, 접속사 뒤엔 주어+동사부터'}}
 
-    function renderMerryChallenge(){
-      if(merryState.screen==='customBuilder'){
-        const qs=merryCustomDraft.questions||[];
-        return `<div class="merry-wrap merry-fade"><div class="merry-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
-            <div><div class="merry-brand">메리토익 · 직접 만들기</div><div class="merry-title" style="font-size:25px;">내 퀴즈 만들기</div></div>
-            <button type="button" class="merry-btn merry-choice" onclick="merryGoHome()">← 퀴즈 목록</button>
-          </div>
-          <div style="margin-top:16px;display:grid;gap:9px;">
-            <label style="font-size:12px;font-weight:900;">퀴즈 제목<input id="merry-custom-title" class="std-input" maxlength="80" value="${escHtml(merryCustomDraft.title||'')}" placeholder="예: 토익 Part 5 오답"></label>
-            <label style="font-size:12px;font-weight:900;">문제<textarea id="merry-custom-q" class="std-input" style="height:84px;padding-top:10px;resize:vertical;" placeholder="문제를 입력하세요. 빈칸은 □ 로 입력해도 돼요."></textarea></label>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-              ${[0,1,2,3].map(i=>`<label style="font-size:11px;font-weight:900;">보기 ${String.fromCharCode(65+i)}<input id="merry-custom-o${i}" class="std-input" placeholder="보기 ${String.fromCharCode(65+i)}"></label>`).join('')}
+
+    function normalizeCustomQuizQuestion(q){
+      const src=q&&typeof q==='object'?q:{};
+      if(src.type==='blank'){
+        return {id:src.id||`cqq_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,type:'blank',question:String(src.question||''),answer:String(src.answer||''),explain:String(src.explain||'')};
+      }
+      const opts=Array.isArray(src.options)?src.options.slice(0,4).map(x=>String(x||'')):[String(src.a||''),String(src.b||''),String(src.c||''),String(src.d||'')];
+      while(opts.length<4)opts.push('');
+      return {id:src.id||`cqq_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,type:'choice',question:String(src.question||''),options:opts,answerIndex:Math.min(3,Math.max(0,Number(src.answerIndex||0))),explain:String(src.explain||'')};
+    }
+    function normalizeCustomQuizzes(){
+      state.userData.customQuizzes=Array.isArray(state.userData.customQuizzes)?state.userData.customQuizzes:[];
+      state.userData.customQuizzes=state.userData.customQuizzes.map(q=>({
+        id:q.id||`cq_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+        title:String(q.title||'제목 없는 퀴즈'),
+        questions:(Array.isArray(q.questions)?q.questions:[]).map(normalizeCustomQuizQuestion),
+        createdAt:q.createdAt||new Date().toISOString(),
+        updatedAt:q.updatedAt||q.createdAt||new Date().toISOString()
+      }));
+      return state.userData.customQuizzes;
+    }
+    function openCustomQuizStudio(){
+      merryStopTimers();
+      merryState.screen='customQuiz';
+      state.customQuizScreen='list';
+      state.customQuizDraft=null;
+      state.customQuizRun=null;
+      render();
+    }
+    function closeCustomQuizStudio(){
+      state.customQuizScreen='list';state.customQuizDraft=null;state.customQuizRun=null;merryState.screen='start';render();
+    }
+    function newCustomQuiz(){
+      state.customQuizDraft={id:`cq_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,title:'',questions:[],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+      state.customQuizQuestionType='choice';
+      state.customQuizScreen='edit';
+      render();
+    }
+    function editCustomQuiz(id){
+      const q=normalizeCustomQuizzes().find(x=>x.id===id);if(!q)return;
+      state.customQuizDraft=JSON.parse(JSON.stringify(q));state.customQuizQuestionType='choice';state.customQuizScreen='edit';render();
+    }
+    function deleteCustomQuiz(id){
+      if(!confirm('이 퀴즈를 삭제할까요?'))return;
+      state.userData.customQuizzes=normalizeCustomQuizzes().filter(x=>x.id!==id);saveUserData();render();
+    }
+    function setCustomQuizQuestionType(type){state.customQuizQuestionType=type==='blank'?'blank':'choice';render()}
+    function addCustomQuizQuestion(){
+      if(!state.customQuizDraft)return;
+      const type=state.customQuizQuestionType;
+      const question=String(document.getElementById('cq-question')?.value||'').trim();
+      const explain=String(document.getElementById('cq-explain')?.value||'').trim();
+      if(!question)return alert('문제를 입력해주세요.');
+      if(type==='blank'){
+        const answer=String(document.getElementById('cq-blank-answer')?.value||'').trim();
+        if(!answer)return alert('정답을 입력해주세요.');
+        state.customQuizDraft.questions.push(normalizeCustomQuizQuestion({type:'blank',question,answer,explain}));
+      }else{
+        const options=['A','B','C','D'].map(k=>String(document.getElementById(`cq-opt-${k}`)?.value||'').trim());
+        if(options.some(x=>!x))return alert('보기 A~D를 모두 입력해주세요.');
+        const answerIndex=Number(document.getElementById('cq-answer-index')?.value||0);
+        state.customQuizDraft.questions.push(normalizeCustomQuizQuestion({type:'choice',question,options,answerIndex,explain}));
+      }
+      render();
+    }
+    function removeCustomQuizQuestion(idx){
+      if(!state.customQuizDraft)return;
+      state.customQuizDraft.questions.splice(idx,1);render();
+    }
+    function saveCustomQuizDraft(){
+      if(!state.customQuizDraft)return;
+      const title=String(document.getElementById('cq-title')?.value||state.customQuizDraft.title||'').trim();
+      if(!title)return alert('퀴즈 제목을 입력해주세요.');
+      if(!state.customQuizDraft.questions.length)return alert('문제를 1개 이상 추가해주세요.');
+      state.customQuizDraft.title=title;state.customQuizDraft.updatedAt=new Date().toISOString();
+      const arr=normalizeCustomQuizzes(),idx=arr.findIndex(x=>x.id===state.customQuizDraft.id);
+      const saved=JSON.parse(JSON.stringify(state.customQuizDraft));
+      if(idx>=0)arr[idx]=saved;else arr.unshift(saved);
+      state.userData.customQuizzes=arr;saveUserData();
+      state.customQuizScreen='list';state.customQuizDraft=null;render();
+    }
+    function normalizeCustomAnswer(v){
+      return String(v||'').toLowerCase().replace(/[\s·・.。,!！?？()（）\[\]{}'"“”‘’]/g,'').trim();
+    }
+    function startCustomQuiz(id){
+      const quiz=normalizeCustomQuizzes().find(x=>x.id===id);if(!quiz||!quiz.questions.length)return;
+      state.customQuizRun={quiz:JSON.parse(JSON.stringify(quiz)),idx:0,correct:0,answered:false,selected:null,userAnswer:'',isCorrect:false,wrong:[],finished:false,rewarded:false};
+      state.customQuizScreen='play';render();
+    }
+    function answerCustomQuizChoice(idx){
+      const r=state.customQuizRun;if(!r||r.answered)return;
+      const q=r.quiz.questions[r.idx],ok=Number(idx)===Number(q.answerIndex);
+      r.answered=true;r.selected=Number(idx);r.isCorrect=ok;if(ok)r.correct++;else r.wrong.push({q,answer:q.options[q.answerIndex],user:q.options[idx]});
+      render();
+    }
+    function submitCustomQuizBlank(){
+      const r=state.customQuizRun;if(!r||r.answered)return;
+      const q=r.quiz.questions[r.idx],raw=String(document.getElementById('cq-run-blank')?.value||'').trim();
+      if(!raw)return;
+      const accepted=String(q.answer||'').split('|').map(normalizeCustomAnswer).filter(Boolean);
+      const ok=accepted.includes(normalizeCustomAnswer(raw));
+      r.answered=true;r.userAnswer=raw;r.isCorrect=ok;if(ok)r.correct++;else r.wrong.push({q,answer:q.answer,user:raw});
+      render();
+    }
+    function nextCustomQuizQuestion(){
+      const r=state.customQuizRun;if(!r||!r.answered)return;
+      if(r.idx<r.quiz.questions.length-1){r.idx++;r.answered=false;r.selected=null;r.userAnswer='';r.isCorrect=false;render();return}
+      r.finished=true;
+      if(!r.rewarded){
+        const exp=r.correct*3,coins=r.correct*4,rate=r.quiz.questions.length?Math.round(r.correct/r.quiz.questions.length*100):0,tickets=rate===100?3:rate>=80?2:rate>=60?1:0;
+        addRewards(exp,coins);if(tickets)state.userData.shop.tickets=Math.min(10,Number(state.userData.shop.tickets||0)+tickets);
+        r.reward={exp,coins,tickets};r.rewarded=true;
+        state.userData.studyHistory.push({date:localDateKey(),type:'custom_quiz',scope:r.quiz.id,total:r.quiz.questions.length,correct:r.correct});
+        saveUserData();
+      }
+      render();
+    }
+    function renderCustomQuizStudio(){
+      const quizzes=normalizeCustomQuizzes();
+      if(state.customQuizScreen==='edit'&&state.customQuizDraft){
+        const d=state.customQuizDraft,type=state.customQuizQuestionType;
+        return `<div class="merry-wrap merry-fade"><div class="merry-card"><div class="cq-shell">
+          <div class="cq-head"><div><div class="merry-brand">내 퀴즈</div><div class="merry-title" style="font-size:24px;">퀴즈 만들기</div></div><button class="merry-btn merry-choice" onclick="state.customQuizScreen='list';state.customQuizDraft=null;render();">← 목록</button></div>
+          <label class="cq-label">퀴즈 제목<input id="cq-title" class="cq-input" maxlength="80" value="${escHtml(d.title||'')}" placeholder="예: 토익 Part 5 오답"></label>
+          <div class="cq-card">
+            <div style="font-size:13px;font-weight:900;">문제 유형</div>
+            <div class="cq-type-tabs"><button class="${type==='choice'?'btn-pixel-black':'btn-pixel-white'}" onclick="setCustomQuizQuestionType('choice')">객관식</button><button class="${type==='blank'?'btn-pixel-black':'btn-pixel-white'}" onclick="setCustomQuizQuestionType('blank')">□ 빈칸형</button></div>
+            <div class="cq-grid">
+              <label class="cq-label full">문제<textarea id="cq-question" class="cq-textarea" placeholder="${type==='blank'?'예: ( □ ) authority 권한을 위임하다\\n빈칸은 □ 로 입력하면 돼요.':'문제를 입력하세요.'}"></textarea></label>
+              ${type==='choice'?`
+                ${['A','B','C','D'].map(k=>`<label class="cq-label">보기 ${k}<input id="cq-opt-${k}" class="cq-input" placeholder="보기 ${k}"></label>`).join('')}
+                <label class="cq-label full">정답<select id="cq-answer-index" class="cq-select"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select></label>
+              `:`
+                <label class="cq-label full">정답<input id="cq-blank-answer" class="cq-input" placeholder="예: delegate  | 로 여러 정답 허용 가능 (provided|assuming)"></label>
+              `}
+              <label class="cq-label full">해설 (선택)<textarea id="cq-explain" class="cq-textarea" style="min-height:70px;" placeholder="왜 이 답이 정답인지 적어둘 수 있어요."></textarea></label>
             </div>
-            <label style="font-size:12px;font-weight:900;">정답
-              <select id="merry-custom-a" class="std-input"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select>
-            </label>
-            <label style="font-size:12px;font-weight:900;">해설 (선택)<textarea id="merry-custom-e" class="std-input" style="height:68px;padding-top:10px;resize:vertical;" placeholder="왜 이 답이 정답인지 적어둘 수 있어요."></textarea></label>
-            <button type="button" class="merry-btn merry-primary" onclick="merryAddCustomQuestion()">＋ 이 문제 추가</button>
+            <button class="merry-btn merry-primary" style="width:100%;margin-top:10px;" onclick="addCustomQuizQuestion()">＋ 이 문제 추가</button>
           </div>
-          <div style="margin-top:18px;border-top:1px solid #E5E7EB;padding-top:14px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;"><b>추가한 문제</b><span>${qs.length}문제</span></div>
-            ${qs.length?qs.map((x,i)=>`<div style="margin-top:8px;padding:10px;border:1px solid #E5E7EB;border-radius:10px;"><div style="display:flex;justify-content:space-between;gap:8px;"><b>${i+1}. ${escHtml(x.q)}</b><button type="button" class="todo-delete" onclick="merryDeleteDraftQuestion(${i})">×</button></div><div style="font-size:11px;color:#64748B;margin-top:5px;">정답 ${String.fromCharCode(65+x.a)} · ${escHtml(x.o[x.a])}</div></div>`).join(''):`<div style="padding:22px;text-align:center;color:#94A3B8;">아직 추가한 문제가 없어요.</div>`}
+          <div class="cq-card"><div class="cq-head"><b>추가한 문제</b><span>${d.questions.length}문제</span></div>
+            <div class="cq-list">${d.questions.length?d.questions.map((q,i)=>`<div class="cq-question-card"><div class="cq-head"><span class="cq-badge">${q.type==='blank'?'□ 빈칸형':'객관식'}</span><button class="todo-delete" onclick="removeCustomQuizQuestion(${i})">×</button></div><div style="font-size:12px;font-weight:850;white-space:pre-wrap;margin-top:7px;">${escHtml(q.question)}</div><div style="font-size:11px;color:#166534;margin-top:5px;">정답: ${escHtml(q.type==='blank'?q.answer:q.options[q.answerIndex])}</div></div>`).join(''):`<div style="padding:22px;text-align:center;color:#94A3B8;">아직 추가한 문제가 없어요.</div>`}</div>
           </div>
-          <button type="button" class="merry-btn merry-primary" style="width:100%;margin-top:14px;" onclick="merrySaveCustomQuiz()" ${qs.length?'':'disabled'}>퀴즈 저장하기</button>
-        </div></div>`;
+          <button class="merry-btn merry-primary" onclick="saveCustomQuizDraft()">퀴즈 저장하기</button>
+        </div></div></div>`;
       }
 
+      if(state.customQuizScreen==='play'&&state.customQuizRun){
+        const r=state.customQuizRun;
+        if(r.finished){
+          const rate=r.quiz.questions.length?Math.round(r.correct/r.quiz.questions.length*100):0;
+          return `<div class="merry-wrap merry-fade"><div class="merry-card"><div class="merry-brand">내 퀴즈</div><div class="merry-title">${escHtml(r.quiz.title)} 결과</div><div class="merry-result-grid"><div class="merry-stat"><b>${r.correct}/${r.quiz.questions.length}</b>정답</div><div class="merry-stat"><b>${rate}%</b>정확도</div><div class="merry-stat"><b>+${r.reward?.exp||0}</b>EXP</div></div><div class="merry-wrong-section"><h3>오답</h3>${r.wrong.length?r.wrong.map((w,i)=>`<div class="merry-wrong-item"><b>${i+1}. ${escHtml(w.q.question)}</b><br>내 답: ${escHtml(w.user)}<br>정답: ${escHtml(w.answer)}${w.q.explain?`<br><span style="color:#64748B;">${escHtml(w.q.explain)}</span>`:''}</div>`).join(''):`<div class="merry-wrong-item">틀린 문제가 없어요.</div>`}</div><button class="merry-btn merry-primary" style="width:100%;margin-top:14px;" onclick="startCustomQuiz('${r.quiz.id}')">다시 풀기</button><button class="merry-btn merry-choice" style="width:100%;margin-top:7px;" onclick="state.customQuizScreen='list';state.customQuizRun=null;render();">퀴즈 목록</button></div></div>`;
+        }
+        const q=r.quiz.questions[r.idx];
+        return `<div class="merry-wrap merry-fade"><div class="merry-card"><div class="cq-head"><div><div class="merry-brand">${escHtml(r.quiz.title)}</div><div style="font-size:12px;font-weight:900;">${r.idx+1} / ${r.quiz.questions.length}</div></div><button class="merry-btn merry-choice" onclick="state.customQuizScreen='list';state.customQuizRun=null;render();">종료</button></div>
+          <div class="cq-card" style="margin-top:12px;"><div class="cq-run-question">${escHtml(q.question)}</div>
+          ${q.type==='choice'?`<div style="margin-top:14px;">${q.options.map((opt,i)=>{let cls='option-btn';if(r.answered){if(i===q.answerIndex)cls+=' btn-correct';else if(i===r.selected)cls+=' btn-wrong'}return `<button class="${cls}" onclick="answerCustomQuizChoice(${i})">${String.fromCharCode(65+i)}. ${escHtml(opt)}</button>`}).join('')}</div>`:`<div style="margin-top:14px;"><input id="cq-run-blank" class="cq-input" placeholder="정답 입력" ${r.answered?'disabled':''} onkeydown="if(event.key==='Enter')submitCustomQuizBlank();">${!r.answered?`<button class="merry-btn merry-primary" style="width:100%;margin-top:8px;" onclick="submitCustomQuizBlank()">정답 확인</button>`:''}</div>`}
+          ${r.answered?`<div class="cq-answer-box ${r.isCorrect?'correct':'wrong'}"><div>${r.isCorrect?'● 정답!':'✕ 오답'}</div>${q.type==='blank'?`<div>내 답: ${escHtml(r.userAnswer)}</div>`:''}<div>정답: ${escHtml(q.type==='blank'?q.answer:q.options[q.answerIndex])}</div>${q.explain?`<div style="margin-top:4px;">${escHtml(q.explain)}</div>`:''}</div><button class="merry-btn merry-primary" style="width:100%;margin-top:9px;" onclick="nextCustomQuizQuestion()">${r.idx<r.quiz.questions.length-1?'다음 문제':'결과 보기'}</button>`:''}
+          </div></div></div>`;
+      }
+
+      return `<div class="merry-wrap merry-fade"><div class="merry-card"><div class="cq-shell">
+        <div class="cq-head"><div><div class="merry-brand">메리토익 · 내 퀴즈</div><div class="merry-title" style="font-size:24px;">내 퀴즈</div><div class="merry-sub">객관식과 □ 빈칸형을 한 퀴즈 안에 섞어서 만들 수 있어요.</div></div><button class="merry-btn merry-choice" onclick="closeCustomQuizStudio()">← 퀴즈 목록</button></div>
+        <button class="merry-btn merry-primary" onclick="newCustomQuiz()">＋ 새 퀴즈 만들기</button>
+        <div class="cq-list">${quizzes.length?quizzes.map(q=>`<div class="cq-list-item"><div class="cq-head"><div><b>${escHtml(q.title)}</b><div style="font-size:10px;color:#64748B;margin-top:4px;">${q.questions.length}문제 · 객관식 ${q.questions.filter(x=>x.type==='choice').length} · 빈칸형 ${q.questions.filter(x=>x.type==='blank').length}</div></div><div style="display:flex;gap:5px;flex-wrap:wrap;"><button class="btn-pixel-black" onclick="startCustomQuiz('${q.id}')">풀기</button><button class="btn-pixel-white" onclick="editCustomQuiz('${q.id}')">수정</button><button class="btn-pixel-white" onclick="deleteCustomQuiz('${q.id}')">삭제</button></div></div></div>`).join(''):`<div class="cq-card" style="text-align:center;color:#94A3B8;">아직 만든 퀴즈가 없어요.<br>위 버튼에서 첫 퀴즈를 만들어보세요.</div>`}</div>
+      </div></div></div>`;
+    }
+
+    function renderMerryChallenge(){
+      if(state.customQuizScreen!=='list' || merryState.screen==='customQuiz') return renderCustomQuizStudio();
       if(merryState.screen==='start')return `<div class="merry-wrap merry-fade"><div class="merry-card">
         <div class="merry-brand">메리토익 · Merry TOEIC</div><div class="merry-title">퀴즈</div>
         <div class="merry-sub">원하는 유형을 골라 독립적으로 연습할 수 있어요.</div><div style="margin-top:10px;padding:9px 11px;border-radius:10px;background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;font-size:11px;font-weight:850;">퀴즈를 끝까지 완료하면 EXP · 코인 · 응원 티켓 보상을 받아요.</div>
@@ -4672,10 +4769,9 @@
           <div class="merry-quiz-card"><span class="merry-progress-chip">자료 전체</span><h3>빈출 자동사</h3><p>자료에 있는 ${MERRY_INTRANSITIVE.length}개 표현을 전부 순서대로 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('intransitive')">시작하기</button></div>
           <div class="merry-quiz-card"><span class="merry-progress-chip">자료 전체</span><h3>연어 + 고급어휘</h3><p>자료에 있는 ${MERRY_COLLOCATIONS.length}개 연어·고급어휘를 전부 순서대로 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('collocation')">시작하기</button></div>
           <div class="merry-quiz-card"><span class="merry-progress-chip">업로드 자료 전체 · ${MERRY_COLLOCATION_UPLOAD.length}문제</span><h3>연어[고급어휘]</h3><p>업로드한 연어 퀴즈/답 자료의 50문제를 전부 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('collocationUpload')">시작하기</button></div>
+          <div class="merry-quiz-card"><span class="merry-progress-chip">직접 제작</span><h3>내 퀴즈</h3><p>객관식뿐 아니라 □ 빈칸형 문제도 직접 만들고 저장해서 풀 수 있어요.</p><button type="button" class="merry-btn merry-primary" onclick="openCustomQuizStudio()">만들기 / 퀴즈 목록</button></div>
           <div class="merry-quiz-card"><span class="merry-progress-chip">업로드 자료 전체 · ${MERRY_PARTS_OF_SPEECH.length}문제</span><h3>빈출품사 필수문제</h3><p>명사·대명사·형용사·부사 필수문제를 자료 순서대로 전부 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('partsOfSpeech')">시작하기</button></div>
           <div class="merry-quiz-card"><span class="merry-progress-chip">자료 전체</span><h3>전치사 + 명사 + 전치사</h3><p>자료에 있는 ${MERRY_PREP_NOUN_PREP.length}개 세트 표현을 전부 순서대로 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('prepNounPrep')">시작하기</button></div>
-          <div class="merry-quiz-card" style="border-style:dashed;"><span class="merry-progress-chip">CUSTOM</span><h3>✏️ 퀴즈 직접 만들기</h3><p>문제 · 보기 4개 · 정답 · 해설을 직접 입력해서 나만의 객관식 퀴즈를 만들어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryOpenCustomBuilder()">만들기</button></div>
-          ${normalizeCustomQuizSets().map(s=>`<div class="merry-quiz-card"><span class="merry-progress-chip">내 퀴즈 · ${(s.questions||[]).length}문제</span><h3>${escHtml(s.title||'내 퀴즈')}</h3><p>직접 만든 문제 세트예요.</p><div style="display:flex;gap:6px;"><button type="button" class="merry-btn merry-primary" style="flex:1;" onclick="merryStartCustomQuiz('${s.id}')">풀기</button><button type="button" class="merry-btn merry-choice" onclick="merryDeleteCustomQuiz('${s.id}')">삭제</button></div></div>`).join('')}
         </div>
       </div></div>`;
 
