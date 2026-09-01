@@ -4574,11 +4574,41 @@
       const norm=x=>String(x||'').toLowerCase().replace(/[\s·・.。,!！?？()（）\[\]{}'"“”‘’]/g,'').trim();
       const accepted=String(q.answer||'').split(/[,/;、]|(?:\s*[·・]\s*)/).map(norm).filter(Boolean);
       const correct=accepted.includes(norm(raw));
+      const entry=merryStandalone.deck[merryStandalone.idx];
+      if(entry)entry.manualCorrect=false;
       merryStandalone.locked=true;
       merryStandalone.selected=raw;
       if(correct){merryStandalone.correct++;merryStandalone.score+=10;}
       else merryStandalone.wrong.push({q,chosen:raw});
       merryRenderOnly(correct?'ok':'no');
+    }
+
+    function merryMarkStandaloneSubjectiveCorrect(){
+      if(!merryStandalone.locked)return;
+      const q=merryStandaloneQuestion();
+      if(!q||q.type!=='subjective')return;
+      const entry=merryStandalone.deck[merryStandalone.idx];
+      if(entry?.manualCorrect)return;
+
+      const norm=x=>String(x||'').toLowerCase().replace(/[\s·・.。,!！?？()（）\[\]{}'"“”‘’]/g,'').trim();
+      const accepted=String(q.answer||'').split(/[,/;、]|(?:\s*[·・]\s*)/).map(norm).filter(Boolean);
+      const alreadyCorrect=accepted.includes(norm(merryStandalone.selected||''));
+      if(alreadyCorrect)return;
+
+      if(entry)entry.manualCorrect=true;
+
+      // 현재 문제의 오답 기록만 제거한다.
+      for(let i=merryStandalone.wrong.length-1;i>=0;i--){
+        const w=merryStandalone.wrong[i];
+        if(w && (w.q===q || (w.q?.stem===q.stem && String(w.chosen||'')===String(merryStandalone.selected||'')))){
+          merryStandalone.wrong.splice(i,1);
+          break;
+        }
+      }
+
+      merryStandalone.correct++;
+      merryStandalone.score+=10;
+      merryRenderOnly('ok');
     }
 
 
@@ -4813,7 +4843,8 @@
         const isSubjective=q?.type==='subjective';
         const normalizedSelected=String(merryStandalone.selected||'').toLowerCase().replace(/[\s·・.。,!！?？()（）\[\]{}'"“”‘’]/g,'').trim();
         const accepted=String(q?.answer||'').split(/[,/;、]|(?:\s*[·・]\s*)/).map(x=>x.toLowerCase().replace(/[\s·・.。,!！?？()（）\[\]{}'"“”‘’]/g,'').trim()).filter(Boolean);
-        const subjectiveCorrect=isSubjective&&merryStandalone.locked&&accepted.includes(normalizedSelected);
+        const currentEntry=merryStandalone.deck[merryStandalone.idx];
+        const subjectiveCorrect=isSubjective&&merryStandalone.locked&&(accepted.includes(normalizedSelected)||currentEntry?.manualCorrect===true);
         return `<div class="merry-wrap merry-fade"><div class="merry-topline"><span class="merry-round-badge">${merryStandaloneTitle()}</span><span>${merryStandalone.idx+1} / ${merryStandalone.deck.length}</span></div><div class="merry-topline"><span class="merry-score">점수 ${merryStandalone.score}</span><span>정답 ${merryStandalone.correct}</span></div><div class="merry-card"><div class="merry-q">${q.stem}</div><div class="merry-sub" style="margin-bottom:12px;">${q.sub}</div>
           ${isSubjective?`
             <input id="merry-standalone-subjective" class="std-input" placeholder="정답을 입력하세요" ${merryStandalone.locked?'disabled':''} value="${merryStandalone.locked?escHtml(merryStandalone.selected||''):''}" onkeydown="if(event.key==='Enter')merrySubmitStandaloneSubjective();">
@@ -4821,7 +4852,7 @@
           `:`
             <div class="merry-options">${q.options.map((opt,optIndex)=>{let cls='';if(merryStandalone.locked&&opt===q.answer)cls='correct';else if(merryStandalone.locked&&opt===merryStandalone.selected&&opt!==q.answer)cls='wrong';return `<button type="button" class="merry-btn merry-option ${cls}" ${merryStandalone.locked?'disabled':''} onclick="merryAnswerStandaloneByIndex(${optIndex})">${opt}</button>`}).join('')}</div>
           `}
-          ${merryStandalone.locked?`<div class="merry-explain">${isSubjective?(subjectiveCorrect?'정답이에요!':'정답은 '+q.answer+'예요.'):(merryStandalone.selected===q.answer?'정답이에요!':'정답은 '+q.answer+'예요.')}<br>${q.explain||q.sub}</div><button type="button" class="merry-btn merry-primary merry-next" onclick="merryNextStandalone()">${merryStandalone.idx===merryStandalone.deck.length-1?'결과 보기':'다음'}</button>`:''}</div></div>`;
+          ${merryStandalone.locked?`<div class="merry-explain">${isSubjective?(subjectiveCorrect?'정답이에요!':'정답은 '+q.answer+'예요.'):(merryStandalone.selected===q.answer?'정답이에요!':'정답은 '+q.answer+'예요.')}<br>${q.explain||q.sub}</div>${isSubjective&&!subjectiveCorrect?`<button type="button" class="merry-btn merry-choice" style="width:100%;margin-top:9px;border-color:#16A34A;color:#15803D;" onclick="merryMarkStandaloneSubjectiveCorrect()">✓ 내 답도 맞음 · 정답 처리</button>`:''}<button type="button" class="merry-btn merry-primary merry-next" onclick="merryNextStandalone()">${merryStandalone.idx===merryStandalone.deck.length-1?'결과 보기':'다음'}</button>`:''}</div></div>`;
       }
 
       const total=merryState.round1Score+merryState.round2Score,level=merryLevel();
