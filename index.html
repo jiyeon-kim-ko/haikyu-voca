@@ -577,7 +577,13 @@
     .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
     .calendar-weekday{text-align:center;font-size:10px;font-weight:900;color:#64748B;padding:5px 0}
     .calendar-day{min-height:72px;border:1.5px solid #E2E8F0;border-radius:9px;background:#FFF;padding:6px;cursor:pointer;text-align:left;position:relative}
-    .calendar-day:hover{border-color:#EA580C}.calendar-day.other{opacity:.38}.calendar-day.today{border-color:#EA580C;background:#FFF7ED}.calendar-day.selected{outline:2px solid #7C3AED;outline-offset:1px}
+    .calendar-day:hover{border-color:#EA580C}.calendar-day.other{opacity:.38}.calendar-day.today{border-color:#EA580C}.calendar-day.selected{outline:2px solid #7C3AED;outline-offset:1px}
+    .calendar-day.study-heat-1{background:#F0FDF4}.calendar-day.study-heat-2{background:#DCFCE7}.calendar-day.study-heat-3{background:#BBF7D0}.calendar-day.study-heat-4{background:#86EFAC}.calendar-day.study-heat-5{background:#4ADE80}
+    .calendar-day.today.study-heat-0{background:#FFF7ED}
+    .calendar-study-time{font-size:8.5px;font-weight:900;color:#166534;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .study-heat-legend{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:9.5px;color:#64748B;font-weight:800}
+    .study-heat-swatch{width:15px;height:15px;border:1px solid #CBD5E1;border-radius:4px;display:inline-block}
+    .calendar-study-summary{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 11px;border-radius:10px;background:#F0FDF4;border:1.5px solid #86EFAC;font-size:11px;font-weight:900;color:#166534}
     .calendar-num{font-size:11px;font-weight:900;color:#334155}.calendar-dot-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px}
     .calendar-dot{width:6px;height:6px;border-radius:50%;background:#EA580C}.calendar-dot.todo{background:#7C3AED}.calendar-count{font-size:9px;color:#64748B;font-weight:800;margin-top:4px}
     .calendar-editor{border:1.5px solid #CBD5E1;border-radius:12px;padding:12px;background:#F8FAFC}
@@ -1834,6 +1840,7 @@
       { minMinutes:10, exp:2, coins:2, tickets:0 }
     ];
     let studyTimerInterval = null;
+    let lastTimerRuntimeCheckpoint = 0;
 
     function getDefaultTimerData(){return {totalStudySeconds:0,completedPomodoros:0,history:[]}}
     function normalizeTimerData(v){const s=v&&typeof v==='object'?v:{};return {totalStudySeconds:Math.max(0,Number(s.totalStudySeconds||0)),completedPomodoros:Math.max(0,Number(s.completedPomodoros||0)),history:Array.isArray(s.history)?s.history:[]}}
@@ -1855,7 +1862,15 @@
       }catch(e){state.studyTimer=base}
       stopStudyTimerInterval();
     }
-    function saveTimerRuntime(){if(!state.studyTimer)return;try{localStorage.setItem(getTimerStorageKey(),JSON.stringify({...state.studyTimer,running:false,lastTickAt:null}))}catch(e){console.warn('Timer save failed',e)}}
+    function saveTimerRuntime(){if(!state.studyTimer)return;try{localStorage.setItem(getTimerStorageKey(),JSON.stringify({...state.studyTimer,running:false,lastTickAt:null,savedAt:Date.now()}))}catch(e){console.warn('Timer save failed',e)}}
+    function checkpointStudyTimer(){
+      if(!state.studyTimer)return;
+      if(state.studyTimer.running) tickStudyTimer();
+      saveTimerRuntime();
+    }
+    window.addEventListener('pagehide', checkpointStudyTimer);
+    window.addEventListener('beforeunload', checkpointStudyTimer);
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden') checkpointStudyTimer();});
     function setTimerMode(mode){
       const t=state.studyTimer;if(!t||t.running||!['pomodoro','countdown','stopwatch'].includes(mode))return;
       t.mode=mode;t.phase='focus';t.elapsedSec=0;t.sessionFocusSec=0;t.completedFocusBlocks=0;
@@ -1867,13 +1882,43 @@
     function pauseStudyTimer(){const t=state.studyTimer;if(!t)return;if(t.running)tickStudyTimer();t.running=false;t.lastTickAt=null;stopStudyTimerInterval();saveTimerRuntime();updateStudyTimerDom()}
     function resetStudyTimer(){if(!confirm('현재 공부 타이머 세션을 초기화할까요? 아직 보상받지 않은 공부 시간도 초기화됩니다.'))return;const sm=state.studyTimer?.studyMinutes||25,rm=state.studyTimer?.restMinutes||5;state.studyTimer={...getDefaultTimerRuntime(),studyMinutes:sm,restMinutes:rm,remainingSec:sm*60};stopStudyTimerInterval();saveTimerRuntime();render()}
     function finishStudyTimerPhase(){const t=state.studyTimer;if(t.phase==='focus'){t.completedFocusBlocks+=1;state.userData.timerData.completedPomodoros+=1;t.phase='rest';t.remainingSec=t.restMinutes*60;state.speech=`집중 구간 완료! ${t.studyMinutes}분 훈련 끝. 잠깐 쉬었다가 다시 가자.`;saveUserData()}else{t.phase='focus';t.remainingSec=t.studyMinutes*60;state.speech=`휴식 끝. 다시 ${t.studyMinutes}분 집중 훈련 시작!`}t.lastTickAt=Date.now();saveTimerRuntime();render()}
-    function tickStudyTimer(){const t=state.studyTimer;if(!t||!t.running)return;const now=Date.now(),elapsed=Math.max(0,Math.min(5,(now-(t.lastTickAt||now))/1000));t.lastTickAt=now;
+    function tickStudyTimer(){const t=state.studyTimer;if(!t||!t.running)return;const now=Date.now(),elapsed=Math.max(0,Math.min(5,(now-(t.lastTickAt||now))/1000));t.lastTickAt=now;if(now-lastTimerRuntimeCheckpoint>=2000){lastTimerRuntimeCheckpoint=now;saveTimerRuntime();}
       if(t.mode==='stopwatch'){t.elapsedSec+=elapsed;t.sessionFocusSec+=elapsed;updateStudyTimerDom();return}
       if(t.mode==='countdown'){t.sessionFocusSec+=elapsed;t.remainingSec-=elapsed;if(t.remainingSec<=0){t.remainingSec=0;t.running=false;t.lastTickAt=null;stopStudyTimerInterval();saveTimerRuntime();try{const A=window.AudioContext||window.webkitAudioContext;if(A){const c=new A(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.12;o.start();setTimeout(()=>{o.stop();c.close()},700)}}catch(e){}alert('⏰ 설정한 공부 시간이 끝났어요!');render();return}updateStudyTimerDom();return}
       if(t.phase==='focus')t.sessionFocusSec+=elapsed;t.remainingSec-=elapsed;if(t.remainingSec<=0){t.remainingSec=0;finishStudyTimerPhase();return}updateStudyTimerDom()}
     function updateStudyTimerDom(){const t=state.studyTimer;if(!t)return;const c=document.getElementById('study-timer-clock');if(c)c.textContent=formatTimerClock(t.mode==='stopwatch'?t.elapsedSec:t.remainingSec);const p=document.getElementById('study-timer-phase');if(p)p.innerHTML=t.mode==='stopwatch'?'⏱️ 스톱워치':t.mode==='countdown'?'⏳ 일반 타이머':(t.phase==='focus'?'📚 집중 공부':'☕ 휴식');const len=Math.max(1,getTimerPhaseLengthSec()),pct=Math.min(100,Math.max(0,((len-t.remainingSec)/len)*100)),bar=document.getElementById('study-timer-progress-fill');if(bar)bar.style.width=`${pct}%`;const ses=document.getElementById('study-timer-session');if(ses)ses.textContent=formatStudyTime(t.sessionFocusSec);const btn=document.getElementById('study-timer-start-btn');if(btn){btn.textContent=t.running?'⏸ 일시정지':'▶ 시작';btn.onclick=t.running?pauseStudyTimer:startStudyTimer}}
-    function finishStudySession(){const t=state.studyTimer;if(!t)return;if(t.running)pauseStudyTimer();const seconds=Math.floor(t.sessionFocusSec);if(seconds<60)return alert('기록할 공부 시간이 아직 1분 미만입니다.');const reward=getStudyTimerReward(seconds),oldLevel=getCharInfo().level;state.userData.timerData.totalStudySeconds+=seconds;state.userData.exp+=reward.exp;state.userData.coins+=reward.coins;state.userData.shop.tickets+=reward.tickets;state.userData.timerData.history.push({date:new Date().toISOString(),seconds,pomodoros:t.completedFocusBlocks,exp:reward.exp,coins:reward.coins,tickets:reward.tickets});if(state.userData.timerData.history.length>100)state.userData.timerData.history=state.userData.timerData.history.slice(-100);const newLevel=getCharInfo().level,msg=[`📚 공부 세션 기록 완료!`,`집중 공부: ${formatStudyTime(seconds)}`,`보상: +${reward.exp} EXP / +${reward.coins} 코인${reward.tickets?` / +${reward.tickets} 응원 티켓`:''}`];if(newLevel>oldLevel)msg.push(`🎉 Lv.${newLevel} ${STAGE_TITLES[newLevel-1]} 승격!`);const sm=t.studyMinutes,rm=t.restMinutes;state.studyTimer={...getDefaultTimerRuntime(),studyMinutes:sm,restMinutes:rm,remainingSec:sm*60};saveTimerRuntime();saveUserData();alert(msg.join('\n'));render()}
-    function getTodayTimerSeconds(){const today=new Date().toISOString().split('T')[0];return (state.userData.timerData?.history||[]).filter(h=>String(h.date||'').slice(0,10)===today).reduce((s,h)=>s+Number(h.seconds||0),0)}
+    function finishStudySession(){const t=state.studyTimer;if(!t)return;if(t.running)pauseStudyTimer();const seconds=Math.floor(t.sessionFocusSec);if(seconds<60)return alert('기록할 공부 시간이 아직 1분 미만입니다.');const reward=getStudyTimerReward(seconds),oldLevel=getCharInfo().level;state.userData.timerData.totalStudySeconds+=seconds;state.userData.exp+=reward.exp;state.userData.coins+=reward.coins;state.userData.shop.tickets+=reward.tickets;state.userData.timerData.history.push({date:new Date().toISOString(),localDate:localDateKey(),seconds,pomodoros:t.completedFocusBlocks,exp:reward.exp,coins:reward.coins,tickets:reward.tickets});if(state.userData.timerData.history.length>100)state.userData.timerData.history=state.userData.timerData.history.slice(-100);const newLevel=getCharInfo().level,msg=[`📚 공부 세션 기록 완료!`,`집중 공부: ${formatStudyTime(seconds)}`,`보상: +${reward.exp} EXP / +${reward.coins} 코인${reward.tickets?` / +${reward.tickets} 응원 티켓`:''}`];if(newLevel>oldLevel)msg.push(`🎉 Lv.${newLevel} ${STAGE_TITLES[newLevel-1]} 승격!`);const sm=t.studyMinutes,rm=t.restMinutes;state.studyTimer={...getDefaultTimerRuntime(),studyMinutes:sm,restMinutes:rm,remainingSec:sm*60};saveTimerRuntime();saveUserData();alert(msg.join('\n'));render()}
+    function localDateKey(value=new Date()){
+      const d=value instanceof Date?value:new Date(value);
+      if(Number.isNaN(d.getTime()))return String(value||'').slice(0,10);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function timerHistoryDateKey(h){
+      if(h?.localDate)return String(h.localDate).slice(0,10);
+      return localDateKey(h?.date||new Date());
+    }
+    function getTimerSecondsByDate(dateKey){
+      return (state.userData.timerData?.history||[])
+        .filter(h=>timerHistoryDateKey(h)===dateKey)
+        .reduce((s,h)=>s+Math.max(0,Number(h.seconds||0)),0);
+    }
+    function getStudyHeatLevel(seconds){
+      const min=Math.floor(Math.max(0,Number(seconds||0))/60);
+      if(min<=0)return 0;
+      if(min<15)return 1;
+      if(min<30)return 2;
+      if(min<60)return 3;
+      if(min<120)return 4;
+      return 5;
+    }
+    function formatCalendarStudyTime(seconds){
+      const s=Math.floor(Math.max(0,Number(seconds||0)));
+      const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);
+      if(h>0)return `${h}시간 ${m}분`;
+      if(m>0)return `${m}분`;
+      return `${s}초`;
+    }
+    function getTodayTimerSeconds(){return getTimerSecondsByDate(localDateKey())}
 
     let state = {
       user: null, // 'jiyeon' | 'gyungmin'
@@ -1900,6 +1945,8 @@
       studyTimer: getDefaultTimerRuntime(),
       fcIdx: 0,
       fcShowMeaning: false,
+      practiceShuffleIds: [],
+      todayWrongMode: 'all',
       quizIdx: 0,
       quizAnswered: false,
       quizSelectedOpt: null,
@@ -1907,6 +1954,7 @@
       quizScore: { correct: 0, total: 0, wrongIds: [], finished: false },
       hardIdx: 0,
       hardAnswered: false,
+      hardLastAnswer: '',
       hardIsCorrect: false,
       hardQuestions: [],
       hardScore: { correct: 0, total: 0, wrongIds: [], finished: false },
@@ -1918,7 +1966,8 @@
       userData: {
         exp: 0, coins: 200, satisfaction: 3, stamina: 3,
         myVocabIds: [], attendanceDates: [], studyHistory: [],
-        spacedRepData: {}, customWords: [], shop: getShopDefaultData(), timerData: getDefaultTimerData()
+        spacedRepData: {}, customWords: [], todayWrongAnswers: [], shop: getShopDefaultData(), todayWrongAnswers: [],
+        timerData: getDefaultTimerData()
       }
     };
 
@@ -1940,6 +1989,7 @@
       state.entered = false;
       state.variantSelecting = false;
       state.selectedDay = 'all';
+      state.practiceShuffleIds = [];
       state.testSource = 'days';
       state.selectedTestDays = [];
       state.tab = 'practice';
@@ -1952,6 +2002,7 @@
       state.entered = false;
       state.variantSelecting = false;
       state.selectedDay = 'all';
+      state.practiceShuffleIds = [];
       state.testSource = 'days';
       state.selectedTestDays = [];
       state.tab = 'practice';
@@ -1998,6 +2049,7 @@
         conversationPhrases: Array.isArray(src.conversationPhrases) ? src.conversationPhrases : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__conversationPhrases) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__conversationPhrases : []),
         bubbleNotes: (src.bubbleNotes && typeof src.bubbleNotes==='object') ? src.bubbleNotes : ((((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes && typeof ((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes==='object') ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes : {}),
         shop: normalizeShopData(src.shop || (((src.spacedRepData ?? src.spaced_rep_data)||{}).__shop) || null),
+        todayWrongAnswers: Array.isArray(src.todayWrongAnswers) ? src.todayWrongAnswers : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__todayWrongAnswers) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__todayWrongAnswers : []),
         timerData: normalizeTimerData(src.timerData || (((src.spacedRepData ?? src.spaced_rep_data)||{}).__timer) || null)
       };
     }
@@ -2094,6 +2146,7 @@
         }
         result.mistakeNotes=uniqueByJson([...(result.mistakeNotes||[]),...(d.mistakeNotes||[])]);
         result.conversationPhrases=uniqueByJson([...(result.conversationPhrases||[]),...(d.conversationPhrases||[])]);
+        result.todayWrongAnswers=uniqueByJson([...(result.todayWrongAnswers||[]),...(d.todayWrongAnswers||[])]).slice(-500);
         result.bubbleNotes={...(result.bubbleNotes||{}),...(d.bubbleNotes||{})};
 
         result.spacedRepData={...(result.spacedRepData||{}),...(d.spacedRepData||{})};
@@ -2209,6 +2262,7 @@
           __calendarEvents: Array.isArray(data.calendarEvents) ? data.calendarEvents : [],
           __mistakeNotes: Array.isArray(data.mistakeNotes) ? data.mistakeNotes : [],
           __conversationPhrases: Array.isArray(data.conversationPhrases) ? data.conversationPhrases : [],
+          __todayWrongAnswers: Array.isArray(data.todayWrongAnswers) ? data.todayWrongAnswers.slice(-500) : [],
           __bubbleNotes: data.bubbleNotes && typeof data.bubbleNotes==='object' ? data.bubbleNotes : {}
         },
         custom_words: Array.isArray(data.customWords) ? data.customWords : [],
@@ -2226,6 +2280,7 @@
       return true;
     }
 
+    let userDataSaveQueue = Promise.resolve();
     function saveUserData() {
       // 저장 버튼을 누르거나 보상을 받을 때 UI를 기다리게 하지 않도록
       // localStorage는 즉시 저장하고 Supabase는 비동기로 동기화한다.
@@ -2237,9 +2292,10 @@
 
       saveLocalBackup(userKey, snapshot);
 
-      saveUserDataToCloud(userName, lang, character, snapshot).catch(e => {
-        console.warn('Background Supabase sync failed:', e);
-      });
+      userDataSaveQueue = userDataSaveQueue
+        .catch(()=>{})
+        .then(()=>saveUserDataToCloud(userName, lang, character, snapshot))
+        .catch(e => { console.warn('Background Supabase sync failed:', e); });
     }
 
     function recordAttendance() {
@@ -2674,6 +2730,23 @@
       state.fcShowMeaning = false;
     }
 
+    function clearPracticeShuffle(){
+      state.practiceShuffleIds=[];
+      state.fcIdx=0;
+      state.fcShowMeaning=false;
+    }
+
+    function getPracticeVocab(){
+      const base=getFilteredVocab();
+      const ids=Array.isArray(state.practiceShuffleIds)?state.practiceShuffleIds:[];
+      if(!ids.length)return base;
+      const map=new Map(base.map(x=>[String(x.id),x]));
+      const ordered=ids.map(id=>map.get(String(id))).filter(Boolean);
+      const used=new Set(ordered.map(x=>String(x.id)));
+      base.forEach(x=>{if(!used.has(String(x.id)))ordered.push(x)});
+      return ordered;
+    }
+
     function generateQuiz() {
       const db = getTestVocab();
       if (db.length < 4) {
@@ -3028,6 +3101,7 @@
               <button class="btn-tab-menu ${state.tab === 'timer' ? 'active' : ''}" onclick="switchTab('timer')">공부<br>타이머</button>
               <button class="btn-tab-menu ${state.tab === 'todo' ? 'active' : ''}" onclick="switchTab('todo')">할 일</button>
               <button class="btn-tab-menu ${state.tab === 'calendar' ? 'active' : ''}" onclick="switchTab('calendar')">캘린더</button>
+              <button class="btn-tab-menu ${state.tab === 'todayWrong' ? 'active' : ''}" onclick="switchTab('todayWrong')">오늘<br>오답</button>
               <button class="btn-tab-menu ${state.tab === 'mistakes' ? 'active' : ''}" onclick="switchTab('mistakes')">오답<br>노트</button>
               <button class="btn-tab-menu ${state.tab === 'merryChallenge' ? 'active' : ''}" onclick="switchTab('merryChallenge')">퀴즈</button>
             </div>
@@ -3251,13 +3325,16 @@
         else if(i>=startDay+daysInMonth){day=i-(startDay+daysInMonth)+1;cm=m+1;other=true;if(cm>11){cm=0;cy=y+1}}
         else day=i-startDay+1;
         const key=dateKeyFromParts(cy,cm,day),entries=calendarEntriesFor(key);
-        cells.push(`<button type="button" class="calendar-day ${other?'other':''} ${key===today?'today':''} ${key===calendarSelectedDate?'selected':''}" onclick="selectCalendarDate('${key}')"><div class="calendar-num">${day}</div>${entries.length?`<div class="calendar-dot-row">${entries.slice(0,5).map(e=>`<span class="calendar-dot ${e.kind==='todo'?'todo':''}"></span>`).join('')}</div><div class="calendar-count">${entries.length}개</div>`:''}</button>`);
+        const studySeconds=getTimerSecondsByDate(key),heat=getStudyHeatLevel(studySeconds);
+        cells.push(`<button type="button" class="calendar-day study-heat-${heat} ${other?'other':''} ${key===today?'today':''} ${key===calendarSelectedDate?'selected':''}" onclick="selectCalendarDate('${key}')"><div class="calendar-num">${day}</div>${studySeconds>0?`<div class="calendar-study-time">⏱ ${formatCalendarStudyTime(studySeconds)}</div>`:''}${entries.length?`<div class="calendar-dot-row">${entries.slice(0,5).map(e=>`<span class="calendar-dot ${e.kind==='todo'?'todo':''}"></span>`).join('')}</div><div class="calendar-count">${entries.length}개</div>`:''}</button>`);
       }
       const selected=calendarEntriesFor(calendarSelectedDate);
       return `<div class="calendar-shell">
-        <div class="calendar-toolbar"><div><h3 style="margin:0;font-weight:900;">📅 캘린더</h3><div style="font-size:10.5px;color:#64748B;font-weight:700;margin-top:3px;">일정과 날짜가 있는 할 일을 기록할 수 있어요. 사용자별로 저장돼요.</div></div><button class="btn-pixel-white" onclick="goCalendarToday()">오늘</button></div>
+        <div class="calendar-toolbar"><div><h3 style="margin:0;font-weight:900;">📅 캘린더</h3><div style="font-size:10.5px;color:#64748B;font-weight:700;margin-top:3px;">일정 · 할 일과 타이머에서 완료한 공부 시간이 날짜별로 자동 기록돼요.</div></div><button class="btn-pixel-white" onclick="goCalendarToday()">오늘</button></div>
         <div class="calendar-toolbar"><button class="btn-pixel-white" onclick="changeCalendarMonth(-1)">◀</button><div class="calendar-title">${y}년 ${m+1}월</div><button class="btn-pixel-white" onclick="changeCalendarMonth(1)">▶</button></div>
+        <div class="study-heat-legend"><span>공부시간</span><span>짧음</span><span class="study-heat-swatch study-heat-1"></span><span class="study-heat-swatch study-heat-2"></span><span class="study-heat-swatch study-heat-3"></span><span class="study-heat-swatch study-heat-4"></span><span class="study-heat-swatch study-heat-5"></span><span>길음</span></div>
         <div class="calendar-grid">${['일','월','화','수','목','금','토'].map(x=>`<div class="calendar-weekday">${x}</div>`).join('')}${cells.join('')}</div>
+        <div class="calendar-study-summary"><span>⏱️ ${calendarSelectedDate} 타이머 공부 기록</span><span>${formatCalendarStudyTime(getTimerSecondsByDate(calendarSelectedDate))}</span></div>
         <div class="calendar-editor">
           <div style="font-size:12px;font-weight:900;margin-bottom:8px;">➕ 일정 / 할 일 추가</div>
           <div class="calendar-form">
@@ -3433,7 +3510,7 @@
       if (state.tab === 'merryChallenge') return renderMerryChallenge();
       if (state.tab === 'customize') return renderExtraCustomization();
       if (state.tab === 'practice') {
-        const list = getFilteredVocab();
+        const list = getPracticeVocab();
         if (list.length === 0) {
           return `
             <div style="display:flex; justify-content:space-between; margin-bottom:12px;">${renderDaySelect('onDayChange')}</div>
@@ -3522,6 +3599,49 @@
         `;
       }
 
+      if (state.tab === 'todayWrong') {
+        const today=localDateKey();
+        const allRows=(state.userData.todayWrongAnswers||[]).filter(x=>x&&x.date===today).slice().reverse();
+        const unique=[]; const seen=new Set();
+        allRows.forEach(x=>{
+          const mode=x.mode||'hard';
+          const k=`${mode}_${String(x.id||x.word)}`;
+          if(!seen.has(k)){seen.add(k);unique.push({...x,mode})}
+        });
+        const mode=state.todayWrongMode||'all';
+        const rows=mode==='all'?unique:unique.filter(x=>x.mode===mode);
+        const counts={
+          all:unique.length,
+          quiz:unique.filter(x=>x.mode==='quiz').length,
+          hard:unique.filter(x=>x.mode==='hard').length,
+          spell:unique.filter(x=>x.mode==='spell').length
+        };
+        const labels={quiz:'객관식',hard:'주관식',spell:'스펠링'};
+        const tabs=[['all','전체'],['quiz','객관식'],['hard','주관식'],...(state.lang!=='ja'?[['spell','스펠링']]:[])];
+        const retryButtons=[
+          counts.quiz?`<button class="btn-pixel-white" onclick="startTodayWrongReview('quiz')">객관식 ${counts.quiz}개 재시험</button>`:'',
+          counts.hard?`<button class="btn-pixel-white" onclick="startTodayWrongReview('hard')">주관식 ${counts.hard}개 재시험</button>`:'',
+          (state.lang!=='ja'&&counts.spell)?`<button class="btn-pixel-white" onclick="startTodayWrongReview('spell')">스펠링 ${counts.spell}개 재시험</button>`:''
+        ].filter(Boolean).join('');
+        return `<div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div><h3 style="margin:0;font-weight:900;">📕 오늘 오답</h3><div style="font-size:11px;color:#64748B;font-weight:700;margin-top:4px;">오늘 틀린 객관식 · 주관식 · 스펠링을 유형별로 자동 저장해요.</div></div>
+            <div style="font-size:12px;font-weight:900;color:#DC2626;">총 ${counts.all}개</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;">
+            ${tabs.map(([k,label])=>`<button class="${mode===k?'btn-pixel-black':'btn-pixel-white'}" onclick="state.todayWrongMode='${k}';render();">${label} ${counts[k]||0}</button>`).join('')}
+          </div>
+          ${retryButtons?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;">${retryButtons}</div>`:''}
+        </div>
+        ${rows.length?rows.map((x,i)=>{
+          const label=labels[x.mode]||'오답';
+          const answer=x.mode==='spell'?(x.correctAnswer||x.word||''):(x.correctAnswer||x.meaning||'');
+          const my=x.userAnswer||x.selectedAnswer||'(선택 기록 없음)';
+          const sub=x.mode==='spell'&&x.meaning?`<div style="font-size:11px;margin-top:3px;color:#64748B;">뜻: ${escHtml(x.meaning)}</div>`:'';
+          return `<div style="border:1.5px solid #E2E8F0;border-radius:10px;padding:11px;margin-bottom:8px;background:#FFF;"><div style="display:flex;justify-content:space-between;gap:8px;"><b>${i+1}. ${escHtml(x.word||'')}</b><span style="font-size:10px;font-weight:900;color:#7C3AED;">${label}</span></div><div style="font-size:12px;margin-top:6px;color:#DC2626;">내 답: ${escHtml(my)}</div><div style="font-size:12px;margin-top:3px;color:#166534;">정답: ${escHtml(answer)}</div>${sub}</div>`;
+        }).join(''):`<div style="padding:36px;text-align:center;color:#94A3B8;font-weight:800;border:1.5px dashed #CBD5E1;border-radius:12px;">${mode==='all'?'오늘 저장된 오답이 없어요.':`${labels[mode]||''} 오답이 없어요.`}</div>`}`;
+      }
+
       if (state.tab === 'hard') {
         const sc = state.hardScore;
         if (sc.finished) {
@@ -3553,8 +3673,10 @@
               ${!state.hardAnswered ? `
                 <button class="btn-pixel-black" style="width: 100%;" onclick="submitHard()">정답 확인</button>
               ` : `
-                <div style="background: ${state.hardIsCorrect ? '#DCFCE7' : '#FEE2E2'}; color: ${state.hardIsCorrect ? '#166534' : '#991B1B'}; padding: 10px; border-radius: 8px; font-weight: bold; text-align: center; margin-bottom: 8px;">
-                  ${state.hardIsCorrect ? '● 정답입니다!' : '✕ 정답: ' + q.meaning}
+                <div style="background: ${state.hardIsCorrect ? '#DCFCE7' : '#FEE2E2'}; color: ${state.hardIsCorrect ? '#166534' : '#991B1B'}; padding: 12px; border-radius: 8px; font-weight: bold; margin-bottom: 8px; line-height:1.7;">
+                  <div style="text-align:center;margin-bottom:5px;">${state.hardIsCorrect ? '● 정답입니다!' : '✕ 오답입니다'}</div>
+                  <div>내가 쓴 답: <b>${escHtml(state.hardLastAnswer||'')}</b></div>
+                  <div>실제 정답: <b>${escHtml(q.meaning)}</b></div>
                 </div>
                 <button class="btn-pixel-black" style="width: 100%;" onclick="nextHard()">
                   ${state.hardIdx < state.hardQuestions.length - 1 ? '다음 문제 ➔' : '세트 결과 확인 ➔'}
@@ -4482,7 +4604,7 @@
 
     function onDayChange(val) {
       state.selectedDay = val;
-      if (state.tab === 'practice') initFlashcards();
+      if (state.tab === 'practice') clearPracticeShuffle();
       if (state.tab === 'quiz') generateQuiz();
       if (state.tab === 'hard') generateHardQuiz();
       if (state.tab === 'spell') generateSpellQuiz();
@@ -4533,11 +4655,29 @@
     function toggleFlashcardMeaning() { state.fcShowMeaning = !state.fcShowMeaning; render(); }
     function prevFlashcard() { if (state.fcIdx > 0) { state.fcIdx--; state.fcShowMeaning = false; render(); } }
     function nextFlashcard() {
-      const list = getFilteredVocab();
+      const list = getPracticeVocab();
       if (state.fcIdx < list.length - 1) { state.fcIdx++; state.fcShowMeaning = false; render(); }
     }
     function shuffleFlashcards() {
-      initFlashcards();
+      const base=getFilteredVocab();
+      if(base.length<2){
+        initFlashcards();
+        state.speech=getCharSpeech('shuffle');
+        render();
+        return;
+      }
+      const ids=base.map(x=>String(x.id));
+      for(let i=ids.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [ids[i],ids[j]]=[ids[j],ids[i]];
+      }
+      // 아주 드물게 원래 순서 그대로 나온 경우 첫 두 장을 바꿔 체감상 반드시 섞이게 함
+      if(ids.every((id,i)=>id===String(base[i].id))){
+        [ids[0],ids[1]]=[ids[1],ids[0]];
+      }
+      state.practiceShuffleIds=ids;
+      state.fcIdx=0;
+      state.fcShowMeaning=false;
       state.speech = getCharSpeech('shuffle');
       render();
     }
@@ -4564,6 +4704,11 @@
         state.speech = getCharSpeech('quizCorrect');
       } else {
         if (!state.quizScore.wrongIds.includes(q.id)) state.quizScore.wrongIds.push(q.id);
+        const today=localDateKey();
+        state.userData.todayWrongAnswers=Array.isArray(state.userData.todayWrongAnswers)?state.userData.todayWrongAnswers:[];
+        state.userData.todayWrongAnswers.push({key:`${today}_quiz_${q.id}_${Date.now()}`,date:today,id:q.id,word:q.word,meaning:q.cAns,correctAnswer:q.cAns,userAnswer:opt,selectedAnswer:opt,mode:'quiz'});
+        state.userData.todayWrongAnswers=state.userData.todayWrongAnswers.slice(-800);
+        saveUserData();
         state.mood = 'angry';
         state.speech = getCharSpeech('quizWrong');
       }
@@ -4599,14 +4744,68 @@
       render();
     }
 
+    function getTodayWrongRows(mode){
+      const today=localDateKey(),seen=new Set(),rows=[];
+      (state.userData.todayWrongAnswers||[]).slice().reverse().forEach(x=>{
+        if(!x||x.date!==today||(mode&&x.mode!==mode))return;
+        const k=`${x.mode||'hard'}_${x.id||x.word}`;
+        if(!seen.has(k)){seen.add(k);rows.push(x)}
+      });
+      return rows;
+    }
+
+    function startTodayWrongReview(mode){
+      const rows=getTodayWrongRows(mode);
+      const ids=rows.map(x=>x.id).filter(Boolean);
+      const pool=getAllWords().filter(w=>ids.includes(w.id));
+      if(!pool.length)return alert('오늘 재시험할 해당 유형의 오답이 없습니다.');
+
+      if(mode==='hard'){
+        state.hardQuestions=pool.map(x=>({id:x.id,word:x.word,meaning:x.meaning}));
+        state.hardIdx=0;state.hardAnswered=false;state.hardIsCorrect=false;state.hardLastAnswer='';
+        state.hardScore={correct:0,total:pool.length,finished:false,wrongIds:[]};
+        state.tab='hard';
+      }else if(mode==='quiz'){
+        const db=getAllWords();
+        state.quizQuestions=pool.map(item=>{
+          const others=db.filter(d=>d.id!==item.id&&d.meaning!==item.meaning).sort(()=>Math.random()-.5).slice(0,3);
+          const opts=[item.meaning,...others.map(o=>o.meaning)];
+          for(let i=opts.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]]}
+          return {id:item.id,word:item.word,cAns:item.meaning,opts};
+        });
+        state.quizIdx=0;state.quizAnswered=false;state.quizSelectedOpt=null;
+        state.quizScore={correct:0,total:state.quizQuestions.length,wrongIds:[],finished:false};
+        state.tab='quiz';
+      }else if(mode==='spell'){
+        if(state.lang==='ja')return alert('일본어에서는 스펠링 시험을 사용하지 않아요.');
+        state.spellQuestions=pool.map(item=>{
+          const word=item.raw_word||item.word;
+          const chars=word.split(''),maskCount=Math.max(1,Math.round(chars.length*.4)),maskIndices=[];
+          while(maskIndices.length<maskCount&&maskIndices.length<chars.length){
+            const r=Math.floor(Math.random()*chars.length);if(!maskIndices.includes(r))maskIndices.push(r);
+          }
+          return {id:item.id,word,meaning:item.meaning,maskedWord:chars.map((c,i)=>maskIndices.includes(i)?'_':c).join(' ')};
+        });
+        state.spellIdx=0;state.spellAnswered=false;state.spellIsCorrect=false;
+        state.spellScore={correct:0,total:state.spellQuestions.length,wrongIds:[],finished:false};
+        state.tab='spell';
+      }
+      render();
+    }
+
+    function startTodayWrongHardReview(){startTodayWrongReview('hard')}
+
     function submitHard() {
       if (state.hardAnswered) return;
       const input = document.getElementById('hard-input');
-      const val = input.value.replace(/\s+/g, '').trim();
+      const rawVal = input.value.trim();
+      const normalizeAnswer = x => String(x||'').toLowerCase().replace(/[\s·・.。,!！?？()（）\[\]{}'"“”‘’]/g,'').trim();
+      const val = normalizeAnswer(rawVal);
       if (!val) return;
       const q = state.hardQuestions[state.hardIdx];
-      const meanings = q.meaning.split(/[,/~;]/).map(m => m.replace(/\s+/g, '').trim());
-      const isCorr = meanings.some(m => m.includes(val) || val.includes(m));
+      const meanings = String(q.meaning||'').split(/[,/~;、]|(?:\s*[·・]\s*)/).map(normalizeAnswer).filter(Boolean);
+      const isCorr = meanings.some(m => m === val);
+      state.hardLastAnswer = rawVal;
       state.hardAnswered = true;
       state.hardIsCorrect = isCorr;
       if (isCorr) {
@@ -4615,6 +4814,11 @@
         state.speech = getCharSpeech('hardCorrect');
       } else {
         if (!state.hardScore.wrongIds.includes(q.id)) state.hardScore.wrongIds.push(q.id);
+        const today=localDateKey();
+        state.userData.todayWrongAnswers = Array.isArray(state.userData.todayWrongAnswers) ? state.userData.todayWrongAnswers : [];
+        state.userData.todayWrongAnswers.push({key:`${today}_${q.id}_${Date.now()}`,date:today,id:q.id,word:q.word,meaning:q.meaning,userAnswer:rawVal,mode:'hard'});
+        state.userData.todayWrongAnswers=state.userData.todayWrongAnswers.slice(-500);
+        saveUserData();
         state.mood = 'angry';
         state.speech = getCharSpeech('hardWrong');
       }
@@ -4626,6 +4830,7 @@
         state.hardIdx++;
         state.hardAnswered = false;
         state.hardIsCorrect = false;
+        state.hardLastAnswer = '';
       } else {
         state.hardScore.finished = true;
         const reward = calculateTestReward('hard', state.hardScore.correct);
@@ -4661,6 +4866,11 @@
         state.speech = getCharSpeech('spellCorrect');
       } else {
         if (!state.spellScore.wrongIds.includes(q.id)) state.spellScore.wrongIds.push(q.id);
+        const today=localDateKey();
+        state.userData.todayWrongAnswers=Array.isArray(state.userData.todayWrongAnswers)?state.userData.todayWrongAnswers:[];
+        state.userData.todayWrongAnswers.push({key:`${today}_spell_${q.id}_${Date.now()}`,date:today,id:q.id,word:q.word,meaning:q.meaning,correctAnswer:q.word,userAnswer:input.value.trim(),mode:'spell'});
+        state.userData.todayWrongAnswers=state.userData.todayWrongAnswers.slice(-800);
+        saveUserData();
         state.mood = 'angry';
         state.speech = getCharSpeech('spellWrong');
       }
