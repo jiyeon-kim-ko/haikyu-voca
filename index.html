@@ -578,12 +578,13 @@
     .calendar-weekday{text-align:center;font-size:10px;font-weight:900;color:#64748B;padding:5px 0}
     .calendar-day{min-height:72px;border:1.5px solid #E2E8F0;border-radius:9px;background:#FFF;padding:6px;cursor:pointer;text-align:left;position:relative}
     .calendar-day:hover{border-color:#EA580C}.calendar-day.other{opacity:.38}.calendar-day.today{border-color:#EA580C}.calendar-day.selected{outline:2px solid #7C3AED;outline-offset:1px}
-    .calendar-day.study-heat-1{background:#F0FDF4}.calendar-day.study-heat-2{background:#DCFCE7}.calendar-day.study-heat-3{background:#BBF7D0}.calendar-day.study-heat-4{background:#86EFAC}.calendar-day.study-heat-5{background:#4ADE80}
+    .calendar-day.study-heat-1{background:#EAF4FA}.calendar-day.study-heat-2{background:#D3E8F3}.calendar-day.study-heat-3{background:#B6D8EA}.calendar-day.study-heat-4{background:#8FC1DD}.calendar-day.study-heat-5{background:#5B9CC6}
     .calendar-day.today.study-heat-0{background:#FFF7ED}
-    .calendar-study-time{font-size:8.5px;font-weight:900;color:#166534;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .calendar-day.study-heat-4 .calendar-num,.calendar-day.study-heat-5 .calendar-num{color:#0F3550}
+    .calendar-study-time{font-size:8.5px;font-weight:900;color:#174E72;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .study-heat-legend{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:9.5px;color:#64748B;font-weight:800}
-    .study-heat-swatch{width:15px;height:15px;border:1px solid #CBD5E1;border-radius:4px;display:inline-block}
-    .calendar-study-summary{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 11px;border-radius:10px;background:#F0FDF4;border:1.5px solid #86EFAC;font-size:11px;font-weight:900;color:#166534}
+    .study-heat-swatch{width:15px;height:15px;border:1px solid #B8CBD8;border-radius:3px;display:inline-block}
+    .calendar-study-summary{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 11px;border-radius:10px;background:#EAF4FA;border:1.5px solid #8FC1DD;font-size:11px;font-weight:900;color:#174E72}
     .calendar-num{font-size:11px;font-weight:900;color:#334155}.calendar-dot-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px}
     .calendar-dot{width:6px;height:6px;border-radius:50%;background:#EA580C}.calendar-dot.todo{background:#7C3AED}.calendar-count{font-size:9px;color:#64748B;font-weight:800;margin-top:4px}
     .calendar-editor{border:1.5px solid #CBD5E1;border-radius:12px;padding:12px;background:#F8FAFC}
@@ -3332,9 +3333,9 @@
       return `<div class="calendar-shell">
         <div class="calendar-toolbar"><div><h3 style="margin:0;font-weight:900;">📅 캘린더</h3><div style="font-size:10.5px;color:#64748B;font-weight:700;margin-top:3px;">일정 · 할 일과 타이머에서 완료한 공부 시간이 날짜별로 자동 기록돼요.</div></div><button class="btn-pixel-white" onclick="goCalendarToday()">오늘</button></div>
         <div class="calendar-toolbar"><button class="btn-pixel-white" onclick="changeCalendarMonth(-1)">◀</button><div class="calendar-title">${y}년 ${m+1}월</div><button class="btn-pixel-white" onclick="changeCalendarMonth(1)">▶</button></div>
-        <div class="study-heat-legend"><span>공부시간</span><span>짧음</span><span class="study-heat-swatch study-heat-1"></span><span class="study-heat-swatch study-heat-2"></span><span class="study-heat-swatch study-heat-3"></span><span class="study-heat-swatch study-heat-4"></span><span class="study-heat-swatch study-heat-5"></span><span>길음</span></div>
+        <div class="study-heat-legend"><span>⏱ 공부시간</span><span class="study-heat-swatch study-heat-1" title="1~14분"></span><span>1~14분</span><span class="study-heat-swatch study-heat-2" title="15~29분"></span><span>15~29분</span><span class="study-heat-swatch study-heat-3" title="30~59분"></span><span>30~59분</span><span class="study-heat-swatch study-heat-4" title="1~2시간"></span><span>1~2시간</span><span class="study-heat-swatch study-heat-5" title="2시간 이상"></span><span>2시간+</span></div>
         <div class="calendar-grid">${['일','월','화','수','목','금','토'].map(x=>`<div class="calendar-weekday">${x}</div>`).join('')}${cells.join('')}</div>
-        <div class="calendar-study-summary"><span>⏱️ ${calendarSelectedDate} 타이머 공부 기록</span><span>${formatCalendarStudyTime(getTimerSecondsByDate(calendarSelectedDate))}</span></div>
+        <div class="calendar-study-summary"><span>⏱️ ${calendarSelectedDate} 완료한 타이머 공부 기록</span><span>${formatCalendarStudyTime(getTimerSecondsByDate(calendarSelectedDate))}</span></div>
         <div class="calendar-editor">
           <div style="font-size:12px;font-weight:900;margin-bottom:8px;">➕ 일정 / 할 일 추가</div>
           <div class="calendar-form">
