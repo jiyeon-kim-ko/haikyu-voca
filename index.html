@@ -570,26 +570,6 @@
     .shop-manage-actions{display:flex;gap:5px;margin-top:8px}.shop-manage-actions button{flex:1}
     @media(max-width:620px){.shop-manage-grid{grid-template-columns:1fr}.equipped-instance-row{flex-wrap:wrap}}
 
-
-    /* 내 퀴즈 만들기 */
-    .cq-shell{display:flex;flex-direction:column;gap:12px}
-    .cq-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-    .cq-card{border:1.5px solid #D8E0EA;border-radius:14px;background:#FFF;padding:14px}
-    .cq-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-    .cq-grid .full{grid-column:1/-1}
-    .cq-label{font-size:11px;font-weight:900;color:#334155;display:flex;flex-direction:column;gap:5px}
-    .cq-input,.cq-select,.cq-textarea{width:100%;box-sizing:border-box;border:1.5px solid #CBD5E1;border-radius:9px;background:#FFF;padding:10px;font:inherit;color:#0F172A}
-    .cq-input,.cq-select{height:42px}.cq-textarea{min-height:92px;resize:vertical;line-height:1.55}
-    .cq-type-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
-    .cq-list{display:flex;flex-direction:column;gap:8px}
-    .cq-list-item{border:1.5px solid #E2E8F0;border-radius:11px;padding:11px;background:#F8FAFC}
-    .cq-question-card{border:1.5px solid #E2E8F0;border-radius:11px;padding:11px;background:#FFF;margin-top:8px}
-    .cq-badge{display:inline-flex;padding:3px 7px;border-radius:999px;background:#EFF6FF;color:#1D4ED8;font-size:9.5px;font-weight:900}
-    .cq-run-question{font-size:19px;font-weight:900;line-height:1.65;color:#172033;white-space:pre-wrap}
-    .cq-answer-box{margin-top:12px;padding:12px;border-radius:10px;font-size:12px;font-weight:850;line-height:1.65}
-    .cq-answer-box.correct{background:#ECFDF5;color:#166534}.cq-answer-box.wrong{background:#FEF2F2;color:#991B1B}
-    @media(max-width:700px){.cq-grid{grid-template-columns:1fr}.cq-grid .full{grid-column:auto}}
-
     /* 캘린더 / 오늘 일정 */
     .calendar-shell{display:flex;flex-direction:column;gap:12px}
     .calendar-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
@@ -1973,10 +1953,6 @@
       fcShowMeaning: false,
       practiceShuffleIds: [],
       todayWrongMode: 'all',
-      customQuizScreen: 'list',
-      customQuizDraft: null,
-      customQuizQuestionType: 'choice',
-      customQuizRun: null,
       quizIdx: 0,
       quizAnswered: false,
       quizSelectedOpt: null,
@@ -1996,7 +1972,7 @@
       userData: {
         exp: 0, coins: 200, satisfaction: 3, stamina: 3,
         myVocabIds: [], attendanceDates: [], studyHistory: [],
-        spacedRepData: {}, customWords: [], todayWrongAnswers: [], shop: getShopDefaultData(), todayWrongAnswers: [],
+        spacedRepData: {}, customWords: [], todayWrongAnswers: [], customQuizSets: [], shop: getShopDefaultData(), todayWrongAnswers: [],
         timerData: getDefaultTimerData()
       }
     };
@@ -2054,7 +2030,7 @@
         calendarEvents: [],
         mistakeNotes: [],
         conversationPhrases: [],
-        customQuizzes: [],
+        customQuizSets: [],
         bubbleNotes: {},
         shop: getShopDefaultData(),
         timerData: getDefaultTimerData()
@@ -2072,13 +2048,13 @@
         myVocabIds: Array.isArray(src.myVocabIds ?? src.my_vocab_ids) ? (src.myVocabIds ?? src.my_vocab_ids) : [],
         attendanceDates: Array.isArray(src.attendanceDates ?? src.attendance_dates) ? (src.attendanceDates ?? src.attendance_dates) : [],
         studyHistory: Array.isArray(src.studyHistory ?? src.study_history) ? (src.studyHistory ?? src.study_history) : [],
-        spacedRepData: (() => { const raw=(src.spacedRepData ?? src.spaced_rep_data)&&typeof (src.spacedRepData ?? src.spaced_rep_data)==='object'?{...(src.spacedRepData ?? src.spaced_rep_data)}:{}; delete raw.__shop; delete raw.__timer; delete raw.__todos; delete raw.__calendarEvents; delete raw.__mistakeNotes; delete raw.__conversationPhrases; delete raw.__customQuizzes; delete raw.__bubbleNotes; return raw; })(),
+        spacedRepData: (() => { const raw=(src.spacedRepData ?? src.spaced_rep_data)&&typeof (src.spacedRepData ?? src.spaced_rep_data)==='object'?{...(src.spacedRepData ?? src.spaced_rep_data)}:{}; delete raw.__shop; delete raw.__timer; delete raw.__todos; delete raw.__calendarEvents; delete raw.__mistakeNotes; delete raw.__conversationPhrases; delete raw.__customQuizSets; delete raw.__bubbleNotes; return raw; })(),
         customWords: Array.isArray(src.customWords ?? src.custom_words) ? (src.customWords ?? src.custom_words) : [],
         todos: Array.isArray(src.todos) ? src.todos : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__todos) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__todos : []),
         calendarEvents: Array.isArray(src.calendarEvents) ? src.calendarEvents : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__calendarEvents) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__calendarEvents : []),
         mistakeNotes: Array.isArray(src.mistakeNotes) ? src.mistakeNotes : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__mistakeNotes) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__mistakeNotes : []),
         conversationPhrases: Array.isArray(src.conversationPhrases) ? src.conversationPhrases : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__conversationPhrases) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__conversationPhrases : []),
-        customQuizzes: Array.isArray(src.customQuizzes) ? src.customQuizzes : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__customQuizzes) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__customQuizzes : []),
+        customQuizSets: Array.isArray(src.customQuizSets) ? src.customQuizSets : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__customQuizSets) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__customQuizSets : []),
         bubbleNotes: (src.bubbleNotes && typeof src.bubbleNotes==='object') ? src.bubbleNotes : ((((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes && typeof ((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes==='object') ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes : {}),
         shop: normalizeShopData(src.shop || (((src.spacedRepData ?? src.spaced_rep_data)||{}).__shop) || null),
         todayWrongAnswers: Array.isArray(src.todayWrongAnswers) ? src.todayWrongAnswers : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__todayWrongAnswers) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__todayWrongAnswers : []),
@@ -2179,9 +2155,9 @@
         result.mistakeNotes=uniqueByJson([...(result.mistakeNotes||[]),...(d.mistakeNotes||[])]);
         result.conversationPhrases=uniqueByJson([...(result.conversationPhrases||[]),...(d.conversationPhrases||[])]);
         {
-          const quizMap=new Map((result.customQuizzes||[]).map(x=>[x.id,x]));
-          (d.customQuizzes||[]).forEach(x=>{if(x&&x.id)quizMap.set(x.id,{...(quizMap.get(x.id)||{}),...x})});
-          result.customQuizzes=[...quizMap.values()];
+          const quizMap=new Map((result.customQuizSets||[]).map(x=>[x.id,x]));
+          (d.customQuizSets||[]).forEach(x=>{if(x&&x.id)quizMap.set(x.id,{...(quizMap.get(x.id)||{}),...x});});
+          result.customQuizSets=[...quizMap.values()];
         }
         result.todayWrongAnswers=uniqueByJson([...(result.todayWrongAnswers||[]),...(d.todayWrongAnswers||[])]).slice(-500);
         result.bubbleNotes={...(result.bubbleNotes||{}),...(d.bubbleNotes||{})};
@@ -2299,7 +2275,7 @@
           __calendarEvents: Array.isArray(data.calendarEvents) ? data.calendarEvents : [],
           __mistakeNotes: Array.isArray(data.mistakeNotes) ? data.mistakeNotes : [],
           __conversationPhrases: Array.isArray(data.conversationPhrases) ? data.conversationPhrases : [],
-          __customQuizzes: Array.isArray(data.customQuizzes) ? data.customQuizzes : [],
+          __customQuizSets: Array.isArray(data.customQuizSets) ? data.customQuizSets : [],
           __todayWrongAnswers: Array.isArray(data.todayWrongAnswers) ? data.todayWrongAnswers.slice(-500) : [],
           __bubbleNotes: data.bubbleNotes && typeof data.bubbleNotes==='object' ? data.bubbleNotes : {}
         },
@@ -4367,6 +4343,8 @@
 
     const MERRY_COLLOCATION_UPLOAD = [["spot ( □ )", "on", "딱 맞는, 정확한 · 전치사 넣기"], ["( □ ) stake", "at", "위태로운 상태인, ~이 걸린, 성패가 달려있는 · 전치사 넣기"], ["( □ ) energy", "renewable", "재생 에너지 · 형용사 넣기"], ["( □ ) a journal", "keep", "일기를 쓰다 · 동사 넣기"], ["aimed ( □ )", "at", "~을 목표로 한 · 전치사 넣기"], ["incorporate A ( □ ) B", "into", "A를 B에 통합시키다 · 전치사 넣기"], ["( □ ) anticipation of", "in", "~를 예상하고, 내다보고 · 전치사 넣기"], ["( □ ) plans", "restructuring", "구조조정 계획 · 명사 넣기"], ["save ( □ )", "on", "~를 절약하다 · 전치사 넣기"], ["( □ ) working order", "in", "정상적으로 작동하고 있는 · 전치사 넣기"], ["warranty ( □ )", "on", "~에 대한 보증(서) · 전치사 넣기"], ["( □ ) temperature", "room", "실온 · 명사 넣기"], ["price ( □ )", "range", "가격대 · 명사 넣기"], ["be intrigued ( □ )", "by", "~에 끌리다, 관심이 가다 · 전치사 넣기"], ["( □ ) the region", "across / throughout", "지역 전역에"], ["in touch ( □ )", "with", "~와 연락하여, 접촉하여 · 전치사 넣기"], ["fall ( □ )", "behind", "뒤지다, 뒤떨어지다 · 전치사 넣기"], ["graduate ( □ )", "from", "~를 졸업하다 · 전치사 넣기"], ["( □ ) concern", "primary", "주요 관심사 · 형용사 넣기"], ["arrive ( □ )", "damaged", "파손된 채로 도착하다 · p.p. 형태 넣기"], ["( □ ) salary", "desired", "희망 연봉 · 형용사 넣기"], ["special ( □ )", "occasion", "특별한 날, 특별한 행사 · 명사 넣기"], ["compromise ( □ )", "on", "~에 대해 타협하다, 양보하다 · 전치사 넣기"], ["( □ ) a policy", "adopt", "정책을 채택하다 · 동사 넣기"], ["dining ( □ )", "establishment", "식당 · 명사 넣기"], ["( □ ) average", "above", "평균 이상 · 전치사 넣기"], ["( □ ) goods", "quality", "품질 좋은 제품 · 형용사 넣기"], ["meet ( □ )", "quotas", "할당량을 충족시키다 · 명사 넣기"], ["( □ ) the ability", "exercise", "능력을 발휘하다 · 동사 넣기"], ["( □ ) the art of 명사/ing", "in", "~하는 기술에서 · 전치사 넣기"], ["advance ( □ )", "to", "~에 진출하다, 다음 단계로 나아가다 · 전치사 넣기"], ["( □ ) one's approval", "without", "~의 승인 없이 · 전치사 넣기"], ["in ( □ ) demand", "high", "수요가 많은 · 형용사 넣기"], ["( □ ) the bright side", "on", "긍정적인 면은 · 부사 넣기"], ["( □ ) design", "by", "일부러, 고의로 · 전치사 넣기"], ["( □ ) progress", "in", "진행 중인 · 전치사 넣기"], ["( □ ) ideas", "communicate", "아이디어를 전달하다 · 동사 넣기"], ["( □ ) ideas", "contribute", "아이디어를 내다 · 동사 넣기"], ["( □ ) demand", "on", "주문형의, 요구만 있으면 언제든지 · 전치사 넣기"], ["( □ ) need", "urgent", "긴급한 요구 · 형용사 넣기"], ["( □ ) customer", "potential / prospective", "잠재 고객 · 형용사 넣기"], ["( □ ) respect", "mutual", "상호 존중 · 형용사 넣기"], ["come ( □ ) a surprise", "to", "놀라움으로 다가오다 · 전치사 넣기"], ["take pride ( □ )", "in", "~에 자긍심을 가지다 · 전치사 넣기"], ["( □ ) receipts", "itemized", "항목별로 분류된 영수증 · p.p. 형태 넣기"], ["( □ ) in extra hours", "put", "초과 근무를 하다 · 동사 넣기"], ["carry ( □ )", "over", "(휴가 등을) 이월하다 · 전치사 넣기"], ["( □ ) sized", "moderately", "적당한 크기의 · 부사 넣기"], ["authority ( □ )", "on", "~의 권위자 · 전치사 넣기"], ["be composed ( □ )", "of", "~로 구성되다 · 전치사 넣기"]];
 
+    const MERRY_DAY1_P5 = [{"q":"( □ ) authority 권한을 위임하다 (동사 넣기)","o":["delegate","occupy","honor","indicate"],"a":0,"e":"delegate authority = 권한을 위임하다."},{"q":"help는 ( □ )을 뒤에 또 넣을 수 있다","o":["동사원형 (사역동사)","to + 명사","전치사 + 명사","과거분사만"],"a":0,"e":"자료 기준: help는 뒤에 동사원형을 둘 수 있습니다."},{"q":"( □ ) one's request 요청을 들어주다 (동사 넣기)","o":["honor / fulfill / grant","delegate / occupy","conform / abide","indicate / inform"],"a":0,"e":"honor / fulfill / grant one's request = 요청을 들어주다."},{"q":"( □ ) the agenda 안건에 올라와 있는, 현안의 (전치사 넣기)","o":["on","at","by","for"],"a":0,"e":"on the agenda = 안건에 올라와 있는, 현안의."},{"q":"even so 뒤에는 ( □ )부터 보인다","o":["콤마 (+ 주어 동사 ~)","명사","동사원형","전치사"],"a":0,"e":"자료 기준: even so 뒤에는 콤마가 먼저 보이고 이어 주어+동사 구조가 옵니다."},{"q":"( □ ) that은 if와 비슷할 수 있다","o":["provided / assuming","because / since","although / though","during / after"],"a":0,"e":"provided that / assuming that은 문맥에 따라 if와 비슷한 조건 의미가 될 수 있습니다."},{"q":"employee / employer / employment 중 안 세도 되는 것","o":["employment","employee","employer","employee / employer"],"a":0,"e":"자료 기준: employment는 여기서 셀 수 없는 명사로 봅니다."},{"q":"be optimistic ( □ ) (전치사 넣기)","o":["about","with","of","to"],"a":0,"e":"be optimistic about. 자료 메모상 that절도 가능합니다."},{"q":"( □ ) the end of ~의 말 즈음에 (전치사 넣기)","o":["toward","during","after","with"],"a":0,"e":"toward the end of = ~의 말 즈음에."},{"q":"until은 강압적, 완료적 느낌보다는 ( □ ) 느낌","o":["지속적, 계속적","완료적","순간적","강압적"],"a":0,"e":"자료 기준: until은 지속적·계속적인 느낌을 강조합니다."},{"q":"( □ ) = hold (직을) 보유하다","o":["occupy","delegate","expire","conform"],"a":0,"e":"occupy = (직을) 보유하다."},{"q":"position, job = ( □ ) 직, 일자리","o":["post","stain","benefit","agenda"],"a":0,"e":"post = 직, 일자리."},{"q":"revision, modification, adjustment ( □ ) + 명사","o":["to","for","with","on"],"a":0,"e":"자료 기준: revision / modification / adjustment to + 명사."},{"q":"several + ( □ ) 명사 필수","o":["복수","단수","불가산","소유격"],"a":0,"e":"several 뒤에는 복수명사가 필요합니다."},{"q":"some + 단수 / 복수 / 불가산?","o":["복수 / 불가산","단수만","복수만","단수 / 복수 전부"],"a":0,"e":"자료 기준: some + 복수명사 또는 불가산명사."},{"q":"as much as / as many as 뒤에 복수명사 나오면?","o":["as many as","as much as","둘 다 불가","둘 다 동일"],"a":0,"e":"복수명사 앞에는 as many as."},{"q":"convenient ( □ ) 사람 (전치사 넣기)","o":["for","with","of","to"],"a":0,"e":"convenient for + 사람."},{"q":"compatible ( □ ) (전치사 넣기)","o":["with","to","of","for"],"a":0,"e":"compatible with."},{"q":"aware ( □ ) (전치사 넣기)","o":["of","with","to","for"],"a":0,"e":"aware of. 자료 메모상 that절도 가능합니다."},{"q":"eager ( □ ) (전치사 넣기)","o":["for","on","of","with"],"a":0,"e":"eager for. 자료 메모상 to + 동사원형도 가능합니다."},{"q":"keen ( □ ) (전치사 넣기)","o":["on","for","with","of"],"a":0,"e":"keen on = 관심이 있는. 자료 메모상 keen to + V는 열의 의미로도 사용."},{"q":"( □ ) customers 다시 오는 고객","o":["returning","successful","stubborn","aware"],"a":0,"e":"returning customers = 다시 오는 고객."},{"q":"( □ ) stain 잘 지워지지 않는 얼룩 (형용사 넣기)","o":["stubborn","returning","successful","compatible"],"a":0,"e":"stubborn stain = 잘 지워지지 않는 얼룩."},{"q":"최상급 뒤에는 ( □ )이 오면, '아직'이 아니라 '역대'의 의미","o":["yet","still","already","ever"],"a":0,"e":"자료 기준: 최상급 뒤의 yet은 '역대'의 의미로 정리했습니다."},{"q":"( □ ) concert 자선 음악회 (복합명사 만들기)","o":["benefit","post","agenda","authority"],"a":0,"e":"benefit concert = 자선 음악회."},{"q":"whose 앞에 오는 명사는 사람 / 사물?","o":["사람 / 사물 둘 다","사람만","사물만","둘 다 불가"],"a":0,"e":"자료 기준: whose는 사람과 사물 모두를 선행사로 받을 수 있습니다."},{"q":"( □ ) applicant 합격자 (형용사 넣기)","o":["successful","returning","stubborn","optimistic"],"a":0,"e":"successful applicant = 합격자."},{"q":"( □ ) contact ( □ ) ~와 연락하여","o":["in contact with","on contact to","at contact of","by contact for"],"a":0,"e":"in contact with = ~와 연락하여."},{"q":"( □ ) search ( □ ) ~를 찾아서, ~를 구하려고","o":["in search of","on search for","at search with","by search to"],"a":0,"e":"in search of = ~를 찾아서, ~를 구하려고."},{"q":"( □ ) relation ( □ ) ~에 관련하여, ~에 관해서","o":["in relation to + N","on relation with + N","at relation of + N","by relation for + N"],"a":0,"e":"in relation to + N = ~에 관련하여, ~에 관해서."},{"q":"( □ ) terms ( □ ) ~의 측면/관점에서","o":["in terms of","on terms with","at terms to","by terms for"],"a":0,"e":"in terms of = ~의 측면/관점에서."},{"q":"though 등 일반 접속사는 동사 있으려면 ( □ )도 필수","o":["주어","목적어","전치사","분사"],"a":0,"e":"자료 기준: 일반 접속사 뒤에 절이 오면 주어와 동사가 필요합니다."},{"q":"( □ ) those ( □ ) ~를 가진 사람들만이","o":["only those with","all those of","only them with","those only for"],"a":0,"e":"only those with = ~를 가진 사람들만이."},{"q":"he / his 중에 주어 가능한 것?","o":["둘 다","he만","his만","둘 다 불가"],"a":0,"e":"자료 기준: he와 his 모두 주어 자리에 올 수 있는 경우를 구분해 기억합니다."},{"q":"expire은 동사일 때는 ( □ )동사로 ( □ )가 없다","o":["자동사, 목적어 X","타동사, 목적어 O","자동사, 보어 X","타동사, 목적어 X"],"a":0,"e":"expire는 동사일 때 자동사이며 목적어를 직접 취하지 않습니다."},{"q":"( □ ) three months","o":["after","during","with","toward"],"a":0,"e":"자료 기준: after three months. during은 이 메모에서 the가 필수라고 정리했습니다."},{"q":"once, if 등은 '바로 뒤' 문장에는 ( □ )시제를 쓰지 않는다.","o":["미래","현재","과거","완료"],"a":0,"e":"자료 기준: once, if 등의 바로 뒤 절에서는 미래시제를 쓰지 않습니다. 떨어진 문장에는 가능하다는 메모가 있습니다."},{"q":"conform ( □ ) (전치사 넣기)","o":["to + N","by + N","with + N","for + N"],"a":0,"e":"conform to + N."},{"q":"abide ( □ ) (전치사 넣기)","o":["by","to","of","for"],"a":0,"e":"abide by."},{"q":"be willing ( □ ) (구조)","o":["to + 동사원형","of + ing","for + 명사","with + 명사"],"a":0,"e":"be willing to + 동사원형."},{"q":"be fortunate ( □ ) (구조)","o":["to + 동사원형","of + ing","for + 명사","with + 명사"],"a":0,"e":"be fortunate to + 동사원형."},{"q":"be capable ( □ )","o":["of + ing + 목적어 / of + 명사","to + 동사원형만","for + 명사","with + 동사원형"],"a":0,"e":"be capable of + ing (+ 목적어) / of + 명사."},{"q":"inform + ( □ ) 목적어를 주로 씀","o":["사람","사물","장소","시간"],"a":0,"e":"자료 기준: inform은 사람 목적어를 주로 씁니다. 메모에 '영향을 미치다' 뜻의 예외가 표시되어 있습니다."},{"q":"indicate는 명사목적어 뿐 아니라 ( □ )절도 잘 끈다","o":["that","if only","although","during"],"a":0,"e":"indicate는 명사 목적어뿐 아니라 that절도 잘 이끕니다."}];
+
     const MERRY_PARTS_OF_SPEECH = [{"q": "In order to form customer □, Alpha Motors offers an 8-year warranty on its automobiles.", "o": ["loyally", "loyalty", "loyal", "loyalties"], "a": 1, "e": "form의 목적어 자리이며 customer loyalty가 '고객 충성도'라는 복합명사를 이룹니다."}, {"q": "As a manager, one of the □ you must have is to recognize the strength of each employee and embrace them.", "o": ["responsible", "responsibly", "responsibility", "responsibilities"], "a": 3, "e": "'one of the + 복수명사' 구조이므로 responsibilities가 맞습니다."}, {"q": "□ to the annual party at the Royal Palace Hotel have been sent to all staff members.", "o": ["Invitations", "Invitation", "Invite", "Inviting"], "a": 0, "e": "동사가 have이므로 주어 자리에 복수명사 Invitations가 필요합니다."}, {"q": "Depending on the weather □ in Los Angeles, your flight may be rescheduled to another date.", "o": ["condition", "conditions", "conditioned", "conditioning"], "a": 0, "e": "자료에서는 '날씨 상태(조건)'를 weather condition으로 제시합니다."}, {"q": "After the first lecture, □ at the second lecture nearly tripled due to Professor Novak's informative presentation.", "o": ["attendant", "attended", "attendee", "attendance"], "a": 3, "e": "주어 자리이며 '참석자 수'라는 의미의 불가산명사 attendance가 자연스럽습니다."}, {"q": "As long as your warranty is valid, you may receive technical □ for free.", "o": ["supporter", "support", "supports", "supported"], "a": 1, "e": "technical 뒤 명사 자리이며 '지원' 의미의 support는 불가산명사입니다."}, {"q": "Mr. Bure has hired some of the most skilled □ from Italy for his wedding in July.", "o": ["photography", "photographs", "photographers", "photographic"], "a": 2, "e": "skilled가 사람을 수식하므로 사람명사 photographers가 맞습니다."}, {"q": "For this weekend only, Trenton Outlet Store will give □ of up to 70% on all their items.", "o": ["discount", "discounts", "discounted", "discounting"], "a": 1, "e": "give의 목적어인 명사 자리이고 discount는 가산명사이므로 복수형 discounts가 맞습니다."}, {"q": "□ on vaccines for the common cold continues, but most specialists agree that successful results are still a long way off.", "o": ["Research", "Researched", "Researchers", "Researches"], "a": 0, "e": "continues의 단수 주어이며 Research는 불가산명사로 쓰입니다."}, {"q": "Bright Clean Car Wash offers free □ to customers who purchase its promotional car wax and leather cleaner.", "o": ["cleaning", "cleanest", "cleaned", "cleanness"], "a": 0, "e": "free 뒤 명사 자리이며 문맥상 '무료 청소'인 cleaning이 맞습니다."}, {"q": "Mr. and Mrs. Pete applied for □ for their voluntary group which aims to plant trees on barren lands.", "o": ["fund", "funding", "funded", "to fund"], "a": 1, "e": "전치사 for 뒤 명사 자리이며 funding은 '자금'의 불가산명사입니다."}, {"q": "Financial concerns have prevented the proposed expansion of affordable □ in the city.", "o": ["housing", "house", "housed", "to house"], "a": 0, "e": "affordable 뒤 명사 자리이며 housing은 '주택' 의미의 불가산명사입니다."}, {"q": "In order to guarantee customer □, Noa United Inc. always takes a close look at customer feedback.", "o": ["satisfy", "satisfaction", "satisfactory", "satisfactorily"], "a": 1, "e": "customer satisfaction이 '고객 만족도'라는 복합명사를 이룹니다."}, {"q": "A complete schedule and □ instructions for the next seminar are enclosed.", "o": ["registers", "register", "registered", "registration"], "a": 3, "e": "registration instructions가 '등록 안내'라는 복합명사를 이룹니다."}, {"q": "Although Mr. Chin doesn't need to hire any managers, he needs to set up a surveillance camera in □ laundromat.", "o": ["himself", "him", "he", "his"], "a": 3, "e": "명사 laundromat 앞이므로 소유격 his가 필요합니다."}, {"q": "The anonymous e-mail you received yesterday was the e-mail □ sent you.", "o": ["my", "me", "I", "mine"], "a": 2, "e": "sent의 주어 자리이므로 주격 I가 맞습니다."}, {"q": "You should receive the booklet by tomorrow and review □ thoroughly.", "o": ["themselves", "them", "itself", "it"], "a": 3, "e": "review의 목적어가 단수 booklet을 받으므로 it이 맞습니다."}, {"q": "The marketing strategies □ want to use for our client's new product line were explained in detail in the document sent last week.", "o": ["we", "our", "ourselves", "us"], "a": 0, "e": "want의 주어 자리이므로 주격 we가 맞습니다."}, {"q": "Through her outstanding performance, Mrs. Robin has shown □ to be a valuable asset to our firm.", "o": ["she", "her", "herself", "hers"], "a": 2, "e": "'show oneself to ~' 구조이므로 herself가 맞습니다."}, {"q": "Since all other staff who were supposed to watch promotional clips were occupied with other tasks, Ms. Ramos had to watch the clip □.", "o": ["her", "hers", "herself", "her own"], "a": 2, "e": "문장이 이미 완전하므로 강조적 재귀대명사 herself가 쓰입니다."}, {"q": "Since Mr. Sapp arrived in Turkey a day earlier than his co-workers, he had to spend a night at the Santa Maria Hotel by □.", "o": ["he", "him", "himself", "his own"], "a": 2, "e": "'by oneself = 혼자서' 관용 표현이므로 himself가 맞습니다."}, {"q": "Dr. Newton rarely schedules appointments □ because he is too busy consulting other patients.", "o": ["his", "he", "himself", "him"], "a": 2, "e": "문장이 이미 완전하므로 강조적 재귀대명사 himself가 쓰입니다."}, {"q": "Only □ with the approval from the CEO could apply for a managerial position in the main headquarters.", "o": ["they", "which", "whose", "those"], "a": 3, "e": "'those with ~'는 '~를 가진 사람들'을 뜻하며 주어 자리에 올 수 있습니다."}, {"q": "This year's sales figures from furniture businesses are similar to □ of the preceding two years.", "o": ["those", "that", "them", "this"], "a": 0, "e": "복수명사 sales figures를 대신하여 비교할 때 those를 씁니다."}, {"q": "□ who is interested in joining the volunteering program must fill out this form.", "o": ["Others", "They", "Herself", "Anyone"], "a": 3, "e": "관계대명사 who의 수식을 받을 수 있고 단수동사 is와 맞는 Anyone이 정답입니다."}, {"q": "Before the departure, station staff must ensure that □ of the tickets is collected from the passengers.", "o": ["every", "all", "each", "much"], "a": 2, "e": "'each of + 복수명사 + 단수동사' 구조이므로 each가 맞습니다."}, {"q": "Among the numerous pots that are displayed in our shop, □ of which are directly imported from China.", "o": ["several", "another", "nothing", "who"], "a": 0, "e": "동사가 are이므로 복수 의미를 갖는 several이 맞습니다."}, {"q": "□ of the managers can adequately deal with the demanding customers.", "o": ["No", "One another", "None", "Every"], "a": 2, "e": "of the managers 앞에서 독립적으로 주어가 될 수 있는 대명사는 None입니다."}, {"q": "While Kass Manufacturing is downsizing, □ within the industry are expanding in anticipation of future growth.", "o": ["the other", "other", "others", "another"], "a": 2, "e": "are expanding의 복수 주어가 필요하므로 others가 맞습니다."}, {"q": "Of the three options that are provided, two are not available to us, while □ is acceptable within our budget.", "o": ["the other", "others", "another", "other"], "a": 0, "e": "정확히 3개 중 2개를 제외한 나머지 하나이므로 the other가 맞습니다."}, {"q": "After three months of training, the new employees have become very □ with the company policies.", "o": ["familiarity", "familiarly", "familiar", "familiarize"], "a": 2, "e": "2형식 동사 become 뒤에는 형용사 familiar가 옵니다."}, {"q": "In response to □ visits from tourists, Rommel Hotel is offering a free transportation service from the airport to the hotel.", "o": ["frequently", "frequenting", "frequent", "frequency"], "a": 2, "e": "명사 visits를 수식하는 형용사 frequent가 필요합니다."}, {"q": "In order to avoid unnecessary costs, Mr. Rossi purchases stocks □ from the company.", "o": ["directly", "directing", "direct", "direction"], "a": 0, "e": "주어+동사+목적어가 완전하므로 동사를 수식하는 부사 directly가 맞습니다."}, {"q": "Thousands of people are visiting this year's □ conference at the Metro Convention Center in Singapore.", "o": ["week", "weeklong", "weekly", "weeks"], "a": 1, "e": "기간을 나타내어 '일주일간의 회의'가 되는 형용사 weeklong이 맞습니다."}, {"q": "Though many experts considered the plan □, the marketing strategy implemented by Lizman proved to be highly successful.", "o": ["impossible", "impossibility", "impossibly", "most impossibly"], "a": 0, "e": "'consider A B'의 목적격보어 B 자리에는 형용사 impossible이 옵니다."}, {"q": "The live speech of Mr. Sterns of Sterns Incorporated is proceeding □ without any interferences so far.", "o": ["steadily", "steadiness", "steady", "steadier"], "a": 0, "e": "자료 해설은 proceed가 자동사라 문장이 완전하며 빈칸에 부사가 와야 한다고 설명합니다. 따라서 steadily를 적용했습니다."}, {"q": "Thanks to the new sorting software, all online applications were □ processed.", "o": ["ease", "easy", "easily", "eased"], "a": 2, "e": "were processed 사이에서 동사를 수식하는 부사 easily가 필요합니다."}, {"q": "The Lexington Industry is aggressively seeking sales representatives with □ skills.", "o": ["specialize", "specialized", "specializing", "specialization"], "a": 1, "e": "명사 skills를 수식하며 '전문적인 기술' 의미가 되는 specialized가 맞습니다."}, {"q": "New employees at Jay Manufacturing will receive close supervision by □ colleagues.", "o": ["experience", "experienced", "experiencing", "experiences"], "a": 1, "e": "명사 colleagues를 수식하며 '경험 많은 동료'가 되는 experienced가 맞습니다."}, {"q": "The feedback regarding the new product was not as □ as the company had hoped or expected.", "o": ["encourage", "encouragement", "encouraged", "encouraging"], "a": 3, "e": "as ~ as 사이의 형용사 자리이며 feedback이 '고무적인' 것이므로 encouraging이 맞습니다."}, {"q": "A number of traditional buildings are in □ condition and need to be repaired.", "o": ["deteriorating", "deterioration", "deteriorates", "deteriorate"], "a": 0, "e": "명사 condition을 수식하는 분사형 형용사 deteriorating이 맞습니다."}, {"q": "It is □ that all managers complete their report by this Friday to prepare for the board meeting.", "o": ["practical", "vital", "ready", "accessible"], "a": 1, "e": "It ~ that 구문에서 '필수적인' 의미의 vital이 자연스럽습니다."}, {"q": "Please note that □ applicants who are scheduled for interviews today must also prepare for additional interviews tomorrow morning.", "o": ["each", "every", "all", "some of"], "a": 2, "e": "복수명사 applicants 앞에 바로 올 수 있는 수량형용사 all이 맞습니다."}, {"q": "Of the 450 applicants who applied this month, □ had more credentials than Villarreal.", "o": ["few", "both", "only", "every"], "a": 0, "e": "빈칸이 had의 주어 자리이며 450명 중 '거의 없는' 의미로 명사 역할이 가능한 few가 맞습니다."}, {"q": "If there is a chance of snowstorm or □ forms of inclement weather, the airport will provide a free bus service for all passengers.", "o": ["others", "another", "any other", "one another"], "a": 2, "e": "복수명사 forms를 수식할 수 있는 any other가 맞습니다."}, {"q": "The managing director was □ of my efforts I had shown during the meeting with Mr. Fuyusuki, who was a very important client.", "o": ["willing", "appreciative", "fulfilled", "decisive"], "a": 1, "e": "'be appreciative of ~'는 '~에 감사하다'라는 표현입니다."}, {"q": "If your customers are □ to receiving their orders within one week, it is essential for you to choose a reliable transportation company.", "o": ["familiar", "accustomed", "need", "aware"], "a": 1, "e": "'be accustomed to + N/ing' 구조이므로 accustomed가 맞습니다."}, {"q": "With the implementation of the automated systems, employees will □ be able to access company files while on business trips.", "o": ["shortly", "yet", "ever", "once"], "a": 0, "e": "will과 함께 가까운 미래를 나타내는 부사 shortly가 맞습니다."}, {"q": "Arnold Van Dutch, □ a popular music artist in the 1980s, now manages a successful record label called M-International.", "o": ["once", "often", "soon", "now"], "a": 0, "e": "1980년대에는 '한때' 음악가였고 지금은 경영한다는 대조이므로 once가 맞습니다."}, {"q": "We will need □ ten minutes to make preparations for the lab experiment we will be conducting for today.", "o": ["approximately", "briefly", "rapidly", "totally"], "a": 0, "e": "숫자 ten minutes를 수식해 '대략'을 뜻하는 approximately가 맞습니다."}, {"q": "□ 30 percent of college freshmen nationwide must enroll in at least one remedial course because they are not prepared for college-level work in a particular subject.", "o": ["Justly", "Roughly", "Mostly", "Fluently"], "a": 1, "e": "숫자 30 percent를 수식해 '대략'을 뜻하는 Roughly가 맞습니다."}, {"q": "After the review with other staff members, Mr. Hopkins was □ able to finish the budget report.", "o": ["lastly", "at first", "finally", "meanwhile"], "a": 2, "e": "After의 흐름상 '마침내, 결국'이라는 finally가 맞습니다."}, {"q": "Newak Restaurant has just added a few new features to its □ popular lunch menu.", "o": ["fascinated", "already", "before", "intended"], "a": 1, "e": "형용사 popular를 수식하는 부사 already가 맞습니다."}];
 
     const MERRY_PREP_NOUN_PREP = [
@@ -4381,18 +4359,81 @@
     ];
 
     let merryStandalone={mode:'hub',set:null,deck:[],idx:0,score:0,correct:0,wrong:[],locked:false,selected:null};
+    let merryCustomDraft={title:'',questions:[]};
+
+    function normalizeCustomQuizSets(){
+      state.userData.customQuizSets=Array.isArray(state.userData.customQuizSets)?state.userData.customQuizSets:[];
+      return state.userData.customQuizSets;
+    }
+    function merryOpenCustomBuilder(){
+      merryStopTimers();
+      merryCustomDraft={title:'',questions:[]};
+      merryState.screen='customBuilder';
+      merryRenderOnly();
+    }
+    function merryAddCustomQuestion(){
+      const q=String(document.getElementById('merry-custom-q')?.value||'').trim();
+      const opts=[0,1,2,3].map(i=>String(document.getElementById(`merry-custom-o${i}`)?.value||'').trim());
+      const a=Math.max(0,Math.min(3,Number(document.getElementById('merry-custom-a')?.value||0)));
+      const e=String(document.getElementById('merry-custom-e')?.value||'').trim();
+      const title=String(document.getElementById('merry-custom-title')?.value||'').trim();
+      if(!q||opts.some(x=>!x))return alert('문제와 보기 4개를 모두 입력해주세요.');
+      if(new Set(opts.map(x=>x.toLowerCase())).size<4)return alert('보기 4개는 서로 다르게 입력해주세요.');
+      merryCustomDraft.title=title||merryCustomDraft.title||'내 퀴즈';
+      merryCustomDraft.questions.push({q,o:opts,a,e});
+      merryRenderOnly();
+    }
+    function merryDeleteDraftQuestion(index){
+      merryCustomDraft.questions.splice(Number(index),1);
+      merryRenderOnly();
+    }
+    function merrySaveCustomQuiz(){
+      const title=String(document.getElementById('merry-custom-title')?.value||merryCustomDraft.title||'').trim();
+      if(!title)return alert('퀴즈 제목을 입력해주세요.');
+      if(!merryCustomDraft.questions.length)return alert('문제를 1개 이상 추가해주세요.');
+      const sets=normalizeCustomQuizSets();
+      sets.unshift({
+        id:`customquiz_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+        title:title.slice(0,80),
+        questions:merryCustomDraft.questions.map(x=>({q:x.q,o:[...x.o],a:x.a,e:x.e||''})),
+        createdAt:new Date().toISOString()
+      });
+      state.userData.customQuizSets=sets.slice(0,100);
+      saveUserData();
+      merryCustomDraft={title:'',questions:[]};
+      merryState.screen='start';
+      merryRenderOnly();
+    }
+    function merryDeleteCustomQuiz(id){
+      if(!confirm('이 직접 만든 퀴즈를 삭제할까요?'))return;
+      state.userData.customQuizSets=normalizeCustomQuizSets().filter(x=>x.id!==id);
+      saveUserData();
+      merryRenderOnly();
+    }
+    function merryStartCustomQuiz(id){
+      const set=normalizeCustomQuizSets().find(x=>x.id===id);
+      if(!set||!Array.isArray(set.questions)||!set.questions.length)return alert('문제가 없는 퀴즈입니다.');
+      merryStartStandalone(`custom:${id}`);
+    }
+
 
     function merryStartStandalone(set){
       merryStopTimers();
-      const source=set==='intransitive'
-        ? MERRY_INTRANSITIVE
-        : set==='collocation'
-          ? MERRY_COLLOCATIONS
-          : set==='collocationUpload'
-            ? MERRY_COLLOCATION_UPLOAD
-            : set==='partsOfSpeech'
-              ? MERRY_PARTS_OF_SPEECH
-              : MERRY_PREP_NOUN_PREP;
+      const customId=String(set||'').startsWith('custom:')?String(set).slice(7):null;
+      const customSet=customId?normalizeCustomQuizSets().find(x=>x.id===customId):null;
+      const source=customSet
+        ? customSet.questions
+        : set==='intransitive'
+          ? MERRY_INTRANSITIVE
+          : set==='collocation'
+            ? MERRY_COLLOCATIONS
+            : set==='collocationUpload'
+              ? MERRY_COLLOCATION_UPLOAD
+              : set==='partsOfSpeech'
+                ? MERRY_PARTS_OF_SPEECH
+                : set==='day1p5'
+                  ? MERRY_DAY1_P5
+                  : MERRY_PREP_NOUN_PREP;
 
       // 자료에 들어 있는 항목을 하나도 빼지 않고 전부 출제합니다.
       // 랜덤 10문제 제한 없이 원본 자료 순서를 그대로 유지합니다.
@@ -4423,7 +4464,10 @@
       const item=entry.x;
       let q=null;
 
-      if(merryStandalone.set==='intransitive'){
+      if(String(merryStandalone.set||'').startsWith('custom:')){
+        const answer=item.o[item.a];
+        q={stem:item.q,sub:'직접 만든 퀴즈',answer,options:[...item.o],explain:item.e||`정답: ${answer}`};
+      }else if(merryStandalone.set==='intransitive'){
         const [base,answer,meaning]=item;
         const distract=merryShuffle([...new Set(MERRY_INTRANSITIVE.map(x=>x[1]).filter(x=>x!==answer))]).slice(0,3);
         q={stem:`${base} ( □ )`,sub:meaning,answer,options:merryShuffle([answer,...distract])};
@@ -4439,6 +4483,9 @@
       }else if(merryStandalone.set==='partsOfSpeech'){
         const answer=item.o[item.a];
         q={stem:item.q,sub:'빈칸에 가장 알맞은 품사를 고르세요.',answer,options:[...item.o],explain:item.e};
+      }else if(merryStandalone.set==='day1p5'){
+        const answer=item.o[item.a];
+        q={stem:item.q,sub:'Day 1 · Part 5 핵심 포인트',answer,options:[...item.o],explain:item.e};
       }else{
         const [phrase,meaning]=item;
         const distract=merryShuffle([...new Set(MERRY_PREP_NOUN_PREP.map(x=>x[0]).filter(x=>x!==phrase))]).slice(0,3);
@@ -4492,10 +4539,15 @@
     }
 
     function merryStandaloneTitle(){
+      if(String(merryStandalone.set||'').startsWith('custom:')){
+        const id=String(merryStandalone.set).slice(7);
+        return normalizeCustomQuizSets().find(x=>x.id===id)?.title||'직접 만든 퀴즈';
+      }
       return merryStandalone.set==='intransitive'?'빈출 자동사'
         :merryStandalone.set==='collocation'?'연어 + 고급어휘'
         :merryStandalone.set==='collocationUpload'?'연어[고급어휘]'
         :merryStandalone.set==='partsOfSpeech'?'빈출품사 필수문제'
+        :merryStandalone.set==='day1p5'?'Day 1 P5'
         :'전치사 + 명사 + 전치사';
     }
 
@@ -4585,6 +4637,29 @@
       merryStandalone={mode:'hub',set:null,deck:[],idx:0,score:0,correct:0,wrong:[],locked:false,selected:null,reward:null,rewarded:false};
       merryRenderOnly();
     }
+    async function merrySyncQuizData(){
+      const btn=document.getElementById('merry-sync-btn');
+      const old=btn?.textContent||'☁️ 동기화';
+      if(btn){btn.disabled=true;btn.textContent='☁️ 동기화 중...';}
+      try{
+        if(!state.user||!state.lang)throw new Error('사용자/언어 정보 없음');
+        // 현재 기기의 퀴즈/학습 데이터를 먼저 클라우드에 올린 뒤 다시 불러옵니다.
+        const snapshot=normalizeUserData(JSON.parse(JSON.stringify(state.userData)));
+        await userDataSaveQueue.catch(()=>{});
+        const ok=await saveUserDataToCloud(state.user,state.lang,SHARED_STUDY_CHARACTER,snapshot);
+        if(!ok)throw new Error('클라우드 저장 실패');
+        await loadUserData();
+        alert('☁️ 퀴즈 데이터 동기화 완료!');
+        merryRenderOnly();
+      }catch(e){
+        console.warn('Quiz sync failed:',e);
+        alert('동기화에 실패했습니다. 인터넷 연결이나 Supabase 상태를 확인해주세요.');
+      }finally{
+        const b=document.getElementById('merry-sync-btn');
+        if(b){b.disabled=false;b.textContent=old;}
+      }
+    }
+
     function merryRestart(){merryGoHome()}
     function merryStopTimers(){if(merryR1Timer)clearInterval(merryR1Timer);if(merryR2Timer)clearInterval(merryR2Timer);clearTimeout(merryFeedbackTimer);merryR1Timer=merryR2Timer=merryFeedbackTimer=null}
     function merryUpdateTimerOnly(){const value=merryState.screen==='r1'?merryState.r1Time:merryState.r2Time,max=merryState.screen==='r1'?60:15,txt=document.getElementById('merry-timer-text'),fill=document.getElementById('merry-timer-fill');if(txt)txt.textContent=`${value}초`;if(fill){fill.style.width=`${Math.max(0,value/max*100)}%`;fill.classList.toggle('danger',value<=10)}}
@@ -4592,186 +4667,47 @@
     function merryTypeHint(type){return type==='전치사'?'뒤에 명사':type==='접속사'?'뒤에 주어+동사':'앞 문장이 끝난 뒤'}
     function merryLevel(){const total=merryState.round1Score+merryState.round2Score,acc=merryState.r2Correct;if(total>=500&&acc>=9)return{t:'👑 전접부 마스터',m:'900+ 각 나왔어요 🔥 빈칸 뒤만 보는 눈이 생겼네요'};if(total>=500&&acc<9)return{t:'마스터급 점수',m:'점수는 마스터급인데 실전 정답률이 아쉬워요! 9개 이상 맞히면 왕관이에요 👑'};if(total>=380)return{t:'800점대 감각',m:'거의 다 왔어요! 겸용 단어(before/after/since/until/except)만 잡으면 마스터예요'};if(total>=250)return{t:'700점대 진입',m:'감 잡았어요. 접속부사는 문장이 끝난 뒤에만 온다는 것, 기억하세요'};return{t:'새싹',m:'괜찮아요, 지금 알았으니 된 거예요 😊 전치사 뒤엔 명사, 접속사 뒤엔 주어+동사부터'}}
 
-
-    function normalizeCustomQuizQuestion(q){
-      const src=q&&typeof q==='object'?q:{};
-      if(src.type==='blank'){
-        return {id:src.id||`cqq_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,type:'blank',question:String(src.question||''),answer:String(src.answer||''),explain:String(src.explain||'')};
-      }
-      const opts=Array.isArray(src.options)?src.options.slice(0,4).map(x=>String(x||'')):[String(src.a||''),String(src.b||''),String(src.c||''),String(src.d||'')];
-      while(opts.length<4)opts.push('');
-      return {id:src.id||`cqq_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,type:'choice',question:String(src.question||''),options:opts,answerIndex:Math.min(3,Math.max(0,Number(src.answerIndex||0))),explain:String(src.explain||'')};
-    }
-    function normalizeCustomQuizzes(){
-      state.userData.customQuizzes=Array.isArray(state.userData.customQuizzes)?state.userData.customQuizzes:[];
-      state.userData.customQuizzes=state.userData.customQuizzes.map(q=>({
-        id:q.id||`cq_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
-        title:String(q.title||'제목 없는 퀴즈'),
-        questions:(Array.isArray(q.questions)?q.questions:[]).map(normalizeCustomQuizQuestion),
-        createdAt:q.createdAt||new Date().toISOString(),
-        updatedAt:q.updatedAt||q.createdAt||new Date().toISOString()
-      }));
-      return state.userData.customQuizzes;
-    }
-    function openCustomQuizStudio(){
-      merryStopTimers();
-      merryState.screen='customQuiz';
-      state.customQuizScreen='list';
-      state.customQuizDraft=null;
-      state.customQuizRun=null;
-      render();
-    }
-    function closeCustomQuizStudio(){
-      state.customQuizScreen='list';state.customQuizDraft=null;state.customQuizRun=null;merryState.screen='start';render();
-    }
-    function newCustomQuiz(){
-      state.customQuizDraft={id:`cq_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,title:'',questions:[],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
-      state.customQuizQuestionType='choice';
-      state.customQuizScreen='edit';
-      render();
-    }
-    function editCustomQuiz(id){
-      const q=normalizeCustomQuizzes().find(x=>x.id===id);if(!q)return;
-      state.customQuizDraft=JSON.parse(JSON.stringify(q));state.customQuizQuestionType='choice';state.customQuizScreen='edit';render();
-    }
-    function deleteCustomQuiz(id){
-      if(!confirm('이 퀴즈를 삭제할까요?'))return;
-      state.userData.customQuizzes=normalizeCustomQuizzes().filter(x=>x.id!==id);saveUserData();render();
-    }
-    function setCustomQuizQuestionType(type){state.customQuizQuestionType=type==='blank'?'blank':'choice';render()}
-    function addCustomQuizQuestion(){
-      if(!state.customQuizDraft)return;
-      const type=state.customQuizQuestionType;
-      const question=String(document.getElementById('cq-question')?.value||'').trim();
-      const explain=String(document.getElementById('cq-explain')?.value||'').trim();
-      if(!question)return alert('문제를 입력해주세요.');
-      if(type==='blank'){
-        const answer=String(document.getElementById('cq-blank-answer')?.value||'').trim();
-        if(!answer)return alert('정답을 입력해주세요.');
-        state.customQuizDraft.questions.push(normalizeCustomQuizQuestion({type:'blank',question,answer,explain}));
-      }else{
-        const options=['A','B','C','D'].map(k=>String(document.getElementById(`cq-opt-${k}`)?.value||'').trim());
-        if(options.some(x=>!x))return alert('보기 A~D를 모두 입력해주세요.');
-        const answerIndex=Number(document.getElementById('cq-answer-index')?.value||0);
-        state.customQuizDraft.questions.push(normalizeCustomQuizQuestion({type:'choice',question,options,answerIndex,explain}));
-      }
-      render();
-    }
-    function removeCustomQuizQuestion(idx){
-      if(!state.customQuizDraft)return;
-      state.customQuizDraft.questions.splice(idx,1);render();
-    }
-    function saveCustomQuizDraft(){
-      if(!state.customQuizDraft)return;
-      const title=String(document.getElementById('cq-title')?.value||state.customQuizDraft.title||'').trim();
-      if(!title)return alert('퀴즈 제목을 입력해주세요.');
-      if(!state.customQuizDraft.questions.length)return alert('문제를 1개 이상 추가해주세요.');
-      state.customQuizDraft.title=title;state.customQuizDraft.updatedAt=new Date().toISOString();
-      const arr=normalizeCustomQuizzes(),idx=arr.findIndex(x=>x.id===state.customQuizDraft.id);
-      const saved=JSON.parse(JSON.stringify(state.customQuizDraft));
-      if(idx>=0)arr[idx]=saved;else arr.unshift(saved);
-      state.userData.customQuizzes=arr;saveUserData();
-      state.customQuizScreen='list';state.customQuizDraft=null;render();
-    }
-    function normalizeCustomAnswer(v){
-      return String(v||'').toLowerCase().replace(/[\s·・.。,!！?？()（）\[\]{}'"“”‘’]/g,'').trim();
-    }
-    function startCustomQuiz(id){
-      const quiz=normalizeCustomQuizzes().find(x=>x.id===id);if(!quiz||!quiz.questions.length)return;
-      state.customQuizRun={quiz:JSON.parse(JSON.stringify(quiz)),idx:0,correct:0,answered:false,selected:null,userAnswer:'',isCorrect:false,wrong:[],finished:false,rewarded:false};
-      state.customQuizScreen='play';render();
-    }
-    function answerCustomQuizChoice(idx){
-      const r=state.customQuizRun;if(!r||r.answered)return;
-      const q=r.quiz.questions[r.idx],ok=Number(idx)===Number(q.answerIndex);
-      r.answered=true;r.selected=Number(idx);r.isCorrect=ok;if(ok)r.correct++;else r.wrong.push({q,answer:q.options[q.answerIndex],user:q.options[idx]});
-      render();
-    }
-    function submitCustomQuizBlank(){
-      const r=state.customQuizRun;if(!r||r.answered)return;
-      const q=r.quiz.questions[r.idx],raw=String(document.getElementById('cq-run-blank')?.value||'').trim();
-      if(!raw)return;
-      const accepted=String(q.answer||'').split('|').map(normalizeCustomAnswer).filter(Boolean);
-      const ok=accepted.includes(normalizeCustomAnswer(raw));
-      r.answered=true;r.userAnswer=raw;r.isCorrect=ok;if(ok)r.correct++;else r.wrong.push({q,answer:q.answer,user:raw});
-      render();
-    }
-    function nextCustomQuizQuestion(){
-      const r=state.customQuizRun;if(!r||!r.answered)return;
-      if(r.idx<r.quiz.questions.length-1){r.idx++;r.answered=false;r.selected=null;r.userAnswer='';r.isCorrect=false;render();return}
-      r.finished=true;
-      if(!r.rewarded){
-        const exp=r.correct*3,coins=r.correct*4,rate=r.quiz.questions.length?Math.round(r.correct/r.quiz.questions.length*100):0,tickets=rate===100?3:rate>=80?2:rate>=60?1:0;
-        addRewards(exp,coins);if(tickets)state.userData.shop.tickets=Math.min(10,Number(state.userData.shop.tickets||0)+tickets);
-        r.reward={exp,coins,tickets};r.rewarded=true;
-        state.userData.studyHistory.push({date:localDateKey(),type:'custom_quiz',scope:r.quiz.id,total:r.quiz.questions.length,correct:r.correct});
-        saveUserData();
-      }
-      render();
-    }
-    function renderCustomQuizStudio(){
-      const quizzes=normalizeCustomQuizzes();
-      if(state.customQuizScreen==='edit'&&state.customQuizDraft){
-        const d=state.customQuizDraft,type=state.customQuizQuestionType;
-        return `<div class="merry-wrap merry-fade"><div class="merry-card"><div class="cq-shell">
-          <div class="cq-head"><div><div class="merry-brand">내 퀴즈</div><div class="merry-title" style="font-size:24px;">퀴즈 만들기</div></div><button class="merry-btn merry-choice" onclick="state.customQuizScreen='list';state.customQuizDraft=null;render();">← 목록</button></div>
-          <label class="cq-label">퀴즈 제목<input id="cq-title" class="cq-input" maxlength="80" value="${escHtml(d.title||'')}" placeholder="예: 토익 Part 5 오답"></label>
-          <div class="cq-card">
-            <div style="font-size:13px;font-weight:900;">문제 유형</div>
-            <div class="cq-type-tabs"><button class="${type==='choice'?'btn-pixel-black':'btn-pixel-white'}" onclick="setCustomQuizQuestionType('choice')">객관식</button><button class="${type==='blank'?'btn-pixel-black':'btn-pixel-white'}" onclick="setCustomQuizQuestionType('blank')">□ 빈칸형</button></div>
-            <div class="cq-grid">
-              <label class="cq-label full">문제<textarea id="cq-question" class="cq-textarea" placeholder="${type==='blank'?'예: ( □ ) authority 권한을 위임하다\\n빈칸은 □ 로 입력하면 돼요.':'문제를 입력하세요.'}"></textarea></label>
-              ${type==='choice'?`
-                ${['A','B','C','D'].map(k=>`<label class="cq-label">보기 ${k}<input id="cq-opt-${k}" class="cq-input" placeholder="보기 ${k}"></label>`).join('')}
-                <label class="cq-label full">정답<select id="cq-answer-index" class="cq-select"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select></label>
-              `:`
-                <label class="cq-label full">정답<input id="cq-blank-answer" class="cq-input" placeholder="예: delegate  | 로 여러 정답 허용 가능 (provided|assuming)"></label>
-              `}
-              <label class="cq-label full">해설 (선택)<textarea id="cq-explain" class="cq-textarea" style="min-height:70px;" placeholder="왜 이 답이 정답인지 적어둘 수 있어요."></textarea></label>
-            </div>
-            <button class="merry-btn merry-primary" style="width:100%;margin-top:10px;" onclick="addCustomQuizQuestion()">＋ 이 문제 추가</button>
-          </div>
-          <div class="cq-card"><div class="cq-head"><b>추가한 문제</b><span>${d.questions.length}문제</span></div>
-            <div class="cq-list">${d.questions.length?d.questions.map((q,i)=>`<div class="cq-question-card"><div class="cq-head"><span class="cq-badge">${q.type==='blank'?'□ 빈칸형':'객관식'}</span><button class="todo-delete" onclick="removeCustomQuizQuestion(${i})">×</button></div><div style="font-size:12px;font-weight:850;white-space:pre-wrap;margin-top:7px;">${escHtml(q.question)}</div><div style="font-size:11px;color:#166534;margin-top:5px;">정답: ${escHtml(q.type==='blank'?q.answer:q.options[q.answerIndex])}</div></div>`).join(''):`<div style="padding:22px;text-align:center;color:#94A3B8;">아직 추가한 문제가 없어요.</div>`}</div>
-          </div>
-          <button class="merry-btn merry-primary" onclick="saveCustomQuizDraft()">퀴즈 저장하기</button>
-        </div></div></div>`;
-      }
-
-      if(state.customQuizScreen==='play'&&state.customQuizRun){
-        const r=state.customQuizRun;
-        if(r.finished){
-          const rate=r.quiz.questions.length?Math.round(r.correct/r.quiz.questions.length*100):0;
-          return `<div class="merry-wrap merry-fade"><div class="merry-card"><div class="merry-brand">내 퀴즈</div><div class="merry-title">${escHtml(r.quiz.title)} 결과</div><div class="merry-result-grid"><div class="merry-stat"><b>${r.correct}/${r.quiz.questions.length}</b>정답</div><div class="merry-stat"><b>${rate}%</b>정확도</div><div class="merry-stat"><b>+${r.reward?.exp||0}</b>EXP</div></div><div class="merry-wrong-section"><h3>오답</h3>${r.wrong.length?r.wrong.map((w,i)=>`<div class="merry-wrong-item"><b>${i+1}. ${escHtml(w.q.question)}</b><br>내 답: ${escHtml(w.user)}<br>정답: ${escHtml(w.answer)}${w.q.explain?`<br><span style="color:#64748B;">${escHtml(w.q.explain)}</span>`:''}</div>`).join(''):`<div class="merry-wrong-item">틀린 문제가 없어요.</div>`}</div><button class="merry-btn merry-primary" style="width:100%;margin-top:14px;" onclick="startCustomQuiz('${r.quiz.id}')">다시 풀기</button><button class="merry-btn merry-choice" style="width:100%;margin-top:7px;" onclick="state.customQuizScreen='list';state.customQuizRun=null;render();">퀴즈 목록</button></div></div>`;
-        }
-        const q=r.quiz.questions[r.idx];
-        return `<div class="merry-wrap merry-fade"><div class="merry-card"><div class="cq-head"><div><div class="merry-brand">${escHtml(r.quiz.title)}</div><div style="font-size:12px;font-weight:900;">${r.idx+1} / ${r.quiz.questions.length}</div></div><button class="merry-btn merry-choice" onclick="state.customQuizScreen='list';state.customQuizRun=null;render();">종료</button></div>
-          <div class="cq-card" style="margin-top:12px;"><div class="cq-run-question">${escHtml(q.question)}</div>
-          ${q.type==='choice'?`<div style="margin-top:14px;">${q.options.map((opt,i)=>{let cls='option-btn';if(r.answered){if(i===q.answerIndex)cls+=' btn-correct';else if(i===r.selected)cls+=' btn-wrong'}return `<button class="${cls}" onclick="answerCustomQuizChoice(${i})">${String.fromCharCode(65+i)}. ${escHtml(opt)}</button>`}).join('')}</div>`:`<div style="margin-top:14px;"><input id="cq-run-blank" class="cq-input" placeholder="정답 입력" ${r.answered?'disabled':''} onkeydown="if(event.key==='Enter')submitCustomQuizBlank();">${!r.answered?`<button class="merry-btn merry-primary" style="width:100%;margin-top:8px;" onclick="submitCustomQuizBlank()">정답 확인</button>`:''}</div>`}
-          ${r.answered?`<div class="cq-answer-box ${r.isCorrect?'correct':'wrong'}"><div>${r.isCorrect?'● 정답!':'✕ 오답'}</div>${q.type==='blank'?`<div>내 답: ${escHtml(r.userAnswer)}</div>`:''}<div>정답: ${escHtml(q.type==='blank'?q.answer:q.options[q.answerIndex])}</div>${q.explain?`<div style="margin-top:4px;">${escHtml(q.explain)}</div>`:''}</div><button class="merry-btn merry-primary" style="width:100%;margin-top:9px;" onclick="nextCustomQuizQuestion()">${r.idx<r.quiz.questions.length-1?'다음 문제':'결과 보기'}</button>`:''}
-          </div></div></div>`;
-      }
-
-      return `<div class="merry-wrap merry-fade"><div class="merry-card"><div class="cq-shell">
-        <div class="cq-head"><div><div class="merry-brand">메리토익 · 내 퀴즈</div><div class="merry-title" style="font-size:24px;">내 퀴즈</div><div class="merry-sub">객관식과 □ 빈칸형을 한 퀴즈 안에 섞어서 만들 수 있어요.</div></div><button class="merry-btn merry-choice" onclick="closeCustomQuizStudio()">← 퀴즈 목록</button></div>
-        <button class="merry-btn merry-primary" onclick="newCustomQuiz()">＋ 새 퀴즈 만들기</button>
-        <div class="cq-list">${quizzes.length?quizzes.map(q=>`<div class="cq-list-item"><div class="cq-head"><div><b>${escHtml(q.title)}</b><div style="font-size:10px;color:#64748B;margin-top:4px;">${q.questions.length}문제 · 객관식 ${q.questions.filter(x=>x.type==='choice').length} · 빈칸형 ${q.questions.filter(x=>x.type==='blank').length}</div></div><div style="display:flex;gap:5px;flex-wrap:wrap;"><button class="btn-pixel-black" onclick="startCustomQuiz('${q.id}')">풀기</button><button class="btn-pixel-white" onclick="editCustomQuiz('${q.id}')">수정</button><button class="btn-pixel-white" onclick="deleteCustomQuiz('${q.id}')">삭제</button></div></div></div>`).join(''):`<div class="cq-card" style="text-align:center;color:#94A3B8;">아직 만든 퀴즈가 없어요.<br>위 버튼에서 첫 퀴즈를 만들어보세요.</div>`}</div>
-      </div></div></div>`;
-    }
-
     function renderMerryChallenge(){
-      if(state.customQuizScreen!=='list' || merryState.screen==='customQuiz') return renderCustomQuizStudio();
+      if(merryState.screen==='customBuilder'){
+        const qs=merryCustomDraft.questions||[];
+        return `<div class="merry-wrap merry-fade"><div class="merry-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+            <div><div class="merry-brand">메리토익 · 직접 만들기</div><div class="merry-title" style="font-size:25px;">내 퀴즈 만들기</div></div>
+            <button type="button" class="merry-btn merry-choice" onclick="merryGoHome()">← 퀴즈 목록</button>
+          </div>
+          <div style="margin-top:16px;display:grid;gap:9px;">
+            <label style="font-size:12px;font-weight:900;">퀴즈 제목<input id="merry-custom-title" class="std-input" maxlength="80" value="${escHtml(merryCustomDraft.title||'')}" placeholder="예: 토익 Part 5 오답"></label>
+            <label style="font-size:12px;font-weight:900;">문제<textarea id="merry-custom-q" class="std-input" style="height:84px;padding-top:10px;resize:vertical;" placeholder="문제를 입력하세요. 빈칸은 □ 로 입력해도 돼요."></textarea></label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              ${[0,1,2,3].map(i=>`<label style="font-size:11px;font-weight:900;">보기 ${String.fromCharCode(65+i)}<input id="merry-custom-o${i}" class="std-input" placeholder="보기 ${String.fromCharCode(65+i)}"></label>`).join('')}
+            </div>
+            <label style="font-size:12px;font-weight:900;">정답
+              <select id="merry-custom-a" class="std-input"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select>
+            </label>
+            <label style="font-size:12px;font-weight:900;">해설 (선택)<textarea id="merry-custom-e" class="std-input" style="height:68px;padding-top:10px;resize:vertical;" placeholder="왜 이 답이 정답인지 적어둘 수 있어요."></textarea></label>
+            <button type="button" class="merry-btn merry-primary" onclick="merryAddCustomQuestion()">＋ 이 문제 추가</button>
+          </div>
+          <div style="margin-top:18px;border-top:1px solid #E5E7EB;padding-top:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;"><b>추가한 문제</b><span>${qs.length}문제</span></div>
+            ${qs.length?qs.map((x,i)=>`<div style="margin-top:8px;padding:10px;border:1px solid #E5E7EB;border-radius:10px;"><div style="display:flex;justify-content:space-between;gap:8px;"><b>${i+1}. ${escHtml(x.q)}</b><button type="button" class="todo-delete" onclick="merryDeleteDraftQuestion(${i})">×</button></div><div style="font-size:11px;color:#64748B;margin-top:5px;">정답 ${String.fromCharCode(65+x.a)} · ${escHtml(x.o[x.a])}</div></div>`).join(''):`<div style="padding:22px;text-align:center;color:#94A3B8;">아직 추가한 문제가 없어요.</div>`}
+          </div>
+          <button type="button" class="merry-btn merry-primary" style="width:100%;margin-top:14px;" onclick="merrySaveCustomQuiz()" ${qs.length?'':'disabled'}>퀴즈 저장하기</button>
+        </div></div>`;
+      }
+
       if(merryState.screen==='start')return `<div class="merry-wrap merry-fade"><div class="merry-card">
-        <div class="merry-brand">메리토익 · Merry TOEIC</div><div class="merry-title">퀴즈</div>
-        <div class="merry-sub">원하는 유형을 골라 독립적으로 연습할 수 있어요.</div><div style="margin-top:10px;padding:9px 11px;border-radius:10px;background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;font-size:11px;font-weight:850;">퀴즈를 끝까지 완료하면 EXP · 코인 · 응원 티켓 보상을 받아요.</div>
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;"><div><div class="merry-brand">메리토익 · Merry TOEIC</div><div class="merry-title">퀴즈</div></div><button id="merry-sync-btn" type="button" class="merry-btn merry-choice" onclick="merrySyncQuizData()">☁️ 동기화</button></div>
+        <div class="merry-sub">원하는 유형을 골라 독립적으로 연습할 수 있어요. 직접 만든 퀴즈도 사용자별로 클라우드 동기화돼요.</div><div style="margin-top:10px;padding:9px 11px;border-radius:10px;background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;font-size:11px;font-weight:850;">퀴즈를 끝까지 완료하면 EXP · 코인 · 응원 티켓 보상을 받아요.</div>
         <div class="merry-quiz-grid">
           <div class="merry-quiz-card"><span class="merry-progress-chip">2라운드</span><h3>전치사·접속사·접속부사</h3><p>60초 스피드 분류 + 실전 빈칸 10문제</p><button type="button" class="merry-btn merry-primary" onclick="merryStart()">시작하기</button></div>
           <div class="merry-quiz-card"><span class="merry-progress-chip">자료 전체</span><h3>빈출 자동사</h3><p>자료에 있는 ${MERRY_INTRANSITIVE.length}개 표현을 전부 순서대로 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('intransitive')">시작하기</button></div>
           <div class="merry-quiz-card"><span class="merry-progress-chip">자료 전체</span><h3>연어 + 고급어휘</h3><p>자료에 있는 ${MERRY_COLLOCATIONS.length}개 연어·고급어휘를 전부 순서대로 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('collocation')">시작하기</button></div>
           <div class="merry-quiz-card"><span class="merry-progress-chip">업로드 자료 전체 · ${MERRY_COLLOCATION_UPLOAD.length}문제</span><h3>연어[고급어휘]</h3><p>업로드한 연어 퀴즈/답 자료의 50문제를 전부 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('collocationUpload')">시작하기</button></div>
-          <div class="merry-quiz-card"><span class="merry-progress-chip">직접 제작</span><h3>내 퀴즈</h3><p>객관식뿐 아니라 □ 빈칸형 문제도 직접 만들고 저장해서 풀 수 있어요.</p><button type="button" class="merry-btn merry-primary" onclick="openCustomQuizStudio()">만들기 / 퀴즈 목록</button></div>
           <div class="merry-quiz-card"><span class="merry-progress-chip">업로드 자료 전체 · ${MERRY_PARTS_OF_SPEECH.length}문제</span><h3>빈출품사 필수문제</h3><p>명사·대명사·형용사·부사 필수문제를 자료 순서대로 전부 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('partsOfSpeech')">시작하기</button></div>
+          <div class="merry-quiz-card"><span class="merry-progress-chip">DAY 1 · ${MERRY_DAY1_P5.length}문제</span><h3>Day 1 P5</h3><p>직접 정리한 Part 5 핵심 어휘·전치사·문법 포인트를 전부 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('day1p5')">시작하기</button></div>
           <div class="merry-quiz-card"><span class="merry-progress-chip">자료 전체</span><h3>전치사 + 명사 + 전치사</h3><p>자료에 있는 ${MERRY_PREP_NOUN_PREP.length}개 세트 표현을 전부 순서대로 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('prepNounPrep')">시작하기</button></div>
+          <div class="merry-quiz-card" style="border-style:dashed;"><span class="merry-progress-chip">CUSTOM</span><h3>✏️ 퀴즈 직접 만들기</h3><p>문제 · 보기 4개 · 정답 · 해설을 직접 입력해서 나만의 객관식 퀴즈를 만들어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryOpenCustomBuilder()">만들기</button></div>
+          ${normalizeCustomQuizSets().map(s=>`<div class="merry-quiz-card"><span class="merry-progress-chip">내 퀴즈 · ${(s.questions||[]).length}문제</span><h3>${escHtml(s.title||'내 퀴즈')}</h3><p>직접 만든 문제 세트예요.</p><div style="display:flex;gap:6px;"><button type="button" class="merry-btn merry-primary" style="flex:1;" onclick="merryStartCustomQuiz('${s.id}')">풀기</button><button type="button" class="merry-btn merry-choice" onclick="merryDeleteCustomQuiz('${s.id}')">삭제</button></div></div>`).join('')}
         </div>
       </div></div>`;
 
