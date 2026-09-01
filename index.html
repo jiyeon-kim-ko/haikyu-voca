@@ -4528,7 +4528,14 @@
         q={stem:item.q,sub:'빈칸에 가장 알맞은 품사를 고르세요.',answer,options:[...item.o],explain:item.e};
       }else if(merryStandalone.set==='day1p5'){
         const answer=item.o[item.a];
-        q={stem:item.q,sub:'Day 1 · Part 5 핵심 포인트',answer,options:[...item.o],explain:item.e};
+        q={
+          type:'subjective',
+          stem:item.q,
+          sub:'Day 1 · Part 5 주관식',
+          answer,
+          options:[],
+          explain:item.e||`정답: ${answer}`
+        };
       }else{
         const [phrase,meaning]=item;
         const distract=merryShuffle([...new Set(MERRY_PREP_NOUN_PREP.map(x=>x[0]).filter(x=>x!==phrase))]).slice(0,3);
@@ -4784,7 +4791,7 @@
           <div class="merry-quiz-card"><span class="merry-progress-chip">자료 전체</span><h3>연어 + 고급어휘</h3><p>자료에 있는 ${MERRY_COLLOCATIONS.length}개 연어·고급어휘를 전부 순서대로 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('collocation')">시작하기</button></div>
           <div class="merry-quiz-card"><span class="merry-progress-chip">업로드 자료 전체 · ${MERRY_COLLOCATION_UPLOAD.length}문제</span><h3>연어[고급어휘]</h3><p>업로드한 연어 퀴즈/답 자료의 50문제를 전부 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('collocationUpload')">시작하기</button></div>
           <div class="merry-quiz-card"><span class="merry-progress-chip">업로드 자료 전체 · ${MERRY_PARTS_OF_SPEECH.length}문제</span><h3>빈출품사 필수문제</h3><p>명사·대명사·형용사·부사 필수문제를 자료 순서대로 전부 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('partsOfSpeech')">시작하기</button></div>
-          <div class="merry-quiz-card"><span class="merry-progress-chip">DAY 1 · ${MERRY_DAY1_P5.length}문제</span><h3>Day 1 P5</h3><p>직접 정리한 Part 5 핵심 어휘·전치사·문법 포인트를 전부 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('day1p5')">시작하기</button></div>
+          <div class="merry-quiz-card"><span class="merry-progress-chip">DAY 1 · 주관식 · ${MERRY_DAY1_P5.length}문제</span><h3>Day 1 P5</h3><p>보기 없이 정답을 직접 입력하는 주관식으로 Part 5 핵심 어휘·전치사·문법 포인트를 전부 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('day1p5')">주관식 시작</button></div>
           <div class="merry-quiz-card"><span class="merry-progress-chip">자료 전체</span><h3>전치사 + 명사 + 전치사</h3><p>자료에 있는 ${MERRY_PREP_NOUN_PREP.length}개 세트 표현을 전부 순서대로 풀어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryStartStandalone('prepNounPrep')">시작하기</button></div>
           <div class="merry-quiz-card" style="border-style:dashed;"><span class="merry-progress-chip">CUSTOM</span><h3>✏️ 퀴즈 직접 만들기</h3><p>문제 · 보기 4개 · 정답 · 해설을 직접 입력해서 나만의 객관식 퀴즈를 만들어요.</p><button type="button" class="merry-btn merry-primary" onclick="merryOpenCustomBuilder()">만들기</button></div>
           ${normalizeCustomQuizSets().map(s=>`<div class="merry-quiz-card"><span class="merry-progress-chip">내 퀴즈 · ${s.type==='subjective'?'주관식':'객관식'} · ${(s.questions||[]).length}문제</span><h3>${escHtml(s.title||'내 퀴즈')}</h3><p>직접 만든 ${s.type==='subjective'?'주관식':'객관식'} 문제 세트예요.</p><div style="display:flex;gap:6px;"><button type="button" class="merry-btn merry-primary" style="flex:1;" onclick="merryStartCustomQuiz('${s.id}')">풀기</button><button type="button" class="merry-btn merry-choice" onclick="merryDeleteCustomQuiz('${s.id}')">삭제</button></div></div>`).join('')}
