@@ -3692,6 +3692,11 @@
                   <div>내가 쓴 답: <b>${escHtml(state.hardLastAnswer||'')}</b></div>
                   <div>실제 정답: <b>${escHtml(q.meaning)}</b></div>
                 </div>
+                ${!state.hardIsCorrect ? `
+                  <button class="btn-pixel-white" style="width:100%;margin-bottom:8px;border-color:#16A34A;color:#15803D;font-weight:900;" onclick="markHardCorrectManually()">
+                    ✓ 내 답도 맞음 · 정답 처리
+                  </button>
+                ` : ''}
                 <button class="btn-pixel-black" style="width: 100%;" onclick="nextHard()">
                   ${state.hardIdx < state.hardQuestions.length - 1 ? '다음 문제 ➔' : '세트 결과 확인 ➔'}
                 </button>
@@ -5118,6 +5123,36 @@
         state.mood = 'angry';
         state.speech = getCharSpeech('hardWrong');
       }
+      render();
+    }
+
+    function markHardCorrectManually() {
+      if (!state.hardAnswered || state.hardIsCorrect) return;
+      const q = state.hardQuestions[state.hardIdx];
+      if (!q) return;
+
+      state.hardIsCorrect = true;
+      state.hardScore.correct++;
+
+      // Remove this question from the current set's wrong list.
+      state.hardScore.wrongIds = (state.hardScore.wrongIds || []).filter(id => id !== q.id);
+
+      // Remove the wrong-answer record created by this exact attempt.
+      const today = localDateKey();
+      const list = Array.isArray(state.userData.todayWrongAnswers) ? state.userData.todayWrongAnswers : [];
+      for (let i = list.length - 1; i >= 0; i--) {
+        const x = list[i];
+        if (x && x.mode === 'hard' && x.date === today && x.id === q.id &&
+            String(x.userAnswer || '') === String(state.hardLastAnswer || '')) {
+          list.splice(i, 1);
+          break;
+        }
+      }
+      state.userData.todayWrongAnswers = list;
+
+      state.mood = 'happy';
+      state.speech = getCharSpeech('hardCorrect');
+      saveUserData();
       render();
     }
 
