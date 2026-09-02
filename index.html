@@ -1941,6 +1941,8 @@
       selectedDay: 'all',
       testSource: 'days', // 'days' | 'myvocab' | 'review'
       selectedTestDays: [], // 여러 DAY를 섞어서 시험 볼 때 사용
+      testGroupMode: 'day', // 단어장/복습 분류: 'day' | 'date'
+      testGroupValue: 'all', // 선택한 DAY 또는 오답 날짜
       selectedAccent: 'US', // US, UK
       blindMode: localStorage.getItem('haikyu_blind_mode') === 'true',
       blindOpacity: Math.min(1, Math.max(0, Number(localStorage.getItem('haikyu_blind_opacity') ?? 0))),
@@ -1998,6 +2000,8 @@
       state.practiceShuffleIds = [];
       state.testSource = 'days';
       state.selectedTestDays = [];
+      state.testGroupMode = 'day';
+      state.testGroupValue = 'all';
       state.tab = 'practice';
       render();
     }
@@ -2011,6 +2015,8 @@
       state.practiceShuffleIds = [];
       state.testSource = 'days';
       state.selectedTestDays = [];
+      state.testGroupMode = 'day';
+      state.testGroupValue = 'all';
       state.tab = 'practice';
       render();
     }
@@ -2353,17 +2359,63 @@
       );
     }
 
-    function getTestVocab() {
-      const db = getCombinedVocab();
+    function getWrongDateForWord(id) {
+      const rows = (state.userData.todayWrongAnswers || [])
+        .filter(x => String(x?.id || '') === String(id) && x?.date)
+        .sort((a,b) => String(b.date).localeCompare(String(a.date)));
+      return rows[0]?.date || '';
+    }
 
-      if (state.testSource === 'myvocab') {
+    function getSourceBaseVocab(source=state.testSource) {
+      const db = getCombinedVocab();
+      if (source === 'myvocab') {
         const ids = new Set(state.userData.myVocabIds || []);
         return db.filter(d => ids.has(d.id));
       }
-
-      if (state.testSource === 'review') {
+      if (source === 'review') {
         const ids = new Set(getReviewWordIds());
         return db.filter(d => ids.has(d.id));
+      }
+      return db;
+    }
+
+    function getTestGroupOptions(source=state.testSource, mode=state.testGroupMode) {
+      const base = getSourceBaseVocab(source);
+      if (mode === 'date') {
+        const vals = new Set();
+        let hasUnknown = false;
+        base.forEach(v => {
+          const date = getWrongDateForWord(v.id);
+          if (date) vals.add(date);
+          else hasUnknown = true;
+        });
+        const dates = [...vals].sort((a,b) => b.localeCompare(a));
+        return hasUnknown ? [...dates, '__unknown__'] : dates;
+      }
+
+      const vals = [...new Set(base.map(v => String(v.day ?? '')).filter(Boolean))];
+      return vals.sort((a,b) => {
+        const na=Number(a), nb=Number(b);
+        if(!Number.isNaN(na) && !Number.isNaN(nb)) return na-nb;
+        return a.localeCompare(b,'ko');
+      });
+    }
+
+    function getTestVocab() {
+      const db = getCombinedVocab();
+
+      if (state.testSource === 'myvocab' || state.testSource === 'review') {
+        let base = getSourceBaseVocab(state.testSource);
+        const value = String(state.testGroupValue || 'all');
+        if (value !== 'all') {
+          if (state.testGroupMode === 'date') {
+            if (value === '__unknown__') base = base.filter(v => !getWrongDateForWord(v.id));
+            else base = base.filter(v => getWrongDateForWord(v.id) === value);
+          } else {
+            base = base.filter(v => String(v.day ?? '') === value);
+          }
+        }
+        return base;
       }
 
       const selected = Array.isArray(state.selectedTestDays) ? state.selectedTestDays : [];
@@ -2373,8 +2425,13 @@
     }
 
     function getTestScopeKey() {
-      if (state.testSource === 'myvocab') return 'myvocab';
-      if (state.testSource === 'review') return 'review';
+      if (state.testSource === 'myvocab' || state.testSource === 'review') {
+        const base = state.testSource;
+        const group = state.testGroupValue && state.testGroupValue !== 'all'
+          ? `:${state.testGroupMode}:${state.testGroupValue}`
+          : ':all';
+        return `${base}${group}`;
+      }
       const days = (state.selectedTestDays || []).map(String).sort((a,b) => {
         const na=Number(a), nb=Number(b);
         if(!isNaN(na) && !isNaN(nb)) return na-nb;
@@ -2393,7 +2450,29 @@
     function setTestSource(source) {
       if (!['days','myvocab','review'].includes(source)) return;
       state.testSource = source;
+      if (source !== 'days') {
+        state.testGroupMode = state.testGroupMode || 'day';
+        state.testGroupValue = 'all';
+      }
       resetCurrentTest();
+    }
+
+    function setTestGroupMode(mode) {
+      if (!['day','date'].includes(mode)) return;
+      state.testGroupMode = mode;
+      state.testGroupValue = 'all';
+      resetCurrentTest();
+    }
+
+    function setTestGroupValue(value) {
+      state.testGroupValue = String(value || 'all');
+      resetCurrentTest();
+    }
+
+    function formatWrongDateLabel(value) {
+      if (value === '__unknown__') return '날짜 기록 없음';
+      const m = String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      return m ? `${Number(m[2])}월 ${Number(m[3])}일` : String(value||'');
     }
 
     function toggleTestDay(day) {
@@ -2425,6 +2504,10 @@
       const days = getDaysList().filter(d => d !== 'all');
       const selected = new Set((state.selectedTestDays || []).map(String));
       const count = getTestVocab().length;
+      const sourceBaseCount = (state.testSource==='myvocab'||state.testSource==='review')
+        ? getSourceBaseVocab(state.testSource).length : count;
+      const groupOptions = (state.testSource==='myvocab'||state.testSource==='review')
+        ? getTestGroupOptions() : [];
 
       return `
         <div class="test-scope-box">
@@ -2455,10 +2538,32 @@
             <div style="font-size:10px;color:#94A3B8;margin-top:5px;">
               드롭다운 안에서 여러 DAY를 체크할 수 있어요.
             </div>
-          ` : state.testSource==='myvocab' ? `
-            <div style="font-size:10.5px;color:#64748B;font-weight:800;">단어장에 저장한 단어 ${count}개로 시험을 봅니다.</div>
           ` : `
-            <div style="font-size:10.5px;color:#64748B;font-weight:800;">오늘 복습 예정인 단어 ${count}개로 시험을 봅니다.</div>
+            <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+              <div style="display:flex;gap:5px;padding:3px;background:#E2E8F0;border-radius:9px;">
+                <button class="test-source-btn ${state.testGroupMode==='day'?'active':''}" style="padding:5px 9px;" onclick="setTestGroupMode('day')">📚 DAY별</button>
+                <button class="test-source-btn ${state.testGroupMode==='date'?'active':''}" style="padding:5px 9px;" onclick="setTestGroupMode('date')">📆 틀린 날짜별</button>
+              </div>
+              <select class="std-input" style="width:auto;min-width:190px;height:36px;padding:5px 9px;" onchange="setTestGroupValue(this.value)">
+                <option value="all" ${state.testGroupValue==='all'?'selected':''}>전체 ${sourceBaseCount}개</option>
+                ${groupOptions.map(v=>{
+                  const n = getSourceBaseVocab(state.testSource).filter(item =>
+                    state.testGroupMode==='date'
+                      ? (v==='__unknown__' ? !getWrongDateForWord(item.id) : getWrongDateForWord(item.id)===v)
+                      : String(item.day??'')===String(v)
+                  ).length;
+                  const label = state.testGroupMode==='date'
+                    ? formatWrongDateLabel(v)
+                    : (isNaN(v)?String(v):`Day ${v}`);
+                  return `<option value="${escHtml(v)}" ${String(state.testGroupValue)===String(v)?'selected':''}>${escHtml(label)} · ${n}개</option>`;
+                }).join('')}
+              </select>
+            </div>
+            <div style="font-size:10px;color:#64748B;font-weight:800;margin-top:7px;line-height:1.5;">
+              ${state.testSource==='myvocab'?'단어장에 저장된 단어':'오늘 복습 가능한 단어'}를
+              ${state.testGroupMode==='day'?'DAY/품사 기준':'실제로 틀린 날짜 기준'}으로 나눠서 시험 볼 수 있어요.
+              ${state.testGroupMode==='date'?'<span style="color:#94A3B8;"> 예전 기록 중 오답 날짜가 저장되지 않은 단어는 ‘날짜 기록 없음’으로 표시됩니다.</span>':''}
+            </div>
           `}
         </div>
       `;
