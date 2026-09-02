@@ -3755,6 +3755,30 @@
             <input type="text" id="c-meaning" placeholder="한국어 뜻 입력" style="width: 45%;" />
             <button class="btn-pixel-black" onclick="addCustomWord()">추가 ➕</button>
           </div>
+          <hr style="border:0;border-top:1px solid #E2E8F0;margin:15px 0;" />
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+            <h4 style="font-weight:900;margin:0;color:#1E293B;">🛠️ 내가 추가한 단어 관리 (${state.userData.customWords.length})</h4>
+            <span style="font-size:10px;color:#64748B;font-weight:800;">오타 수정 · Day/품사 변경 · 삭제</span>
+          </div>
+          <div style="max-height:260px;overflow-y:auto;margin-top:9px;">
+            ${state.userData.customWords.length===0
+              ? '<div style="color:#94A3B8;text-align:center;padding:20px;border:1.5px dashed #CBD5E1;border-radius:10px;font-size:11px;font-weight:800;">직접 추가한 단어가 아직 없어요.</div>'
+              : state.userData.customWords.map(r=>`
+                <div class="word-row" style="gap:8px;flex-wrap:wrap;">
+                  <div style="flex:1;min-width:190px;">
+                    <div style="font-size:10px;color:#94A3B8;font-weight:900;">${state.lang==='ja'?'품사':'Day'} ${escHtml(r.day||'')}</div>
+                    <div style="margin-top:2px;">
+                      <span style="font-weight:900;color:#1E293B;">${escHtml(r.word||'')}</span>
+                      <span style="color:#64748B;margin-left:8px;">${escHtml(r.meaning||'')}</span>
+                    </div>
+                  </div>
+                  ${renderListPronunciationButtons(r)}
+                  <button class="btn-pixel-white" onclick="editCustomWord('${r.id}')">✏️ 편집</button>
+                  <button class="btn-pixel-white" style="color:#B91C1C;border-color:#FCA5A5;" onclick="deleteCustomWordEntry('${r.id}')">🗑 삭제</button>
+                </div>
+              `).join('')}
+          </div>
+
           <hr style="border: 0; border-top: 1px solid #E2E8F0; margin: 15px 0;" />
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <h4 style="font-weight: 900; margin: 0; color: #1E293B;">📑 내 오답 단어장 (${myVocab.length})</h4>
@@ -5183,6 +5207,52 @@
       state.userData.customWords.push(newWord);
       saveUserData();
       alert('단어가 추가되었습니다!');
+      render();
+    }
+
+    function editCustomWord(id) {
+      const item = (state.userData.customWords || []).find(x => x.id === id);
+      if (!item) return alert('수정할 단어를 찾지 못했습니다.');
+
+      const dayLabel = state.lang === 'ja' ? '품사' : 'Day';
+      const newDay = prompt(`${dayLabel} 수정`, String(item.day || ''));
+      if (newDay === null) return;
+
+      const newWord = prompt(`${state.lang === 'ja' ? '일본어 단어' : '영어 단어'} 수정`, String(item.word || ''));
+      if (newWord === null) return;
+
+      const newMeaning = prompt('한국어 뜻 수정', String(item.meaning || ''));
+      if (newMeaning === null) return;
+
+      const d = newDay.trim(), w = newWord.trim(), m = newMeaning.trim();
+      if (!d || !w || !m) return alert('Day/품사, 단어, 뜻은 비워둘 수 없습니다.');
+
+      item.day = d;
+      item.word = w;
+      item.raw_word = w;
+      item.speech_word = w;
+      item.meaning = m;
+      saveUserData();
+      render();
+    }
+
+    function deleteCustomWordEntry(id) {
+      const item = (state.userData.customWords || []).find(x => x.id === id);
+      if (!item) return;
+      if (!confirm(`"${item.word}" 단어를 완전히 삭제할까요?\\n단어장/복습 목록에서도 함께 제거됩니다.`)) return;
+
+      state.userData.customWords = (state.userData.customWords || []).filter(x => x.id !== id);
+      state.userData.myVocabIds = (state.userData.myVocabIds || []).filter(x => x !== id);
+      if (state.userData.spacedRepData && typeof state.userData.spacedRepData === 'object') {
+        delete state.userData.spacedRepData[id];
+      }
+      state.userData.todayWrongAnswers = (state.userData.todayWrongAnswers || []).filter(x => x.id !== id);
+
+      state.practiceShuffleIds = (state.practiceShuffleIds || []).filter(x => String(x) !== String(id));
+      state.fcIdx = 0;
+      state.fcShowMeaning = false;
+
+      saveUserData();
       render();
     }
 
