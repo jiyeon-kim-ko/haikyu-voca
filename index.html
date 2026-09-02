@@ -601,6 +601,16 @@
     .calendar-entry.done{opacity:.55}.calendar-entry.done .calendar-entry-title{text-decoration:line-through}
     .calendar-entry-time{font-size:10px;color:#64748B;font-weight:900;min-width:42px}.calendar-entry-title{flex:1;min-width:0;font-size:12px;font-weight:850;word-break:break-word}
     .calendar-entry-kind{font-size:9px;font-weight:900;padding:3px 6px;border-radius:999px;background:#FFF7ED;color:#C2410C}.calendar-entry-kind.todo{background:#F5F3FF;color:#6D28D9}
+    .calendar-repeat-box{margin-top:10px;padding:10px;border:1.5px solid #C4B5FD;border-radius:11px;background:#FAF5FF}
+    .calendar-repeat-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:11px;font-weight:900;color:#5B21B6}
+    .calendar-weekday-picks{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+    .calendar-weekday-pick{width:34px;height:34px;border:1.5px solid #CBD5E1;border-radius:8px;background:#FFF;color:#475569;font-size:11px;font-weight:900;cursor:pointer}
+    .calendar-weekday-pick.active{background:#7C3AED;border-color:#7C3AED;color:#FFF}
+    .calendar-repeat-until{display:flex;align-items:end;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .calendar-repeat-until label{font-size:10px;font-weight:900;color:#6D28D9;display:flex;flex-direction:column;gap:4px}
+    .calendar-repeat-until input{height:36px;border:1.5px solid #C4B5FD;border-radius:8px;padding:0 8px;background:#FFF;font:inherit}
+    .calendar-repeat-badge{font-size:9px;font-weight:900;color:#6D28D9;background:#F5F3FF;border-radius:999px;padding:3px 6px}
+
     .today-mini-box{margin:7px 4px 9px;padding:9px 10px;border:1.5px solid #FDBA74;border-radius:11px;background:#FFF7ED;text-align:left}
     .today-mini-head{font-size:10.5px;font-weight:900;color:#9A3412;display:flex;justify-content:space-between;align-items:center;gap:6px}
     .today-mini-item{font-size:10.5px;color:#334155;font-weight:800;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -3372,10 +3382,43 @@
       return state.userData.calendarEvents;
     }
     function dateKeyFromParts(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
+    function dateKeyToLocalDate(key){
+      const m=String(key||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if(!m)return new Date(NaN);
+      return new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));
+    }
+    function isRecurringCalendarOccurrence(e,dateKey){
+      const r=e?.repeat;
+      if(!r||r.enabled!==true)return e.date===dateKey;
+      if(!e.date||dateKey<e.date)return false;
+      if(r.until && dateKey>r.until)return false;
+      const d=dateKeyToLocalDate(dateKey);
+      if(Number.isNaN(d.getTime()))return false;
+      const weekdays=Array.isArray(r.weekdays)?r.weekdays.map(Number):[];
+      return weekdays.includes(d.getDay());
+    }
+    function isCalendarOccurrenceDone(e,dateKey){
+      if(e?.repeat?.enabled===true){
+        return Array.isArray(e.doneDates) && e.doneDates.includes(dateKey);
+      }
+      return !!e.done;
+    }
+    function getRepeatSummary(e){
+      if(!e?.repeat?.enabled)return '';
+      const names=['일','월','화','수','목','금','토'];
+      const days=(e.repeat.weekdays||[]).map(Number).sort((a,b)=>a-b).map(x=>names[x]).join('·');
+      return `${days||'요일 미지정'} · ${e.repeat.until?`${e.repeat.until}까지`:'종료일 없음'}`;
+    }
     function calendarEntriesFor(dateKey){
       const events=normalizeCalendarEvents()
-        .filter(x=>x.date===dateKey)
-        .map(x=>({...x,source:'calendar'}));
+        .filter(x=>isRecurringCalendarOccurrence(x,dateKey))
+        .map(x=>({
+          ...x,
+          date:dateKey,
+          done:isCalendarOccurrenceDone(x,dateKey),
+          occurrenceDate:dateKey,
+          source:'calendar'
+        }));
       const linkedTodos=normalizeTodos()
         .filter(x=>x.dueDate===dateKey)
         .map(x=>({
@@ -3389,19 +3432,65 @@
         }));
       return [...events,...linkedTodos].sort((a,b)=>String(a.time||'99:99').localeCompare(String(b.time||'99:99')));
     }
+
     function changeCalendarMonth(delta){calendarViewDate=new Date(calendarViewDate.getFullYear(),calendarViewDate.getMonth()+delta,1);render()}
     function goCalendarToday(){calendarViewDate=new Date();calendarSelectedDate=new Date().toISOString().slice(0,10);render()}
     function selectCalendarDate(key){calendarSelectedDate=key;const [y,m]=key.split('-').map(Number);calendarViewDate=new Date(y,m-1,1);render()}
+    let calendarRepeatWeekdays=[];
+    function toggleCalendarRepeatUi(){
+      const box=document.getElementById('cal-repeat-options');
+      const checked=!!document.getElementById('cal-repeat')?.checked;
+      if(box)box.style.display=checked?'block':'none';
+      if(checked && calendarRepeatWeekdays.length===0){
+        const date=document.getElementById('cal-date')?.value||calendarSelectedDate;
+        const d=dateKeyToLocalDate(date);
+        if(!Number.isNaN(d.getTime()))calendarRepeatWeekdays=[d.getDay()];
+      }
+      updateCalendarWeekdayPickDom();
+    }
+    function toggleCalendarRepeatWeekday(day){
+      const n=Number(day);
+      if(calendarRepeatWeekdays.includes(n))calendarRepeatWeekdays=calendarRepeatWeekdays.filter(x=>x!==n);
+      else calendarRepeatWeekdays.push(n);
+      updateCalendarWeekdayPickDom();
+    }
+    function updateCalendarWeekdayPickDom(){
+      document.querySelectorAll('[data-cal-weekday]').forEach(btn=>{
+        const n=Number(btn.getAttribute('data-cal-weekday'));
+        btn.classList.toggle('active',calendarRepeatWeekdays.includes(n));
+      });
+    }
     function addCalendarEntry(){
       const date=document.getElementById('cal-date')?.value||calendarSelectedDate;
       const time=document.getElementById('cal-time')?.value||'';
       const kind=document.getElementById('cal-kind')?.value||'schedule';
       const title=String(document.getElementById('cal-title')?.value||'').trim();
-      if(!date||!title)return;
-      normalizeCalendarEvents().push({id:`cal_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,date,time,kind,title:title.slice(0,160),done:false,createdAt:new Date().toISOString()});
-      calendarSelectedDate=date;saveUserData();render();
+      const repeatEnabled=!!document.getElementById('cal-repeat')?.checked;
+      const until=document.getElementById('cal-repeat-until')?.value||'';
+
+      if(!date||!title)return alert('날짜와 내용을 입력해주세요.');
+      if(repeatEnabled){
+        if(!calendarRepeatWeekdays.length)return alert('반복할 요일을 하나 이상 선택해주세요.');
+        if(!until)return alert('반복 종료 날짜(~까지)를 지정해주세요.');
+        if(until<date)return alert('반복 종료 날짜는 시작 날짜보다 빠를 수 없습니다.');
+      }
+
+      normalizeCalendarEvents().push({
+        id:`cal_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+        date,time,kind,title:title.slice(0,160),done:false,doneDates:[],
+        repeat:repeatEnabled?{
+          enabled:true,
+          weekdays:[...calendarRepeatWeekdays].sort((a,b)=>a-b),
+          until
+        }:{enabled:false},
+        createdAt:new Date().toISOString()
+      });
+      calendarRepeatWeekdays=[];
+      calendarSelectedDate=date;
+      saveUserData();
+      render();
     }
-    function toggleCalendarEntry(id,source='calendar'){
+    function toggleCalendarEntry(id,source='calendar',dateKey=''){
       if(source==='todo'){
         const t=normalizeTodos().find(x=>x.id===id);
         if(!t)return;
@@ -3409,7 +3498,14 @@
       }else{
         const e=normalizeCalendarEvents().find(x=>x.id===id);
         if(!e)return;
-        e.done=!e.done;
+        if(e.repeat?.enabled===true){
+          const key=dateKey||calendarSelectedDate;
+          e.doneDates=Array.isArray(e.doneDates)?e.doneDates:[];
+          if(e.doneDates.includes(key))e.doneDates=e.doneDates.filter(x=>x!==key);
+          else e.doneDates.push(key);
+        }else{
+          e.done=!e.done;
+        }
       }
       saveUserData();render();
     }
@@ -3417,10 +3513,13 @@
       if(source==='todo'){
         state.userData.todos=normalizeTodos().filter(x=>x.id!==id);
       }else{
+        const e=normalizeCalendarEvents().find(x=>x.id===id);
+        if(e?.repeat?.enabled===true && !confirm(`"${e.title}" 반복 일정을 전체 삭제할까요?`))return;
         state.userData.calendarEvents=normalizeCalendarEvents().filter(x=>x.id!==id);
       }
       saveUserData();render();
     }
+
     function renderTodayNearCharacter(){
       const today=new Date().toISOString().slice(0,10);
       const cal=calendarEntriesFor(today).filter(x=>!x.done);
@@ -3457,14 +3556,31 @@
         <div class="calendar-editor">
           <div style="font-size:12px;font-weight:900;margin-bottom:8px;">➕ 일정 / 할 일 추가</div>
           <div class="calendar-form">
-            <label>날짜<input id="cal-date" type="date" value="${calendarSelectedDate}"></label>
+            <label>시작 날짜<input id="cal-date" type="date" value="${calendarSelectedDate}" onchange="if(document.getElementById('cal-repeat')?.checked){calendarRepeatWeekdays=[];toggleCalendarRepeatUi();}"></label>
             <label>시간<input id="cal-time" type="time"></label>
-            <label>내용<input id="cal-title" type="text" maxlength="160" placeholder="예: 토익 모의고사 / 단어 Day 12 복습"></label>
+            <label>내용<input id="cal-title" type="text" maxlength="160" placeholder="예: 듀오링고 하기 / 단어 Day 12 복습"></label>
             <label>종류<select id="cal-kind"><option value="schedule">일정</option><option value="todo">할 일</option></select></label>
             <button class="btn-pixel-black" onclick="addCalendarEntry()">추가</button>
           </div>
+          <div class="calendar-repeat-box">
+            <div class="calendar-repeat-head">
+              <input id="cal-repeat" type="checkbox" onchange="toggleCalendarRepeatUi()">
+              <label for="cal-repeat" style="cursor:pointer;">🔁 반복하기</label>
+              <span style="font-size:9.5px;color:#7C3AED;">원하는 요일 + 종료 날짜까지</span>
+            </div>
+            <div id="cal-repeat-options" style="display:none;">
+              <div style="font-size:10px;font-weight:900;color:#6D28D9;margin-top:9px;">반복할 요일</div>
+              <div class="calendar-weekday-picks">
+                ${['일','월','화','수','목','금','토'].map((name,i)=>`<button type="button" class="calendar-weekday-pick" data-cal-weekday="${i}" onclick="toggleCalendarRepeatWeekday(${i})">${name}</button>`).join('')}
+              </div>
+              <div class="calendar-repeat-until">
+                <label>반복 종료일 (~까지)<input id="cal-repeat-until" type="date" min="${calendarSelectedDate}"></label>
+                <div style="font-size:10px;color:#7C3AED;font-weight:800;padding-bottom:8px;">예: 월·수·금 선택 + 2026-10-31까지</div>
+              </div>
+            </div>
+          </div>
           <div style="font-size:11px;font-weight:900;margin-top:12px;">${calendarSelectedDate} 기록</div>
-          <div class="calendar-entry-list">${selected.length?selected.map(e=>`<div class="calendar-entry ${e.done?'done':''}">${e.kind==='todo'?`<input type="checkbox" ${e.done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}')">`:''}<span class="calendar-entry-time">${e.time||'종일'}</span><span class="calendar-entry-kind ${e.kind==='todo'?'todo':''}">${e.kind==='todo'?'할 일':'일정'}</span>${e.source==='todo'?`<span class="linked-todo-badge">할 일 연동</span>`:''}<span class="calendar-entry-title">${escHtml(e.title)}</span>${e.kind==='schedule'?`<button class="btn-pixel-white" style="padding:5px 7px;font-size:9px;" onclick="toggleCalendarEntry('${e.id}','calendar')">${e.done?'완료 취소':'완료'}</button>`:''}<button class="todo-delete" title="삭제" onclick="deleteCalendarEntry('${e.id}','${e.source||'calendar'}')">×</button></div>`).join(''):`<div style="padding:18px;text-align:center;color:#94A3B8;font-size:11px;font-weight:800;">이 날짜에는 기록이 없어요.</div>`}</div>
+          <div class="calendar-entry-list">${selected.length?selected.map(e=>`<div class="calendar-entry ${e.done?'done':''}">${e.kind==='todo'?`<input type="checkbox" ${e.done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}','${e.occurrenceDate||calendarSelectedDate}')">`:''}<span class="calendar-entry-time">${e.time||'종일'}</span><span class="calendar-entry-kind ${e.kind==='todo'?'todo':''}">${e.kind==='todo'?'할 일':'일정'}</span>${e.source==='todo'?`<span class="linked-todo-badge">할 일 연동</span>`:''}${e.repeat?.enabled?`<span class="calendar-repeat-badge">🔁 ${escHtml(getRepeatSummary(e))}</span>`:''}<span class="calendar-entry-title">${escHtml(e.title)}</span>${e.kind==='schedule'?`<button class="btn-pixel-white" style="padding:5px 7px;font-size:9px;" onclick="toggleCalendarEntry('${e.id}','calendar','${e.occurrenceDate||calendarSelectedDate}')">${e.done?'완료 취소':'완료'}</button>`:''}<button class="todo-delete" title="${e.repeat?.enabled?'반복 전체 삭제':'삭제'}" onclick="deleteCalendarEntry('${e.id}','${e.source||'calendar'}')">×</button></div>`).join(''):`<div style="padding:18px;text-align:center;color:#94A3B8;font-size:11px;font-weight:800;">이 날짜에는 기록이 없어요.</div>`}</div>
         </div>
       </div>`;
     }
