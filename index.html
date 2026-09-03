@@ -9,6 +9,7 @@
   <!-- CSV 파싱 라이브러리 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -338,6 +339,18 @@
     .custom-input-row input, .std-input {
       border: 2px solid #CBD5E1; border-radius: 8px; padding: 8px 10px; font-size: 13.5px; height: 38px; width: 100%;
     }
+    .scan-import-box{margin-top:12px;padding:13px;border:1.5px solid #93C5FD;border-radius:12px;background:#EFF6FF}
+    .scan-import-grid{display:grid;grid-template-columns:130px 1fr auto;gap:8px;align-items:end}
+    .scan-import-grid label{font-size:10.5px;font-weight:900;color:#1E3A8A;display:flex;flex-direction:column;gap:5px}
+    .scan-import-grid input{height:38px;border:1.5px solid #93C5FD;border-radius:8px;background:#FFF;padding:0 9px;font:inherit}
+    .scan-preview{margin-top:10px;display:grid;grid-template-columns:170px 1fr;gap:10px}
+    .scan-image-box{min-height:140px;border:1.5px dashed #93C5FD;border-radius:9px;background:#FFF;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#94A3B8;font-size:10px;font-weight:800;text-align:center;padding:8px}
+    .scan-image-box img{max-width:100%;max-height:230px;object-fit:contain}
+    .scan-result-list{max-height:260px;overflow:auto;display:flex;flex-direction:column;gap:7px;margin-top:8px}
+    .scan-result-row{display:grid;grid-template-columns:1fr 1.2fr auto;gap:6px;align-items:center}
+    .scan-result-row input{height:34px;border:1px solid #CBD5E1;border-radius:7px;padding:0 8px;font-size:11px}
+    @media(max-width:700px){.scan-import-grid,.scan-preview,.scan-result-row{grid-template-columns:1fr}}
+
 
     .accent-btn-group {
       display: inline-flex; gap: 4px; background: #E2E8F0; padding: 3px; border-radius: 8px;
@@ -3981,6 +3994,23 @@
             <input type="text" id="c-meaning" placeholder="한국어 뜻 입력" style="width: 45%;" />
             <button class="btn-pixel-black" onclick="addCustomWord()">추가 ➕</button>
           </div>
+          <div class="scan-import-box">
+            <div style="font-size:12px;font-weight:900;color:#1E3A8A;">📷 스캔/사진에서 단어 자동 추가</div>
+            <div style="font-size:10px;color:#64748B;font-weight:700;margin-top:3px;">Day만 입력하고 사진을 올리면 영어 표현 + 한국어 뜻을 자동 인식합니다. 결과를 수정한 뒤 한꺼번에 추가할 수 있어요.</div>
+            <div class="scan-import-grid" style="margin-top:10px;">
+              <label>추가할 Day<input id="scan-day" type="text" placeholder="예: 3"></label>
+              <label>사진 / 스캔본<input id="scan-image-input" type="file" accept="image/*" onchange="previewScanImage(this)"></label>
+              <button id="scan-ocr-btn" class="btn-pixel-black" onclick="scanVocabularyImage()">🔎 자동 인식</button>
+            </div>
+            <div class="scan-preview">
+              <div id="scan-image-preview" class="scan-image-box">사진을 선택하면<br>미리보기가 보여요.</div>
+              <div style="border:1.5px solid #BFDBFE;border-radius:9px;background:#FFF;padding:10px;min-height:140px;">
+                <div style="display:flex;justify-content:space-between;"><b style="font-size:11px;">인식 결과</b><span id="scan-status" style="font-size:9.5px;color:#64748B;font-weight:800;">대기 중</span></div>
+                <div id="scan-result-list" class="scan-result-list"><div style="padding:25px 8px;text-align:center;color:#94A3B8;font-size:10px;font-weight:800;">아직 인식한 단어가 없어요.</div></div>
+                <button id="scan-add-all-btn" class="btn-pixel-black" style="width:100%;margin-top:9px;display:none;" onclick="addScannedWords()">인식 결과 전체 추가 ➕</button>
+              </div>
+            </div>
+          </div>
           <hr style="border:0;border-top:1px solid #E2E8F0;margin:15px 0;" />
           <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
             <h4 style="font-weight:900;margin:0;color:#1E293B;">🛠️ 내가 추가한 단어 관리 (${state.userData.customWords.length})</h4>
@@ -5451,6 +5481,91 @@
         });
         saveUserData();
       }
+      render();
+    }
+
+
+    let scannedVocabularyRows=[];
+
+    function previewScanImage(input){
+      const box=document.getElementById('scan-image-preview'),file=input?.files?.[0];
+      if(!box)return;
+      if(!file){box.innerHTML='사진을 선택하면<br>미리보기가 보여요.';return;}
+      box.innerHTML=`<img src="${URL.createObjectURL(file)}" alt="단어장 스캔 미리보기">`;
+    }
+
+    function parseVocabularyOcrText(raw){
+      const rows=[],seen=new Set();
+      String(raw||'').split(/\r?\n/).forEach(line=>{
+        line=String(line||'').replace(/^\s*\d+\s*[\.\):\-]?\s*/,'').replace(/\s+/g,' ').trim();
+        if(!line)return;
+        const k=line.search(/[가-힣]/);
+        if(k<=0)return;
+        let word=line.slice(0,k).trim().replace(/\s+(동사|명사|부사|형용사|전치사|접속사)\s*$/,'').trim();
+        let meaning=line.slice(k).trim();
+        if(!/[A-Za-z]/.test(word)||!meaning)return;
+        const key=`${word.toLowerCase()}|||${meaning}`;
+        if(seen.has(key))return;
+        seen.add(key);rows.push({word,meaning});
+      });
+      return rows.slice(0,150);
+    }
+
+    function renderScannedVocabularyRows(){
+      const list=document.getElementById('scan-result-list'),btn=document.getElementById('scan-add-all-btn');
+      if(!list)return;
+      if(!scannedVocabularyRows.length){
+        list.innerHTML='<div style="padding:25px 8px;text-align:center;color:#94A3B8;font-size:10px;font-weight:800;">인식된 단어가 없어요. 더 선명한 사진으로 다시 시도해보세요.</div>';
+        if(btn)btn.style.display='none';return;
+      }
+      list.innerHTML=scannedVocabularyRows.map((r,i)=>`<div class="scan-result-row">
+        <input value="${escHtml(r.word)}" oninput="scannedVocabularyRows[${i}].word=this.value" placeholder="단어/표현">
+        <input value="${escHtml(r.meaning)}" oninput="scannedVocabularyRows[${i}].meaning=this.value" placeholder="뜻">
+        <button class="btn-pixel-white" style="color:#B91C1C;border-color:#FCA5A5;" onclick="removeScannedVocabularyRow(${i})">삭제</button>
+      </div>`).join('');
+      if(btn)btn.style.display='block';
+    }
+
+    function removeScannedVocabularyRow(i){
+      scannedVocabularyRows.splice(Number(i),1);renderScannedVocabularyRows();
+    }
+
+    async function scanVocabularyImage(){
+      const file=document.getElementById('scan-image-input')?.files?.[0];
+      const status=document.getElementById('scan-status'),btn=document.getElementById('scan-ocr-btn');
+      if(!file)return alert('먼저 사진이나 스캔본을 선택해주세요.');
+      if(!window.Tesseract)return alert('OCR 모듈을 불러오지 못했습니다. 인터넷 연결 후 새로고침해주세요.');
+      try{
+        if(btn){btn.disabled=true;btn.textContent='인식 중...';}
+        const result=await Tesseract.recognize(file,'eng+kor',{logger:m=>{
+          if(status&&m.status==='recognizing text')status.textContent=`${Math.round((m.progress||0)*100)}% · 인식 중`;
+        }});
+        scannedVocabularyRows=parseVocabularyOcrText(result?.data?.text||'');
+        if(status)status.textContent=`완료 · ${scannedVocabularyRows.length}개`;
+        renderScannedVocabularyRows();
+      }catch(e){
+        console.warn(e);if(status)status.textContent='인식 실패';alert('사진 인식에 실패했습니다. 더 선명한 사진으로 다시 시도해주세요.');
+      }finally{
+        if(btn){btn.disabled=false;btn.textContent='🔎 자동 인식';}
+      }
+    }
+
+    function addScannedWords(){
+      const day=String(document.getElementById('scan-day')?.value||'').trim();
+      if(!day)return alert('추가할 Day를 입력해주세요.');
+      const valid=scannedVocabularyRows.map(r=>({word:String(r.word||'').trim(),meaning:String(r.meaning||'').trim()})).filter(r=>r.word&&r.meaning);
+      if(!valid.length)return alert('추가할 단어가 없습니다.');
+      const existing=new Set((state.userData.customWords||[]).map(x=>`${String(x.day)}|||${String(x.word).toLowerCase()}|||${String(x.meaning)}`));
+      let added=0,skipped=0;
+      valid.forEach(r=>{
+        const key=`${day}|||${r.word.toLowerCase()}|||${r.meaning}`;
+        if(existing.has(key)){skipped++;return;}
+        existing.add(key);
+        state.userData.customWords.push({id:`c_scan_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,day,word:r.word,raw_word:r.word,speech_word:r.word,meaning:r.meaning});
+        added++;
+      });
+      saveUserData();scannedVocabularyRows=[];
+      alert(`스캔 단어 ${added}개를 Day ${day}에 추가했습니다.${skipped?`\n중복 ${skipped}개는 건너뛰었습니다.`:''}`);
       render();
     }
 
