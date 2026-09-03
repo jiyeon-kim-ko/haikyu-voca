@@ -10,6 +10,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -3996,14 +3997,14 @@
           </div>
           <div class="scan-import-box">
             <div style="font-size:12px;font-weight:900;color:#1E3A8A;">📷 스캔/사진에서 단어 자동 추가</div>
-            <div style="font-size:10px;color:#64748B;font-weight:700;margin-top:3px;">Day만 입력하고 사진을 올리면 영어 표현 + 한국어 뜻을 자동 인식합니다. 결과를 수정한 뒤 한꺼번에 추가할 수 있어요.</div>
+            <div style="font-size:10px;color:#64748B;font-weight:700;margin-top:3px;">Day만 입력하고 사진 또는 PDF를 올리면 영어 표현 + 한국어 뜻을 자동 인식합니다. PDF는 전체 페이지를 순서대로 읽고, 결과를 수정한 뒤 한꺼번에 추가할 수 있어요.</div>
             <div class="scan-import-grid" style="margin-top:10px;">
               <label>추가할 Day<input id="scan-day" type="text" placeholder="예: 3"></label>
-              <label>사진 / 스캔본<input id="scan-image-input" type="file" accept="image/*" onchange="previewScanImage(this)"></label>
+              <label>사진 / PDF<input id="scan-image-input" type="file" accept="image/*,application/pdf,.pdf" onchange="previewScanImage(this)"></label>
               <button id="scan-ocr-btn" class="btn-pixel-black" onclick="scanVocabularyImage()">🔎 자동 인식</button>
             </div>
             <div class="scan-preview">
-              <div id="scan-image-preview" class="scan-image-box">사진을 선택하면<br>미리보기가 보여요.</div>
+              <div id="scan-image-preview" class="scan-image-box">사진/PDF를 선택하면<br>미리보기가 보여요.</div>
               <div style="border:1.5px solid #BFDBFE;border-radius:9px;background:#FFF;padding:10px;min-height:140px;">
                 <div style="display:flex;justify-content:space-between;"><b style="font-size:11px;">인식 결과</b><span id="scan-status" style="font-size:9.5px;color:#64748B;font-weight:800;">대기 중</span></div>
                 <div id="scan-result-list" class="scan-result-list"><div style="padding:25px 8px;text-align:center;color:#94A3B8;font-size:10px;font-weight:800;">아직 인식한 단어가 없어요.</div></div>
@@ -5487,11 +5488,35 @@
 
     let scannedVocabularyRows=[];
 
-    function previewScanImage(input){
+    async function previewScanImage(input){
       const box=document.getElementById('scan-image-preview'),file=input?.files?.[0];
       if(!box)return;
-      if(!file){box.innerHTML='사진을 선택하면<br>미리보기가 보여요.';return;}
-      box.innerHTML=`<img src="${URL.createObjectURL(file)}" alt="단어장 스캔 미리보기">`;
+      if(!file){box.innerHTML='사진/PDF를 선택하면<br>미리보기가 보여요.';return;}
+      if(file.type==='application/pdf'||/\.pdf$/i.test(file.name||'')){
+        box.innerHTML='<div>📄 PDF 선택됨<br><span style="font-size:9px;color:#64748B;">페이지 수 확인 중...</span></div>';
+        try{
+          if(!window.pdfjsLib)throw new Error('PDF.js unavailable');
+          pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          const buf=await file.arrayBuffer();
+          const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+          box.innerHTML=`<div>📄 ${escHtml(file.name)}<br><b>${pdf.numPages}페이지</b><br><span style="font-size:9px;color:#64748B;">자동 인식 시 전체 페이지 처리</span></div>`;
+        }catch(e){
+          console.warn(e);
+          box.innerHTML='<div>📄 PDF 선택됨<br><span style="font-size:9px;color:#B91C1C;">미리보기 확인 실패</span></div>';
+        }
+      }else{
+        box.innerHTML=`<img src="${URL.createObjectURL(file)}" alt="단어장 스캔 미리보기">`;
+      }
+    }
+
+    async function renderPdfPageToBlob(page,scale=2){
+      const viewport=page.getViewport({scale});
+      const canvas=document.createElement('canvas');
+      const ctx=canvas.getContext('2d',{willReadFrequently:true});
+      canvas.width=Math.ceil(viewport.width);
+      canvas.height=Math.ceil(viewport.height);
+      await page.render({canvasContext:ctx,viewport}).promise;
+      return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('PDF page image conversion failed')),'image/png'));
     }
 
     function parseVocabularyOcrText(raw){
@@ -5533,18 +5558,61 @@
     async function scanVocabularyImage(){
       const file=document.getElementById('scan-image-input')?.files?.[0];
       const status=document.getElementById('scan-status'),btn=document.getElementById('scan-ocr-btn');
-      if(!file)return alert('먼저 사진이나 스캔본을 선택해주세요.');
+      if(!file)return alert('먼저 사진이나 PDF를 선택해주세요.');
       if(!window.Tesseract)return alert('OCR 모듈을 불러오지 못했습니다. 인터넷 연결 후 새로고침해주세요.');
+      const isPdf=file.type==='application/pdf'||/\.pdf$/i.test(file.name||'');
+
       try{
         if(btn){btn.disabled=true;btn.textContent='인식 중...';}
-        const result=await Tesseract.recognize(file,'eng+kor',{logger:m=>{
-          if(status&&m.status==='recognizing text')status.textContent=`${Math.round((m.progress||0)*100)}% · 인식 중`;
-        }});
-        scannedVocabularyRows=parseVocabularyOcrText(result?.data?.text||'');
+        let allText='';
+
+        if(isPdf){
+          if(!window.pdfjsLib)return alert('PDF 모듈을 불러오지 못했습니다. 인터넷 연결 후 새로고침해주세요.');
+          pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          if(status)status.textContent='PDF 여는 중...';
+          const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+
+          for(let p=1;p<=pdf.numPages;p++){
+            if(status)status.textContent=`PDF ${p}/${pdf.numPages} · 페이지 준비 중`;
+            const page=await pdf.getPage(p);
+
+            // First use embedded PDF text when available. It is faster and more accurate
+            // for digitally-created PDFs. Scanned/image PDFs fall back to OCR.
+            let pageText='';
+            try{
+              const tc=await page.getTextContent();
+              pageText=(tc.items||[]).map(x=>x.str||'').join(' ').trim();
+            }catch(_){}
+
+            const hasKorean=/[가-힣]/.test(pageText);
+            const hasEnglish=/[A-Za-z]/.test(pageText);
+            if(pageText.length>40 && hasKorean && hasEnglish){
+              allText+=`\n${pageText}\n`;
+              if(status)status.textContent=`PDF ${p}/${pdf.numPages} · 텍스트 추출 완료`;
+            }else{
+              const blob=await renderPdfPageToBlob(page,2);
+              const result=await Tesseract.recognize(blob,'eng+kor',{logger:m=>{
+                if(status&&m.status==='recognizing text'){
+                  status.textContent=`PDF ${p}/${pdf.numPages} · OCR ${Math.round((m.progress||0)*100)}%`;
+                }
+              }});
+              allText+=`\n${result?.data?.text||''}\n`;
+            }
+          }
+        }else{
+          const result=await Tesseract.recognize(file,'eng+kor',{logger:m=>{
+            if(status&&m.status==='recognizing text')status.textContent=`${Math.round((m.progress||0)*100)}% · 인식 중`;
+          }});
+          allText=result?.data?.text||'';
+        }
+
+        scannedVocabularyRows=parseVocabularyOcrText(allText);
         if(status)status.textContent=`완료 · ${scannedVocabularyRows.length}개`;
         renderScannedVocabularyRows();
       }catch(e){
-        console.warn(e);if(status)status.textContent='인식 실패';alert('사진 인식에 실패했습니다. 더 선명한 사진으로 다시 시도해주세요.');
+        console.warn(e);
+        if(status)status.textContent='인식 실패';
+        alert('파일 인식에 실패했습니다. PDF가 너무 크면 필요한 페이지만 나눠서 올리거나, 더 선명한 스캔본으로 다시 시도해주세요.');
       }finally{
         if(btn){btn.disabled=false;btn.textContent='🔎 자동 인식';}
       }
