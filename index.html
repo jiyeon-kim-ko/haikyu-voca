@@ -722,6 +722,24 @@
     .planner-edit-actions .wide{grid-column:1/-1}
     .planner-series-note{margin-top:9px;padding:8px 10px;border-radius:8px;background:#FFF7ED;border:1px solid #FED7AA;color:#9A3412;font-size:9.5px;font-weight:800;line-height:1.5}
 
+  
+    /* 스티커 메모 */
+    .memo-board{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+    .memo-toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+    .memo-card{position:relative;min-height:180px;border:1.5px solid #D8DEE9;border-radius:12px;padding:14px 12px 12px;background:#FFFDF2;box-shadow:0 4px 12px rgba(15,23,42,.06)}
+    .memo-card.yellow{background:#FFF9C9;border-color:#F2D96B}.memo-card.pink{background:#FFE5EC;border-color:#F5B8C8}
+    .memo-card.blue{background:#EAF2FF;border-color:#B8CDF5}.memo-card.green{background:#EAF8E8;border-color:#B9DEB3}
+    .memo-card.purple{background:#F0E8FF;border-color:#CFB9F6}.memo-card.gray{background:#F4F5F7;border-color:#D2D6DC}
+    .memo-card-title{width:100%;border:0;background:transparent;font-size:13px;font-weight:1000;color:#1E293B;outline:none;padding:0 26px 6px 0;border-bottom:1px dashed rgba(71,85,105,.18)}
+    .memo-card-body{width:100%;min-height:115px;border:0;resize:vertical;background:transparent;outline:none;padding:8px 0 0;font:inherit;font-size:11px;line-height:1.55;color:#334155}
+    .memo-card-actions{position:absolute;top:8px;right:8px;display:flex;gap:4px}
+    .memo-icon-btn{width:25px;height:25px;border:0;border-radius:7px;background:rgba(255,255,255,.65);font-size:12px;font-weight:900;cursor:pointer}
+    .memo-color-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+    .memo-color-dot{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(15,23,42,.18);cursor:pointer}
+    .memo-color-dot.yellow{background:#FFF0A8}.memo-color-dot.pink{background:#FFD1DE}.memo-color-dot.blue{background:#D7E6FF}
+    .memo-color-dot.green{background:#DDF3D9}.memo-color-dot.purple{background:#E5D7FF}.memo-color-dot.gray{background:#E8EAED}
+    .memo-empty{padding:40px 16px;text-align:center;color:#94A3B8;font-weight:900;border:1.5px dashed #CBD5E1;border-radius:12px;background:#F8FAFC}
+
   </style>
 </head>
 <body>
@@ -3304,6 +3322,7 @@
               <button class="btn-tab-menu ${state.tab === 'todo' ? 'active' : ''}" onclick="switchTab('todo')">할 일</button>
               <button class="btn-tab-menu ${state.tab === 'calendar' ? 'active' : ''}" onclick="switchTab('calendar')">캘린더</button>
               <button class="btn-tab-menu ${state.tab === 'dailyPlanner' ? 'active' : ''}" onclick="switchTab('dailyPlanner')">오늘<br>시간표</button>
+              <button class="btn-tab-menu ${state.tab === 'memo' ? 'active' : ''}" onclick="switchTab('memo')">메모</button>
               <button class="btn-tab-menu ${state.tab === 'todayWrong' ? 'active' : ''}" onclick="switchTab('todayWrong')">오늘<br>오답</button>
               <button class="btn-tab-menu ${state.tab === 'mistakes' ? 'active' : ''}" onclick="switchTab('mistakes')">오답<br>노트</button>
               <button class="btn-tab-menu ${state.tab === 'merryChallenge' ? 'active' : ''}" onclick="switchTab('merryChallenge')">퀴즈</button>
@@ -3871,6 +3890,83 @@
       </div>`;
     }
 
+
+    function getMemoNotes(){
+      if(!Array.isArray(state.userData.memoNotes))state.userData.memoNotes=[];
+      return state.userData.memoNotes;
+    }
+    function addMemoNote(){
+      const notes=getMemoNotes();
+      notes.unshift({
+        id:`memo_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+        title:'',body:'',color:'yellow',
+        createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()
+      });
+      saveUserData();render();
+      setTimeout(()=>document.querySelector('.memo-card-title')?.focus(),0);
+    }
+    function updateMemoNote(id,field,value){
+      const note=getMemoNotes().find(x=>String(x.id)===String(id));
+      if(!note)return;
+      note[field]=String(value??'');
+      note.updatedAt=new Date().toISOString();
+      saveUserData();
+    }
+    function setMemoColor(id,color){
+      const note=getMemoNotes().find(x=>String(x.id)===String(id));
+      if(!note)return;
+      note.color=color;note.updatedAt=new Date().toISOString();
+      saveUserData();render();
+    }
+    function deleteMemoNote(id){
+      const note=getMemoNotes().find(x=>String(x.id)===String(id));
+      if(!note)return;
+      const label=note.title?.trim()||'이 메모';
+      if(!confirm(`"${label}"를 삭제할까요?`))return;
+      state.userData.memoNotes=getMemoNotes().filter(x=>String(x.id)!==String(id));
+      saveUserData();render();
+    }
+    function duplicateMemoNote(id){
+      const note=getMemoNotes().find(x=>String(x.id)===String(id));
+      if(!note)return;
+      getMemoNotes().unshift({
+        ...note,
+        id:`memo_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+        title:note.title ? `${note.title} 복사본` : '',
+        createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()
+      });
+      saveUserData();render();
+    }
+    function renderMemoBoard(){
+      const notes=getMemoNotes();
+      const colors=['yellow','pink','blue','green','purple','gray'];
+      return `<div>
+        <div class="memo-toolbar">
+          <div>
+            <div style="font-size:18px;font-weight:1000;color:#1E293B;">📝 메모장 / 스티커 메모</div>
+            <div style="font-size:10px;color:#64748B;font-weight:800;margin-top:3px;">짧은 메모부터 공부 기록까지 자유롭게 저장해둘 수 있어요.</div>
+          </div>
+          <button class="btn-pixel-black" onclick="addMemoNote()">＋ 새 메모</button>
+        </div>
+        ${notes.length?`<div class="memo-board">
+          ${notes.map(n=>`<div class="memo-card ${escHtml(n.color||'yellow')}">
+            <div class="memo-card-actions">
+              <button class="memo-icon-btn" title="복사" onclick="duplicateMemoNote('${n.id}')">⧉</button>
+              <button class="memo-icon-btn" title="삭제" onclick="deleteMemoNote('${n.id}')">×</button>
+            </div>
+            <input class="memo-card-title" value="${escHtml(n.title||'')}" placeholder="메모 제목" oninput="updateMemoNote('${n.id}','title',this.value)">
+            <textarea class="memo-card-body" placeholder="내용을 입력하세요..." oninput="updateMemoNote('${n.id}','body',this.value)">${escHtml(n.body||'')}</textarea>
+            <div class="memo-color-row">
+              ${colors.map(c=>`<button class="memo-color-dot ${c}" title="${c}" onclick="setMemoColor('${n.id}','${c}')"></button>`).join('')}
+            </div>
+          </div>`).join('')}
+        </div>`:`<div class="memo-empty">
+          아직 메모가 없어요.<br>
+          <button class="btn-pixel-black" style="margin-top:12px;" onclick="addMemoNote()">＋ 첫 메모 만들기</button>
+        </div>`}
+      </div>`;
+    }
+
     function renderTodayNearCharacter(){
       const today=new Date().toISOString().slice(0,10);
       const cal=calendarEntriesFor(today).filter(x=>!x.done);
@@ -4092,6 +4188,7 @@
       if (state.tab === 'mistakes') return renderMistakeNotebook();
       if (state.tab === 'calendar') return renderCalendar();
       if (state.tab === 'dailyPlanner') return renderDailyPlanner();
+      if (state.tab === 'memo') return renderMemoBoard();
       if (state.tab === 'shopManage') return renderShopManager();
       if (state.tab === 'todo') return renderTodoList();
       if (state.tab === 'merryChallenge') return renderMerryChallenge();
