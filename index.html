@@ -2139,6 +2139,7 @@
         conversationPhrases: [],
         customQuizSets: [],
         bubbleNotes: {},
+        memoNotes: [],
         shop: getShopDefaultData(),
         timerData: getDefaultTimerData()
       };
@@ -2155,7 +2156,7 @@
         myVocabIds: Array.isArray(src.myVocabIds ?? src.my_vocab_ids) ? (src.myVocabIds ?? src.my_vocab_ids) : [],
         attendanceDates: Array.isArray(src.attendanceDates ?? src.attendance_dates) ? (src.attendanceDates ?? src.attendance_dates) : [],
         studyHistory: Array.isArray(src.studyHistory ?? src.study_history) ? (src.studyHistory ?? src.study_history) : [],
-        spacedRepData: (() => { const raw=(src.spacedRepData ?? src.spaced_rep_data)&&typeof (src.spacedRepData ?? src.spaced_rep_data)==='object'?{...(src.spacedRepData ?? src.spaced_rep_data)}:{}; delete raw.__shop; delete raw.__timer; delete raw.__todos; delete raw.__calendarEvents; delete raw.__mistakeNotes; delete raw.__conversationPhrases; delete raw.__customQuizSets; delete raw.__bubbleNotes; return raw; })(),
+        spacedRepData: (() => { const raw=(src.spacedRepData ?? src.spaced_rep_data)&&typeof (src.spacedRepData ?? src.spaced_rep_data)==='object'?{...(src.spacedRepData ?? src.spaced_rep_data)}:{}; delete raw.__shop; delete raw.__timer; delete raw.__todos; delete raw.__calendarEvents; delete raw.__mistakeNotes; delete raw.__conversationPhrases; delete raw.__customQuizSets; delete raw.__bubbleNotes; delete raw.__memoNotes; return raw; })(),
         customWords: Array.isArray(src.customWords ?? src.custom_words) ? (src.customWords ?? src.custom_words) : [],
         todos: Array.isArray(src.todos) ? src.todos : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__todos) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__todos : []),
         calendarEvents: Array.isArray(src.calendarEvents) ? src.calendarEvents : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__calendarEvents) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__calendarEvents : []),
@@ -2163,6 +2164,7 @@
         conversationPhrases: Array.isArray(src.conversationPhrases) ? src.conversationPhrases : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__conversationPhrases) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__conversationPhrases : []),
         customQuizSets: Array.isArray(src.customQuizSets) ? src.customQuizSets : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__customQuizSets) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__customQuizSets : []),
         bubbleNotes: (src.bubbleNotes && typeof src.bubbleNotes==='object') ? src.bubbleNotes : ((((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes && typeof ((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes==='object') ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__bubbleNotes : {}),
+        memoNotes: Array.isArray(src.memoNotes) ? src.memoNotes : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__memoNotes) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__memoNotes : []),
         shop: normalizeShopData(src.shop || (((src.spacedRepData ?? src.spaced_rep_data)||{}).__shop) || null),
         todayWrongAnswers: Array.isArray(src.todayWrongAnswers) ? src.todayWrongAnswers : (Array.isArray(((src.spacedRepData ?? src.spaced_rep_data)||{}).__todayWrongAnswers) ? ((src.spacedRepData ?? src.spaced_rep_data)||{}).__todayWrongAnswers : []),
         timerData: normalizeTimerData(src.timerData || (((src.spacedRepData ?? src.spaced_rep_data)||{}).__timer) || null)
@@ -2268,6 +2270,17 @@
         }
         result.todayWrongAnswers=uniqueByJson([...(result.todayWrongAnswers||[]),...(d.todayWrongAnswers||[])]).slice(-500);
         result.bubbleNotes={...(result.bubbleNotes||{}),...(d.bubbleNotes||{})};
+        {
+          const memoMap=new Map((result.memoNotes||[]).filter(x=>x&&x.id).map(x=>[String(x.id),x]));
+          (d.memoNotes||[]).forEach(x=>{
+            if(!x||!x.id)return;
+            const key=String(x.id), prev=memoMap.get(key);
+            if(!prev || String(x.updatedAt||x.createdAt||'') >= String(prev.updatedAt||prev.createdAt||'')){
+              memoMap.set(key,{...(prev||{}),...x});
+            }
+          });
+          result.memoNotes=[...memoMap.values()].sort((a,b)=>String(b.updatedAt||b.createdAt||'').localeCompare(String(a.updatedAt||a.createdAt||'')));
+        }
 
         result.spacedRepData={...(result.spacedRepData||{}),...(d.spacedRepData||{})};
 
@@ -2384,7 +2397,8 @@
           __conversationPhrases: Array.isArray(data.conversationPhrases) ? data.conversationPhrases : [],
           __customQuizSets: Array.isArray(data.customQuizSets) ? data.customQuizSets : [],
           __todayWrongAnswers: Array.isArray(data.todayWrongAnswers) ? data.todayWrongAnswers.slice(-500) : [],
-          __bubbleNotes: data.bubbleNotes && typeof data.bubbleNotes==='object' ? data.bubbleNotes : {}
+          __bubbleNotes: data.bubbleNotes && typeof data.bubbleNotes==='object' ? data.bubbleNotes : {},
+          __memoNotes: Array.isArray(data.memoNotes) ? data.memoNotes : []
         },
         custom_words: Array.isArray(data.customWords) ? data.customWords : [],
         updated_at: new Date().toISOString()
@@ -3905,12 +3919,17 @@
       saveUserData();render();
       setTimeout(()=>document.querySelector('.memo-card-title')?.focus(),0);
     }
+    let memoSaveTimer=null;
     function updateMemoNote(id,field,value){
       const note=getMemoNotes().find(x=>String(x.id)===String(id));
       if(!note)return;
       note[field]=String(value??'');
       note.updatedAt=new Date().toISOString();
-      saveUserData();
+
+      // 입력 내용은 즉시 로컬에 백업하고, 클라우드 저장은 타이핑이 잠깐 멈춘 뒤 실행
+      saveLocalBackup(getUserKey(), normalizeUserData(JSON.parse(JSON.stringify(state.userData))));
+      clearTimeout(memoSaveTimer);
+      memoSaveTimer=setTimeout(()=>saveUserData(),500);
     }
     function setMemoColor(id,color){
       const note=getMemoNotes().find(x=>String(x.id)===String(id));
