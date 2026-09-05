@@ -740,6 +740,18 @@
     .memo-color-dot.green{background:#DDF3D9}.memo-color-dot.purple{background:#E5D7FF}.memo-color-dot.gray{background:#E8EAED}
     .memo-empty{padding:40px 16px;text-align:center;color:#94A3B8;font-weight:900;border:1.5px dashed #CBD5E1;border-radius:12px;background:#F8FAFC}
 
+  
+    .memo-format-toolbar{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:8px 0 4px;padding:6px;background:rgba(255,255,255,.48);border:1px solid rgba(100,116,139,.14);border-radius:8px}
+    .memo-format-btn{min-width:28px;height:28px;padding:0 7px;border:1px solid rgba(100,116,139,.22);border-radius:6px;background:rgba(255,255,255,.78);font-size:11px;font-weight:900;color:#334155;cursor:pointer}
+    .memo-format-btn:hover{background:#fff}
+    .memo-font-size{height:28px;border:1px solid rgba(100,116,139,.22);border-radius:6px;background:rgba(255,255,255,.78);padding:0 5px;font-size:10px;font-weight:800;color:#334155}
+    .memo-card-body-rich{width:100%;min-height:115px;max-height:420px;overflow:auto;background:transparent;outline:none;padding:8px 2px 4px;font-size:11px;line-height:1.55;color:#334155;white-space:pre-wrap;word-break:break-word}
+    .memo-card-body-rich:empty:before{content:attr(data-placeholder);color:#94A3B8;pointer-events:none}
+    .memo-card-body-rich ul{margin:5px 0;padding-left:20px}
+    .memo-card-body-rich .memo-check-row{display:flex;align-items:flex-start;gap:6px;margin:3px 0}
+    .memo-card-body-rich .memo-check-row input{margin-top:2px;flex:0 0 auto}
+    .memo-card-body-rich .memo-check-row.checked .memo-check-text{text-decoration:line-through;opacity:.58}
+
   </style>
 </head>
 <body>
@@ -3956,6 +3968,98 @@
       });
       saveUserData();render();
     }
+
+    function sanitizeMemoHtml(html){
+      const tpl=document.createElement('template');
+      tpl.innerHTML=String(html||'');
+      const allowed=new Set(['B','STRONG','I','EM','S','STRIKE','BR','DIV','P','SPAN','UL','OL','LI','LABEL','INPUT']);
+      [...tpl.content.querySelectorAll('*')].forEach(el=>{
+        if(!allowed.has(el.tagName)){
+          el.replaceWith(...el.childNodes);
+          return;
+        }
+        [...el.attributes].forEach(a=>{
+          const ok =
+            (el.tagName==='SPAN' && a.name==='style') ||
+            (el.tagName==='LABEL' && a.name==='class') ||
+            (el.tagName==='INPUT' && ['type','checked'].includes(a.name));
+          if(!ok)el.removeAttribute(a.name);
+        });
+        if(el.tagName==='SPAN' && el.hasAttribute('style')){
+          const size=(el.style.fontSize||'').match(/^(\d+(?:\.\d+)?)(px|em|rem|%)$/);
+          el.removeAttribute('style');
+          if(size)el.style.fontSize=size[0];
+        }
+        if(el.tagName==='INPUT'){
+          el.type='checkbox';
+          el.removeAttribute('value');
+          el.removeAttribute('name');
+        }
+        if(el.tagName==='LABEL'){
+          const cls=String(el.className||'');
+          el.className=cls.includes('memo-check-row') ? (cls.includes('checked')?'memo-check-row checked':'memo-check-row') : '';
+        }
+      });
+      return tpl.innerHTML;
+    }
+    function memoHtmlFromNote(note){
+      if(note?.html)return sanitizeMemoHtml(note.html);
+      return escHtml(note?.body||'').replace(/\n/g,'<br>');
+    }
+    function saveMemoRichBody(id,el){
+      const note=getMemoNotes().find(x=>String(x.id)===String(id));
+      if(!note)return;
+      note.html=sanitizeMemoHtml(el.innerHTML);
+      note.body=el.innerText||'';
+      note.updatedAt=new Date().toISOString();
+      saveLocalBackup(getUserKey(), normalizeUserData(JSON.parse(JSON.stringify(state.userData))));
+      clearTimeout(memoSaveTimer);
+      memoSaveTimer=setTimeout(()=>saveUserData(),500);
+    }
+    function memoFormat(id,command,value=null){
+      const el=document.getElementById(`memo-body-${id}`);
+      if(!el)return;
+      el.focus();
+      document.execCommand(command,false,value);
+      saveMemoRichBody(id,el);
+    }
+    function memoFontSize(id,value){
+      const el=document.getElementById(`memo-body-${id}`);
+      if(!el)return;
+      el.focus();
+      const sel=window.getSelection();
+      if(!sel||!sel.rangeCount)return;
+      const range=sel.getRangeAt(0);
+      if(!el.contains(range.commonAncestorContainer))return;
+      const span=document.createElement('span');
+      span.style.fontSize=value;
+      try{range.surroundContents(span)}
+      catch(_){
+        const frag=range.extractContents();
+        span.appendChild(frag);
+        range.insertNode(span);
+      }
+      sel.removeAllRanges();
+      const nr=document.createRange();
+      nr.selectNodeContents(span);nr.collapse(false);
+      sel.addRange(nr);
+      saveMemoRichBody(id,el);
+    }
+    function insertMemoCheckbox(id){
+      const el=document.getElementById(`memo-body-${id}`);
+      if(!el)return;
+      el.focus();
+      const html=`<label class="memo-check-row"><input type="checkbox" onchange="toggleMemoCheckbox(this,'${id}')"><span class="memo-check-text">할 일 입력</span></label><div><br></div>`;
+      document.execCommand('insertHTML',false,html);
+      saveMemoRichBody(id,el);
+    }
+    function toggleMemoCheckbox(box,id){
+      const row=box.closest('.memo-check-row');
+      if(row)row.classList.toggle('checked',box.checked);
+      const el=document.getElementById(`memo-body-${id}`);
+      if(el)saveMemoRichBody(id,el);
+    }
+
     function renderMemoBoard(){
       const notes=getMemoNotes();
       const colors=['yellow','pink','blue','green','purple','gray'];
@@ -3974,7 +4078,21 @@
               <button class="memo-icon-btn" title="삭제" onclick="deleteMemoNote('${n.id}')">×</button>
             </div>
             <input class="memo-card-title" value="${escHtml(n.title||'')}" placeholder="메모 제목" oninput="updateMemoNote('${n.id}','title',this.value)">
-            <textarea class="memo-card-body" placeholder="내용을 입력하세요..." oninput="updateMemoNote('${n.id}','body',this.value)">${escHtml(n.body||'')}</textarea>
+            <div class="memo-format-toolbar" onmousedown="event.stopPropagation()">
+              <button class="memo-format-btn" title="굵게" onmousedown="event.preventDefault();memoFormat('${n.id}','bold')"><b>B</b></button>
+              <button class="memo-format-btn" title="기울임" onmousedown="event.preventDefault();memoFormat('${n.id}','italic')"><i>I</i></button>
+              <button class="memo-format-btn" title="취소선" onmousedown="event.preventDefault();memoFormat('${n.id}','strikeThrough')"><s>S</s></button>
+              <button class="memo-format-btn" title="체크박스 추가" onmousedown="event.preventDefault();insertMemoCheckbox('${n.id}')">☐</button>
+              <select class="memo-font-size" title="글씨 크기" onchange="memoFontSize('${n.id}',this.value);this.selectedIndex=0">
+                <option value="" selected disabled>글씨 크기</option>
+                <option value="10px">작게</option>
+                <option value="12px">보통</option>
+                <option value="15px">크게</option>
+                <option value="19px">아주 크게</option>
+                <option value="24px">제목 크기</option>
+              </select>
+            </div>
+            <div id="memo-body-${n.id}" class="memo-card-body-rich" contenteditable="true" data-placeholder="내용을 입력하세요..." oninput="saveMemoRichBody('${n.id}',this)" onblur="saveMemoRichBody('${n.id}',this)">${memoHtmlFromNote(n)}</div>
             <div class="memo-color-row">
               ${colors.map(c=>`<button class="memo-color-dot ${c}" title="${c}" onclick="setMemoColor('${n.id}','${c}')"></button>`).join('')}
             </div>
