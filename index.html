@@ -1976,20 +1976,119 @@
       try{
         const saved=JSON.parse(localStorage.getItem(getTimerStorageKey())||'null');
         if(saved&&typeof saved==='object'){
-          state.studyTimer={...base,mode:['pomodoro','countdown','stopwatch'].includes(saved.mode)?saved.mode:'pomodoro',studyMinutes:Math.min(180,Math.max(1,Number(saved.studyMinutes||25))),restMinutes:Math.min(60,Math.max(1,Number(saved.restMinutes||5))),countdownMinutes:Math.min(720,Math.max(1,Number(saved.countdownMinutes||60))),phase:saved.phase==='rest'?'rest':'focus',remainingSec:Math.max(0,Number(saved.remainingSec??1500)),elapsedSec:Math.max(0,Number(saved.elapsedSec||0)),sessionFocusSec:Math.max(0,Number(saved.sessionFocusSec||0)),completedFocusBlocks:Math.max(0,Number(saved.completedFocusBlocks||0)),running:false,lastTickAt:null};
+          const wasRunning=saved.running===true;
+          const now=Date.now();
+          const savedTick=Number(saved.lastTickAt||saved.savedAt||now);
+          let elapsedSec=Math.max(0,Number(saved.elapsedSec||0));
+          let sessionFocusSec=Math.max(0,Number(saved.sessionFocusSec||0));
+          let remainingSec=Math.max(0,Number(saved.remainingSec??1500));
+          const mode=['pomodoro','countdown','stopwatch'].includes(saved.mode)?saved.mode:'pomodoro';
+
+          // 실행 중 브라우저가 새로고침/백그라운드 복원되어도 실제 경과 시간을 이어서 반영
+          if(wasRunning){
+            const awaySec=Math.max(0,(now-savedTick)/1000);
+            if(mode==='stopwatch'){
+              elapsedSec+=awaySec;
+              sessionFocusSec+=awaySec;
+            }else if(mode==='countdown'){
+              const counted=Math.min(remainingSec,awaySec);
+              remainingSec=Math.max(0,remainingSec-awaySec);
+              sessionFocusSec+=counted;
+            }else if(saved.phase!=='rest'){
+              const counted=Math.min(remainingSec,awaySec);
+              remainingSec=Math.max(0,remainingSec-awaySec);
+              sessionFocusSec+=counted;
+            }else{
+              remainingSec=Math.max(0,remainingSec-awaySec);
+            }
+          }
+
+          state.studyTimer={
+            ...base,
+            mode,
+            studyMinutes:Math.min(180,Math.max(1,Number(saved.studyMinutes||25))),
+            restMinutes:Math.min(60,Math.max(1,Number(saved.restMinutes||5))),
+            countdownMinutes:Math.min(720,Math.max(1,Number(saved.countdownMinutes||60))),
+            phase:saved.phase==='rest'?'rest':'focus',
+            remainingSec,
+            elapsedSec,
+            sessionFocusSec,
+            completedFocusBlocks:Math.max(0,Number(saved.completedFocusBlocks||0)),
+            running:wasRunning && (mode==='stopwatch' || remainingSec>0),
+            lastTickAt:wasRunning?now:null
+          };
         }else state.studyTimer=base;
-      }catch(e){state.studyTimer=base}
+      }catch(e){
+        console.warn('Timer restore failed',e);
+        state.studyTimer=base;
+      }
+
       stopStudyTimerInterval();
+      if(state.studyTimer?.running){
+        studyTimerInterval=setInterval(tickStudyTimer,250);
+      }
     }
-    function saveTimerRuntime(){if(!state.studyTimer)return;try{localStorage.setItem(getTimerStorageKey(),JSON.stringify({...state.studyTimer,running:false,lastTickAt:null,savedAt:Date.now()}))}catch(e){console.warn('Timer save failed',e)}}
+
+    // running 상태를 false로 강제 저장하지 않음.
+    // 사용자가 일시정지/종료를 누르지 않았다면 새로고침 후에도 계속 실행됨.
+    function saveTimerRuntime(){
+      if(!state.studyTimer)return;
+      try{
+        localStorage.setItem(
+          getTimerStorageKey(),
+          JSON.stringify({...state.studyTimer,savedAt:Date.now()})
+        );
+      }catch(e){console.warn('Timer save failed',e)}
+    }
+
     function checkpointStudyTimer(){
       if(!state.studyTimer)return;
       if(state.studyTimer.running) tickStudyTimer();
       saveTimerRuntime();
     }
+
+    function ensureStudyTimerRunning(){
+      const t=state.studyTimer;
+      if(!t||!t.running)return;
+      const now=Date.now();
+
+      // 브라우저가 백그라운드에서 interval을 멈췄다가 돌아온 경우 누락 시간을 복구
+      if(t.lastTickAt){
+        const gap=Math.max(0,(now-t.lastTickAt)/1000);
+        if(gap>0.75){
+          if(t.mode==='stopwatch'){
+            t.elapsedSec+=gap;
+            t.sessionFocusSec+=gap;
+            t.lastTickAt=now;
+          }else{
+            // 일반 타이머/뽀모도로는 기존 tick 로직을 사용하되 큰 공백만 안전하게 보정
+            const counted=Math.min(t.remainingSec,gap);
+            if(t.mode==='countdown' || t.phase==='focus')t.sessionFocusSec+=counted;
+            t.remainingSec=Math.max(0,t.remainingSec-gap);
+            t.lastTickAt=now;
+          }
+        }
+      }else{
+        t.lastTickAt=now;
+      }
+
+      if(!studyTimerInterval){
+        studyTimerInterval=setInterval(tickStudyTimer,250);
+      }
+      saveTimerRuntime();
+      updateStudyTimerDom();
+    }
+
     window.addEventListener('pagehide', checkpointStudyTimer);
     window.addEventListener('beforeunload', checkpointStudyTimer);
-    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden') checkpointStudyTimer();});
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='hidden'){
+        checkpointStudyTimer();
+      }else{
+        ensureStudyTimerRunning();
+      }
+    });
+    window.addEventListener('focus', ensureStudyTimerRunning);
     function setTimerMode(mode){
       const t=state.studyTimer;if(!t||t.running||!['pomodoro','countdown','stopwatch'].includes(mode))return;
       t.mode=mode;t.phase='focus';t.elapsedSec=0;t.sessionFocusSec=0;t.completedFocusBlocks=0;
@@ -1997,11 +2096,20 @@
       saveTimerRuntime();render();
     }
     function setStudyTimerSetting(key,value){const t=state.studyTimer;if(!t||t.running)return;const n=Math.max(1,Math.floor(Number(value||1)));if(key==='studyMinutes')t.studyMinutes=Math.min(180,n);if(key==='restMinutes')t.restMinutes=Math.min(60,n);if(key==='countdownMinutes')t.countdownMinutes=Math.min(720,n);if(t.sessionFocusSec===0&&t.completedFocusBlocks===0){t.phase='focus';t.remainingSec=t.studyMinutes*60}else if(t.phase==='focus')t.remainingSec=Math.min(t.remainingSec,t.studyMinutes*60);else t.remainingSec=Math.min(t.remainingSec,t.restMinutes*60);saveTimerRuntime();render()}
-    function startStudyTimer(){const t=state.studyTimer;if(!t||t.running)return;t.running=true;t.lastTickAt=Date.now();if(t.remainingSec<=0)t.remainingSec=getTimerPhaseLengthSec();stopStudyTimerInterval();studyTimerInterval=setInterval(tickStudyTimer,250);updateStudyTimerDom()}
+    function startStudyTimer(){const t=state.studyTimer;if(!t||t.running)return;t.running=true;t.lastTickAt=Date.now();if(t.mode!=='stopwatch'&&t.remainingSec<=0)t.remainingSec=getTimerPhaseLengthSec();stopStudyTimerInterval();studyTimerInterval=setInterval(tickStudyTimer,250);saveTimerRuntime();updateStudyTimerDom()}
+    // 실행 중 타이머 interval이 예기치 않게 사라지는 경우 자동 복구
+    setInterval(()=>{
+      if(state?.entered && state.studyTimer?.running && !studyTimerInterval){
+        state.studyTimer.lastTickAt=state.studyTimer.lastTickAt||Date.now();
+        studyTimerInterval=setInterval(tickStudyTimer,250);
+      }
+    },1000);
+
     function pauseStudyTimer(){const t=state.studyTimer;if(!t)return;if(t.running)tickStudyTimer();t.running=false;t.lastTickAt=null;stopStudyTimerInterval();saveTimerRuntime();updateStudyTimerDom()}
     function resetStudyTimer(){if(!confirm('현재 공부 타이머 세션을 초기화할까요? 아직 보상받지 않은 공부 시간도 초기화됩니다.'))return;const sm=state.studyTimer?.studyMinutes||25,rm=state.studyTimer?.restMinutes||5;state.studyTimer={...getDefaultTimerRuntime(),studyMinutes:sm,restMinutes:rm,remainingSec:sm*60};stopStudyTimerInterval();saveTimerRuntime();render()}
     function finishStudyTimerPhase(){const t=state.studyTimer;if(t.phase==='focus'){t.completedFocusBlocks+=1;state.userData.timerData.completedPomodoros+=1;t.phase='rest';t.remainingSec=t.restMinutes*60;state.speech=`집중 구간 완료! ${t.studyMinutes}분 훈련 끝. 잠깐 쉬었다가 다시 가자.`;saveUserData()}else{t.phase='focus';t.remainingSec=t.studyMinutes*60;state.speech=`휴식 끝. 다시 ${t.studyMinutes}분 집중 훈련 시작!`}t.lastTickAt=Date.now();saveTimerRuntime();render()}
-    function tickStudyTimer(){const t=state.studyTimer;if(!t||!t.running)return;const now=Date.now(),elapsed=Math.max(0,Math.min(5,(now-(t.lastTickAt||now))/1000));t.lastTickAt=now;if(now-lastTimerRuntimeCheckpoint>=2000){lastTimerRuntimeCheckpoint=now;saveTimerRuntime();}
+    function tickStudyTimer(){const t=state.studyTimer;if(!t||!t.running)return;const now=Date.now(),rawElapsed=Math.max(0,(now-(t.lastTickAt||now))/1000),elapsed=t.mode==='stopwatch'?rawElapsed:Math.min(5,rawElapsed);t.lastTickAt=now;if(now-lastTimerRuntimeCheckpoint>=2000){lastTimerRuntimeCheckpoint=now;saveTimerRuntime();}
+      // 스톱워치는 실제 시각 차이를 그대로 누적해서 탭 비활성/절전 때문에 시간이 사라지지 않게 함
       if(t.mode==='stopwatch'){t.elapsedSec+=elapsed;t.sessionFocusSec+=elapsed;updateStudyTimerDom();return}
       if(t.mode==='countdown'){t.sessionFocusSec+=elapsed;t.remainingSec-=elapsed;if(t.remainingSec<=0){t.remainingSec=0;t.running=false;t.lastTickAt=null;stopStudyTimerInterval();saveTimerRuntime();try{const A=window.AudioContext||window.webkitAudioContext;if(A){const c=new A(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.12;o.start();setTimeout(()=>{o.stop();c.close()},700)}}catch(e){}alert('⏰ 설정한 공부 시간이 끝났어요!');render();return}updateStudyTimerDom();return}
       if(t.phase==='focus')t.sessionFocusSec+=elapsed;t.remainingSec-=elapsed;if(t.remainingSec<=0){t.remainingSec=0;finishStudyTimerPhase();return}updateStudyTimerDom()}
