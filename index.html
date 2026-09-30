@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="referrer" content="no-referrer" />
   <title>하이큐 단어 훈련소</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800;900&display=swap" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700;800;900&family=Pretendard:wght@400;600;700;800;900&display=swap" />
   <!-- CSV 파싱 라이브러리 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1127,6 +1129,208 @@
       .weekly-day-col{border-left:0;border-top:1.4px solid #4A433D;min-height:260px}
       .weekly-day-col:first-child{border-top:0}
       .weekly-paper{padding:11px 9px}
+    }
+
+
+
+    /* ==========================================================
+       WEEKLY PAPER PLANNER · readability fix v2
+       - 제목/날짜: Gowun Batang
+       - 할 일 본문: Noto Sans KR
+       - 7칸을 억지로 압축하지 않고 최소 폭 유지
+       ========================================================== */
+    .weekly-paper{
+      background:#FBF7ED;
+      color:#22201E;
+    }
+
+    .weekly-paper-title{
+      font-family:"Gowun Batang",serif !important;
+      font-size:21px !important;
+      font-weight:700 !important;
+      letter-spacing:-.035em !important;
+      line-height:1.35 !important;
+    }
+
+    .weekly-paper-sub{
+      font-family:"Noto Sans KR","Pretendard",sans-serif !important;
+      font-size:9.5px !important;
+      font-weight:600 !important;
+      letter-spacing:-.025em !important;
+      line-height:1.45 !important;
+    }
+
+    .weekly-paper-nav{
+      font-family:"Noto Sans KR","Pretendard",sans-serif !important;
+      font-size:10.5px !important;
+      font-weight:700 !important;
+      letter-spacing:-.02em !important;
+    }
+
+    /* 7개 칸을 너무 좁게 찌그러뜨리지 않음 */
+    .weekly-check-grid{
+      grid-template-columns:repeat(7,minmax(145px,1fr)) !important;
+      overflow-x:auto !important;
+      overflow-y:hidden !important;
+      scrollbar-width:thin;
+    }
+
+    .weekly-day-col{
+      min-width:145px !important;
+      min-height:430px !important;
+    }
+
+    .weekly-day-head{
+      min-height:58px !important;
+      padding:9px 8px 8px !important;
+    }
+
+    .weekly-day-date{
+      font-family:"Gowun Batang",serif !important;
+      font-size:16px !important;
+      font-weight:700 !important;
+      letter-spacing:-.025em !important;
+      line-height:1.25 !important;
+      white-space:nowrap !important;
+    }
+
+    .weekly-day-dday{
+      font-family:"Noto Sans KR","Pretendard",sans-serif !important;
+      font-size:9.5px !important;
+      font-weight:700 !important;
+      line-height:1.35 !important;
+      letter-spacing:-.025em !important;
+      word-break:keep-all !important;
+      overflow-wrap:break-word !important;
+    }
+
+    .weekly-list{
+      padding:9px 8px 7px !important;
+      gap:7px !important;
+    }
+
+    .weekly-item{
+      display:grid !important;
+      grid-template-columns:16px minmax(0,1fr) !important;
+      grid-template-areas:
+        "check title"
+        ". time" !important;
+      column-gap:6px !important;
+      row-gap:1px !important;
+      align-items:start !important;
+      min-height:23px !important;
+      font-family:"Noto Sans KR","Pretendard",sans-serif !important;
+      font-size:11px !important;
+      font-weight:600 !important;
+      line-height:1.42 !important;
+      letter-spacing:-.035em !important;
+      color:#292522 !important;
+    }
+
+    .weekly-item input{
+      grid-area:check !important;
+      width:14px !important;
+      height:14px !important;
+      margin-top:1px !important;
+    }
+
+    .weekly-item input:checked:after{
+      content:"✓" !important;
+      left:-2px !important;
+      top:-8px !important;
+      color:#D23D59 !important;
+      font-family:"Noto Sans KR",sans-serif !important;
+      font-size:21px !important;
+      font-weight:900 !important;
+      transform:rotate(-9deg) !important;
+    }
+
+    .weekly-item-title{
+      grid-area:title !important;
+      min-width:0 !important;
+      display:block !important;
+      word-break:keep-all !important;
+      overflow-wrap:break-word !important;
+      white-space:normal !important;
+      hyphens:none !important;
+    }
+
+    .weekly-item-time{
+      grid-area:time !important;
+      justify-self:start !important;
+      margin:0 !important;
+      font-family:"Noto Sans KR","Pretendard",sans-serif !important;
+      font-size:8.5px !important;
+      font-weight:600 !important;
+      color:#887D73 !important;
+      line-height:1.2 !important;
+    }
+
+    .weekly-item-important{
+      color:#8F223A !important;
+      font-weight:700 !important;
+      background:linear-gradient(transparent 62%,rgba(245,178,190,.42) 62%,rgba(245,178,190,.42) 92%,transparent 92%) !important;
+    }
+
+    .weekly-item.done .weekly-item-title{
+      color:#958B82 !important;
+      text-decoration:line-through !important;
+      text-decoration-color:#D85A6E !important;
+      text-decoration-thickness:1.5px !important;
+    }
+
+    .weekly-empty-line{
+      font-family:"Noto Sans KR","Pretendard",sans-serif !important;
+    }
+
+    .weekly-quick-add input{
+      font-family:"Noto Sans KR","Pretendard",sans-serif !important;
+      font-size:10px !important;
+      font-weight:500 !important;
+      letter-spacing:-.03em !important;
+    }
+
+    .weekly-note-head{
+      font-family:"Gowun Batang",serif !important;
+      font-size:14px !important;
+      font-weight:700 !important;
+      letter-spacing:-.025em !important;
+    }
+
+    .weekly-note-area textarea{
+      font-family:"Noto Sans KR","Pretendard",sans-serif !important;
+      font-size:11px !important;
+      font-weight:500 !important;
+      letter-spacing:-.025em !important;
+      line-height:32px !important;
+    }
+
+    /* 화면 폭에 따라 열 수를 줄이지 않고 가로 스크롤로 보존 */
+    @media(max-width:980px){
+      .weekly-check-grid{
+        grid-template-columns:repeat(7,minmax(145px,1fr)) !important;
+      }
+      .weekly-day-col:nth-child(5),
+      .weekly-day-col:nth-child(n+5){
+        border-top:0 !important;
+      }
+      .weekly-day-col:nth-child(5){
+        border-left:1.4px solid #4A433D !important;
+      }
+    }
+
+    @media(max-width:650px){
+      .weekly-check-grid{
+        grid-template-columns:repeat(7,minmax(150px,1fr)) !important;
+      }
+      .weekly-day-col{
+        border-top:0 !important;
+        border-left:1.4px solid #4A433D !important;
+        min-height:390px !important;
+      }
+      .weekly-day-col:first-child{
+        border-left:0 !important;
+      }
     }
 
 </style>
