@@ -1510,6 +1510,40 @@
     @media(max-width:900px){.planner-cover{min-width:0;padding:18px 18px 18px 20px}.planner-cover:after,.planner-tab-rail,.planner-ribbon{display:none}.planner-spread{grid-template-columns:1fr}.planner-binder{display:none}.planner-page{min-height:auto;border-radius:18px!important;margin-bottom:10px}.planner-summary-grid{grid-template-columns:1fr 1fr 1fr}.planner-week-grid{grid-template-columns:repeat(4,minmax(108px,1fr))}.planner-sticky-board{grid-template-columns:1fr}}
     @media(max-width:680px){.planner-week-grid{grid-template-columns:1fr}.planner-month-grid{grid-template-columns:repeat(7,minmax(92px,1fr));overflow:auto;display:grid}.planner-day-grid{grid-template-columns:54px minmax(0,1fr)}}
 
+  
+
+    /* ===== Diary planner architecture v2: separate top-level tab, landscape book ===== */
+    .planner-notebook-wrap{width:100%;overflow-x:auto;padding:2px 0 14px}
+    .planner-notebook-toolbar{position:sticky;left:0;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;padding:0 2px}
+    .planner-notebook-title{font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:900;color:#6B5A21}
+    .planner-cover{min-width:0;width:100%;max-width:1180px;margin:0 auto;padding:18px 24px 20px 26px;border-radius:24px;background:linear-gradient(180deg,#F8E64A,#F0D424);overflow:visible}
+    .planner-spread{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr);align-items:stretch}
+    .planner-page{min-height:500px;padding:18px 20px 16px;overflow:hidden}
+    .planner-page.full{grid-column:1/-1;min-height:520px;border-radius:18px!important;background:#fffef9;position:relative}
+    .planner-page.full:after{content:'';position:absolute;top:0;bottom:0;left:50%;width:1px;background:linear-gradient(180deg,transparent,#E7E0D5 7%,#D6CEC1 50%,#E7E0D5 93%,transparent);box-shadow:0 0 9px rgba(70,50,30,.08);pointer-events:none}
+    .planner-page-kicker{font-size:24px}
+    .planner-page-head{margin-bottom:9px;padding-bottom:7px}
+    .planner-tab-rail{top:80px}
+    .planner-tab{font-size:10px;padding:11px 8px}
+    .planner-month-full-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:34px repeat(6,minmax(66px,1fr));border:1.5px solid #AFA69B;border-radius:12px;overflow:hidden;height:430px;background:#fff}
+    .planner-month-full-grid .wk{display:flex;align-items:center;justify-content:center;background:#FAF7F0;border-left:1px solid #D5CEC4;border-bottom:1px solid #BEB5AA;font-size:10px;font-weight:900;color:#6E675F}
+    .planner-month-full-grid .wk:first-child{border-left:0}
+    .planner-month-cell{position:relative;min-width:0;padding:7px;border-left:1px solid #DDD7CE;border-bottom:1px solid #DDD7CE;overflow:hidden;cursor:pointer;background:#FFFEFB}
+    .planner-month-cell:nth-child(7n+1){border-left:0}
+    .planner-month-cell.other{opacity:.35}.planner-month-cell.today{background:#FFF9DD}.planner-month-cell.selected{box-shadow:inset 0 0 0 2px #D8B31F}
+    .planner-month-cell .num{font-size:11px;font-weight:1000;color:#292524}.planner-month-cell .star{position:absolute;right:6px;top:5px;color:#D94A5A;font-size:12px}
+    .planner-month-mini{margin-top:4px;display:flex;flex-direction:column;gap:2px}.planner-month-mini span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:8.5px;line-height:1.35;padding:1px 4px;border-radius:5px;background:#F4F0E9;color:#514A44}.planner-month-mini span.imp{background:#FCE7EC;color:#B42343;font-weight:800}
+    .planner-week-full-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1.5px solid #AFA69B;border-radius:12px;overflow:hidden;height:445px;background:#fff}
+    .planner-week-full-col{min-width:0;border-left:1px solid #CFC7BC;display:flex;flex-direction:column;background:#FFFEFB}.planner-week-full-col:first-child{border-left:0}.planner-week-full-col.today{background:#FFF9DD}
+    .planner-week-full-head{padding:8px 7px;border-bottom:1px solid #CFC7BC;min-height:47px;position:relative}.planner-week-full-date{font-size:11px;font-weight:1000;color:#292524}.planner-week-full-dday{font-size:8px;color:#C83C50;font-weight:800;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .planner-week-full-list{padding:7px;display:flex;flex-direction:column;gap:4px;overflow:auto;flex:1}.planner-week-full-item{display:grid;grid-template-columns:15px minmax(0,1fr);gap:5px;align-items:start;font-family:'Noto Sans KR',sans-serif}.planner-week-full-item input{width:14px;height:14px;accent-color:#D94A5A;margin:2px 0 0}.planner-week-full-item .txt{font-size:9px;line-height:1.35;word-break:keep-all;overflow-wrap:break-word;color:#312E2B}.planner-week-full-item .time{font-size:7.5px;color:#9B9188;margin-left:4px;white-space:nowrap}.planner-week-full-item.done .txt{text-decoration:line-through;color:#AAA19A}
+    .planner-day-compact{display:grid;grid-template-columns:44px minmax(0,1fr);border-top:1px solid #D9D1C6}.planner-day-compact-hour{display:contents}.planner-day-compact-hour .h{padding:4px 5px 3px 0;border-bottom:1px solid #ECE6DC;text-align:right;font-size:8px;color:#8D847A;font-weight:800}.planner-day-compact-hour .slot{min-height:27px;border-bottom:1px solid #ECE6DC;padding:2px 0 2px 7px}.planner-day-compact-event{display:inline-block;margin:1px 4px 1px 0;padding:3px 6px;border-radius:5px;background:#F7EDF0;border-left:3px solid #D98796;font-size:8.5px;line-height:1.25;color:#403833;word-break:keep-all}.planner-day-compact-event.exam{background:#EEF4FC;border-color:#8FB0DE}.planner-day-compact-event.routine{background:#F0F7EE;border-color:#98BF95}.planner-day-compact-event.fixed{background:#F4F0FA;border-color:#A895CB}.planner-day-compact-event.done{opacity:.45;text-decoration:line-through}
+    .planner-daily-todo{display:flex;flex-direction:column;gap:1px}.planner-daily-todo label{display:grid;grid-template-columns:17px minmax(0,1fr) auto;gap:6px;align-items:start;padding:4px 0;border-bottom:1px solid #ECE6DC;font-family:'Noto Sans KR',sans-serif}.planner-daily-todo input{width:14px;height:14px;accent-color:#D94A5A;margin-top:2px}.planner-daily-todo .txt{font-size:9.5px;line-height:1.4;word-break:keep-all;overflow-wrap:break-word;color:#332F2B}.planner-daily-todo .tm{font-size:8px;color:#938A82;white-space:nowrap}.planner-daily-todo .imp{font-weight:800;background:linear-gradient(transparent 62%,#F7D1D8 62%)}.planner-daily-todo label.done .txt{text-decoration:line-through;color:#AAA19A}
+    .planner-decor-dock{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:7px;border-top:1px dashed #D8D0C5}.planner-decor-dock .label{font-size:9px;font-weight:900;color:#8C7A37}.planner-decor-dock button{border:1px solid #D9CC8A;background:#FFFDF2;border-radius:7px;padding:3px 6px;cursor:pointer;font-size:12px}.planner-decor-dock .placed{display:inline-flex;gap:4px;align-items:center}.planner-decor-dock .placed span{cursor:pointer;font-size:15px}
+    .planner-memo-full{display:grid;grid-template-columns:1fr 1fr;gap:20px;height:430px}.planner-free-memo{position:relative;border:1px solid #D8D0C5;border-radius:12px;background-image:radial-gradient(#D9D2C7 1px,transparent 1px);background-size:15px 15px;overflow:hidden}.planner-free-memo textarea{width:100%;height:100%;resize:none;border:0;outline:0;background:transparent;padding:16px;font-family:'Noto Sans KR',sans-serif;font-size:11px;line-height:1.7;color:#39332E}.planner-memo-stickies{overflow:auto;padding:4px}.planner-sticky-board{grid-template-columns:repeat(2,minmax(0,1fr))}.planner-sticky-note{min-height:110px}.planner-sticky-note textarea{min-height:72px}
+    .planner-spread.single-full{display:block}.planner-spread.single-full .planner-page.full{width:100%}
+    @media(max-width:900px){.planner-cover{width:100%;padding:14px}.planner-page.full{min-width:780px}.planner-notebook-wrap{overflow-x:auto}.planner-tab-rail{display:flex;position:static;flex-direction:row;margin-bottom:8px}.planner-tab{writing-mode:horizontal-tb;transform:none;border-radius:8px}.planner-week-full-grid,.planner-month-full-grid{min-width:760px}.planner-memo-full{min-width:760px}}
+
   </style>
 </head>
 <body>
@@ -2838,6 +2872,62 @@
     }
 
     window.addEventListener('pagehide', checkpointStudyTimer);
+
+
+    // ===== Diary planner v2 overrides =====
+    function plannerDecorDockHtml(){
+      const stickers=plannerStickersForPage();
+      const palette=['💛','⭐','📚','☁️','🍀','🩷','✏️','🌷'];
+      return `<div class="planner-decor-dock"><span class="label">STICKER</span><span class="placed">${stickers.map((s,i)=>`<span title="클릭해서 제거" onclick="removePlannerSticker(${i})">${escHtml(s.label)}</span>`).join('')}</span>${palette.map(x=>`<button type="button" title="스티커 붙이기" onclick="addPlannerSticker('${x}')">${x}</button>`).join('')}</div>`;
+    }
+
+    function renderPlannerMonthlyPage(){
+      const y=calendarViewDate.getFullYear(),m=calendarViewDate.getMonth();
+      const first=new Date(y,m,1),startDay=first.getDay(),daysInMonth=new Date(y,m+1,0).getDate(),prevDays=new Date(y,m,0).getDate();
+      const today=localDateKey(), cells=[];
+      for(let i=0;i<42;i++){
+        let cy=y,cm=m,day,other=false;
+        if(i<startDay){day=prevDays-startDay+i+1;cm=m-1;other=true;if(cm<0){cm=11;cy=y-1}}
+        else if(i>=startDay+daysInMonth){day=i-(startDay+daysInMonth)+1;cm=m+1;other=true;if(cm>11){cm=0;cy=y+1}}
+        else day=i-startDay+1;
+        const key=dateKeyFromParts(cy,cm,day), entries=calendarEntriesFor(key), important=entries.some(e=>e.important===true);
+        cells.push(`<div class="planner-month-cell ${other?'other':''} ${key===today?'today':''} ${key===calendarSelectedDate?'selected':''}" onclick="calendarSelectedDate='${key}';calendarViewDate=new Date(${cy},${cm},1);plannerNotebookSection='daily';render()">${important?'<span class="star">★</span>':''}<div class="num">${day}</div><div class="planner-month-mini">${entries.slice(0,4).map(e=>`<span class="${e.important?'imp':''}">${e.time?escHtml(e.time)+' ':''}${escHtml(e.title)}</span>`).join('')}${entries.length>4?`<span>+${entries.length-4} more</span>`:''}</div></div>`);
+      }
+      return `<section class="planner-page full"><div class="planner-page-head"><div><div class="planner-page-kicker">MONTHLY</div><div class="planner-page-sub">월간 일정 · 캘린더와 자동 연동</div></div><div class="planner-page-date">${y}년 ${m+1}월</div></div><div class="planner-month-full-grid">${['SUN','MON','TUE','WED','THU','FRI','SAT'].map(x=>`<div class="wk">${x}</div>`).join('')}${cells.join('')}</div>${plannerDecorDockHtml()}</section>`;
+    }
+
+    function renderPlannerDailyPage(){
+      const date=calendarSelectedDate||localDateKey(),d=dateKeyToLocalDate(date),dayNames=['일','월','화','수','목','금','토'];
+      const entries=calendarEntriesFor(date), hours=Array.from({length:16},(_,i)=>8+i);
+      const slots=hours.map(h=>{const arr=entries.filter(e=>{const mm=plannerMinutes(e.time);return mm!==null&&Math.floor(mm/60)===h});return `<div class="planner-day-compact-hour"><div class="h">${String(h).padStart(2,'0')}</div><div class="slot">${arr.map(e=>{const occ=e.occurrenceDate||date,done=isCalendarOccurrenceDone(e,occ);return `<span class="planner-day-compact-event ${plannerCategoryClass(e)} ${done?'done':''}" onclick="${e.source==='calendar'?`editDailyPlannerEntry('${e.id}','${date}')`:''}">${e.time?escHtml(e.time)+' ':''}${e.important?'⭐ ':''}${escHtml(e.title)}</span>`}).join('')}</div></div>`}).join('');
+      const todos=entries.map(e=>{const occ=e.occurrenceDate||date,done=isCalendarOccurrenceDone(e,occ);return `<label class="${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}','${occ}')"><span class="txt ${e.important?'imp':''}">${e.important?'⭐ ':''}${escHtml(e.title)}</span><span class="tm">${e.time?escHtml(e.time):''}</span></label>`}).join('');
+      return `<section class="planner-page left"><div class="planner-page-head"><div><div class="planner-page-kicker">DAILY</div><div class="planner-page-sub">TIME PLAN</div></div><div class="planner-page-date">${d.getMonth()+1}월 ${d.getDate()}일 ${dayNames[d.getDay()]}요일</div></div><div class="planner-day-compact">${slots}</div>${plannerDecorDockHtml()}</section><section class="planner-page right"><div class="planner-page-head"><div><div class="planner-page-kicker">TO DO LIST</div><div class="planner-page-sub">완료 상태도 캘린더와 동일</div></div><div class="planner-page-date">${date}</div></div><div class="planner-daily-todo">${todos||'<div style="font-size:10px;color:#9C948B;font-weight:800;padding:10px 0;">오늘 일정이 없어요.</div>'}${Array.from({length:Math.max(4,12-Math.min(entries.length,12))},()=>'<div style="height:27px;border-bottom:1px solid #ECE6DC;position:relative"><span style="position:absolute;left:0;top:5px;color:#B8B0A8">□</span></div>').join('')}</div></section>`;
+    }
+
+    function renderPlannerWeeklyPage(){
+      const weekStart=startOfPlannerWeek(weeklyPlannerAnchor||calendarSelectedDate||localDateKey()),start=dateKeyToLocalDate(weekStart),dayNames=['일','월','화','수','목','금','토'],today=localDateKey();
+      const days=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return dateKeyFromParts(d.getFullYear(),d.getMonth(),d.getDate())});
+      const cols=days.map(date=>{const d=dateKeyToLocalDate(date),entries=calendarEntriesFor(date),imp=entries.filter(e=>e.important===true);return `<div class="planner-week-full-col ${date===today?'today':''}"><div class="planner-week-full-head"><div class="planner-week-full-date">${d.getMonth()+1}/${d.getDate()} ${dayNames[d.getDay()]}</div>${imp.length?`<div class="planner-week-full-dday">★ ${calendarDdayLabel(date)} · ${escHtml(imp[0].title)}</div>`:''}</div><div class="planner-week-full-list">${entries.map(e=>{const occ=e.occurrenceDate||date,done=isCalendarOccurrenceDone(e,occ);return `<label class="planner-week-full-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}','${occ}')"><span class="txt">${e.important?'⭐ ':''}${escHtml(e.title)}${e.time?`<span class="time">${escHtml(e.time)}</span>`:''}</span></label>`}).join('')}${Array.from({length:Math.max(5,11-Math.min(entries.length,11))},()=>'<div style="height:22px;border-bottom:1px solid #EEE8DF"></div>').join('')}</div></div>`}).join('');
+      return `<section class="planner-page full"><div class="planner-page-head"><div><div class="planner-page-kicker">WEEKLY</div><div class="planner-page-sub">주간 체크 플래너 · 캘린더/할 일 연동</div></div><div class="planner-page-date">${days[0].slice(5).replace('-','/')} ~ ${days[6].slice(5).replace('-','/')}</div></div><div class="planner-week-full-grid">${cols}</div>${plannerDecorDockHtml()}</section>`;
+    }
+
+    function renderPlannerMemoPage(){
+      const note=getPlannerPageNote('memo'), sticky=plannerStickyNotesForPage(),monthLabel=`${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월`;
+      return `<section class="planner-page full"><div class="planner-page-head"><div><div class="planner-page-kicker">MEMO</div><div class="planner-page-sub">자유 메모 · 스티커 · 포스트잇</div></div><div class="planner-page-date">${monthLabel}</div></div><div class="planner-memo-full"><div class="planner-free-memo"><textarea id="planner-page-note" placeholder="자유롭게 적어두세요. 아이디어, 회고, 목표, 링크 뭐든 좋아요." oninput="normalizePlannerPageNotes()[plannerCurrentPageKey('memo')]=this.value.slice(0,5000);saveUserData()">${escHtml(note)}</textarea></div><div class="planner-memo-stickies"><div class="planner-sticky-board">${sticky.length?sticky.map(n=>`<div class="planner-sticky-note ${escHtml(n.color)}"><button class="close" onclick="deletePlannerStickyNote('${n.id}')">×</button><textarea placeholder="메모를 적어두세요." oninput="updatePlannerStickyNote('${n.id}',this.value)">${escHtml(n.text||'')}</textarea></div>`).join(''):'<div style="font-size:10px;color:#9CA3AF;font-weight:800;padding:8px">포스트잇을 추가해보세요.</div>'}</div><div class="planner-sticky-actions"><button onclick="addPlannerStickyNote('yellow')">노랑</button><button onclick="addPlannerStickyNote('pink')">핑크</button><button onclick="addPlannerStickyNote('blue')">블루</button><button onclick="addPlannerStickyNote('green')">그린</button></div>${plannerDecorDockHtml()}</div></div></section>`;
+    }
+
+    function renderPlannerNotebook(){
+      const section=plannerNotebookSection;
+      let body='',title='';
+      if(section==='monthly'){body=renderPlannerMonthlyPage();title=`${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월`;}
+      else if(section==='daily'){body=renderPlannerDailyPage();title=calendarSelectedDate||localDateKey();}
+      else if(section==='weekly'){body=renderPlannerWeeklyPage();const keys=weeklyPlannerDateKeys();title=`${keys[0].slice(5).replace('-','/')} ~ ${keys[6].slice(5).replace('-','/')}`;}
+      else {body=renderPlannerMemoPage();title=`${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월`;}
+      const full=section!=='daily';
+      const spreadHtml=full?body:body.replace('</section><section class="planner-page right">',`</section><div class="planner-binder">${Array.from({length:7},()=>'<span class="planner-ring"></span>').join('')}</div><section class="planner-page right">`);
+      return `<div class="planner-notebook-wrap"><div class="planner-notebook-toolbar"><div><div class="planner-notebook-title">📔 다이어리 플래너 · 캘린더 일정 자동 연동</div></div><div class="nav"><button class="btn-pixel-white" onclick="shiftPlannerPeriod(-1)">◀ 이전</button><strong style="font-family:'Gowun Batang',serif;font-size:14px;">${title}</strong><button class="btn-pixel-white" onclick="shiftPlannerPeriod(1)">다음 ▶</button><button class="btn-pixel-white" onclick="goPlannerToday()">오늘</button></div></div><div class="planner-cover"><div class="planner-tab-rail"><button class="planner-tab ${section==='monthly'?'active':''}" onclick="setPlannerNotebookSection('monthly')">MONTHLY</button><button class="planner-tab ${section==='daily'?'active':''}" onclick="setPlannerNotebookSection('daily')">DAILY</button><button class="planner-tab ${section==='weekly'?'active':''}" onclick="setPlannerNotebookSection('weekly')">WEEKLY</button><button class="planner-tab ${section==='memo'?'active':''}" onclick="setPlannerNotebookSection('memo')">MEMO</button></div><div class="planner-spread ${full?'single-full':''}">${spreadHtml}</div><div class="planner-ribbon"></div></div></div>`;
+    }
+
     window.addEventListener('beforeunload', checkpointStudyTimer);
     document.addEventListener('visibilitychange',()=>{
       if(document.visibilityState==='hidden'){
@@ -4213,6 +4303,7 @@
               <button class="btn-tab-menu ${state.tab === 'timer' ? 'active' : ''}" onclick="switchTab('timer')">공부<br>타이머</button>
               <button class="btn-tab-menu ${state.tab === 'todo' ? 'active' : ''}" onclick="switchTab('todo')">할 일</button>
               <button class="btn-tab-menu ${state.tab === 'calendar' ? 'active' : ''}" onclick="switchTab('calendar')">캘린더</button>
+              <button class="btn-tab-menu ${state.tab === 'diary' ? 'active' : ''}" onclick="switchTab('diary')">다이어리<br>플래너</button>
               <button class="btn-tab-menu ${state.tab === 'dailyPlanner' ? 'active' : ''}" onclick="switchTab('dailyPlanner')">오늘<br>시간표</button>
               <button class="btn-tab-menu ${state.tab === 'memo' ? 'active' : ''}" onclick="switchTab('memo')">메모</button>
               <button class="btn-tab-menu ${state.tab === 'todayWrong' ? 'active' : ''}" onclick="switchTab('todayWrong')">오늘<br>오답</button>
@@ -5148,8 +5239,8 @@
     let plannerPageTurnBusy=false;
 
     function setCalendarDisplayMode(mode){
-      calendarDisplayMode=['calendar','planner'].includes(mode)?mode:'calendar';
-      if(calendarDisplayMode==='planner' && !calendarSelectedDate) calendarSelectedDate=localDateKey();
+      calendarDisplayMode=['calendar','weekly'].includes(mode)?mode:'calendar';
+      if(calendarDisplayMode==='weekly' && !calendarSelectedDate) calendarSelectedDate=localDateKey();
       render();
     }
 
@@ -5446,8 +5537,8 @@
       const selected=calendarEntriesFor(calendarSelectedDate);
       const importantMonth=calendarImportantItemsForMonth(y,m);
       return `<div class="calendar-shell">
-        <div class="calendar-toolbar"><div><h3 style="margin:0;font-weight:900;">📅 캘린더 & 다이어리</h3><div style="font-size:10.5px;color:#64748B;font-weight:700;margin-top:3px;">기본 캘린더와 다이어리 플래너를 따로 전환해서 사용할 수 있어요.</div></div><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;"><div class="calendar-view-toggle"><button class="${calendarDisplayMode==='calendar'?'active':''}" onclick="setCalendarDisplayMode('calendar')">캘린더</button><button class="${calendarDisplayMode==='planner'?'active':''}" onclick="setCalendarDisplayMode('planner')">다이어리 플래너</button></div><button class="btn-pixel-white" onclick="goCalendarToday()">오늘</button></div></div>
-        ${calendarDisplayMode==='planner'?renderPlannerNotebook():`
+        <div class="calendar-toolbar"><div><h3 style="margin:0;font-weight:900;">📅 캘린더</h3><div style="font-size:10.5px;color:#64748B;font-weight:700;margin-top:3px;">월간 캘린더와 주간 체크 플래너는 여기에서 확인해요.</div></div><div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;"><div class="calendar-view-toggle"><button class="${calendarDisplayMode==='calendar'?'active':''}" onclick="setCalendarDisplayMode('calendar')">월간 캘린더</button><button class="${calendarDisplayMode==='weekly'?'active':''}" onclick="setCalendarDisplayMode('weekly')">위클리</button></div><button class="btn-pixel-white" onclick="goCalendarToday()">오늘</button></div></div>
+        ${calendarDisplayMode==='weekly'?renderWeeklyChecklistPlanner():`
         <div class="calendar-toolbar"><button class="btn-pixel-white" onclick="changeCalendarMonth(-1)">◀</button><div class="calendar-title">${y}년 ${m+1}월</div><button class="btn-pixel-white" onclick="changeCalendarMonth(1)">▶</button></div>
         <div class="calendar-important-board"><div class="calendar-important-head"><span>⭐ 이번 달 중요 일정</span><span>${importantMonth.length}개</span></div><div class="calendar-important-list">${importantMonth.length?importantMonth.map(e=>`<button class="calendar-important-item" onclick="selectCalendarDate('${e.date}')">${e.date.slice(5)} ${e.time?e.time+' ':''}${escHtml(e.title)} <span class="calendar-important-dday">${calendarDdayLabel(e.date)}</span></button>`).join(''):'<span style="font-size:10px;color:#B45309;font-weight:800;">중요 일정으로 지정한 항목이 없어요.</span>'}</div></div>
         <div class="study-heat-legend"><span>⏱ 공부시간</span><span class="study-heat-swatch study-heat-1"></span><span>1~14분</span><span class="study-heat-swatch study-heat-2"></span><span>15~29분</span><span class="study-heat-swatch study-heat-3"></span><span>30~59분</span><span class="study-heat-swatch study-heat-4"></span><span>1~2시간</span><span class="study-heat-swatch study-heat-5"></span><span>2시간+</span></div>
@@ -5634,6 +5725,7 @@
     function renderTabContent() {
       if (state.tab === 'mistakes') return renderMistakeNotebook();
       if (state.tab === 'calendar') return renderCalendar();
+      if (state.tab === 'diary') return renderPlannerNotebook();
       if (state.tab === 'dailyPlanner') return renderDailyPlanner();
       if (state.tab === 'memo') return renderMemoBoard();
       if (state.tab === 'shopManage') return renderShopManager();
