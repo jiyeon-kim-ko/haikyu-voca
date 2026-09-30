@@ -8480,5 +8480,91 @@ function renderChallengeMode(){
       render();
     })();
   </script>
+
+<style>
+/* === INNER DIARY SCROLL FIX ===
+   Keep the whole diary spread fixed while the content inside each page scrolls. */
+.planner-spread .planner-page{
+  min-height:0 !important;
+  overflow:hidden !important;
+}
+
+/* WEEKLY: each day column scrolls independently inside the book page */
+.planner-week-half-grid{
+  min-height:0 !important;
+  overflow:hidden !important;
+}
+.planner-week-half-grid .planner-week-full-col{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  display:flex !important;
+  flex-direction:column !important;
+  overflow:hidden !important;
+}
+.planner-week-half-grid .planner-week-full-head{
+  flex:0 0 auto;
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:#fff;
+}
+.planner-week-half-grid .planner-week-full-col.today .planner-week-full-head{
+  background:#FFF9DD;
+}
+.planner-week-half-grid .planner-week-full-list{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  padding-right:8px;
+}
+
+/* DAILY: if one half becomes long, only that page body scrolls */
+.planner-daily-half{
+  max-height:445px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+}
+.planner-daily-untimed{
+  max-height:110px;
+  overflow-y:auto;
+}
+
+/* MONTHLY: keep month page fixed; long mini-items scroll inside cells */
+.planner-month-half-grid .planner-month-mini{
+  max-height:46px;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+
+/* MEMO already scrolls via textarea; keep it contained in the page */
+.planner-memo-page textarea{
+  overflow-y:auto !important;
+  overscroll-behavior:contain;
+}
+
+/* Small, visible paper-style scrollbars */
+.planner-week-full-list::-webkit-scrollbar,
+.planner-daily-half::-webkit-scrollbar,
+.planner-daily-untimed::-webkit-scrollbar,
+.planner-month-mini::-webkit-scrollbar,
+.planner-memo-page textarea::-webkit-scrollbar{width:7px;height:7px}
+.planner-week-full-list::-webkit-scrollbar-track,
+.planner-daily-half::-webkit-scrollbar-track,
+.planner-daily-untimed::-webkit-scrollbar-track,
+.planner-month-mini::-webkit-scrollbar-track,
+.planner-memo-page textarea::-webkit-scrollbar-track{background:#F4EEE4;border-radius:999px}
+.planner-week-full-list::-webkit-scrollbar-thumb,
+.planner-daily-half::-webkit-scrollbar-thumb,
+.planner-daily-untimed::-webkit-scrollbar-thumb,
+.planner-month-mini::-webkit-scrollbar-thumb,
+.planner-memo-page textarea::-webkit-scrollbar-thumb{background:#BFAE9E;border-radius:999px;border:1px solid #F4EEE4}
+</style>
+
 </body>
 </html>
