@@ -5979,7 +5979,7 @@ body:not(.diary-focus-mode) .planner-notebook-wrap{
     }
 
     function plannerSectionOrder(section){
-      return ['monthly','daily','weekly','memo'].indexOf(section);
+      return ['monthly','daily','weekly','memo','inspiration'].indexOf(section);
     }
 
     function runPlannerPageTurn(direction='next', afterTurn=null){
@@ -6017,7 +6017,7 @@ body:not(.diary-focus-mode) .planner-notebook-wrap{
     }
 
     function setPlannerNotebookSection(section){
-      if(!['monthly','daily','weekly','memo'].includes(section) || section===plannerNotebookSection)return;
+      if(!['monthly','daily','weekly','memo','inspiration'].includes(section) || section===plannerNotebookSection)return;
       const oldIndex=plannerSectionOrder(plannerNotebookSection), newIndex=plannerSectionOrder(section);
       runPlannerPageTurn(newIndex>=oldIndex?'next':'prev',()=>{
         plannerNotebookSection=section;
@@ -6180,7 +6180,7 @@ body:not(.diary-focus-mode) .planner-notebook-wrap{
     function shiftPlannerPeriod(delta){
       const step=Number(delta||0); if(!step)return;
       runPlannerPageTurn(step>0?'next':'prev',()=>{
-        if(plannerNotebookSection==='monthly' || plannerNotebookSection==='memo') calendarViewDate=new Date(calendarViewDate.getFullYear(),calendarViewDate.getMonth()+step,1);
+        if(plannerNotebookSection==='monthly' || plannerNotebookSection==='memo' || plannerNotebookSection==='inspiration') calendarViewDate=new Date(calendarViewDate.getFullYear(),calendarViewDate.getMonth()+step,1);
         else if(plannerNotebookSection==='daily'){ const d=dateKeyToLocalDate(calendarSelectedDate||localDateKey()); d.setDate(d.getDate()+step); calendarSelectedDate=dateKeyFromParts(d.getFullYear(),d.getMonth(),d.getDate()); calendarViewDate=new Date(d.getFullYear(),d.getMonth(),1); }
         else if(plannerNotebookSection==='weekly'){ const d=dateKeyToLocalDate(weeklyPlannerAnchor||calendarSelectedDate||localDateKey()); d.setDate(d.getDate()+7*step); weeklyPlannerAnchor=dateKeyFromParts(d.getFullYear(),d.getMonth(),d.getDate()); calendarSelectedDate=weeklyPlannerAnchor; }
         render();
