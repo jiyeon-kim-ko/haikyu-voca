@@ -1343,6 +1343,51 @@
     .weekly-clean-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 9px}
     .weekly-delete-select{width:15px;height:15px;accent-color:#DC2626;flex:0 0 auto;margin-top:2px}
 
+
+
+    /* ===== Daily binder diary ===== */
+    .diary-book-wrap{width:100%;overflow:auto;padding:8px 2px 14px}
+    .diary-book{position:relative;min-width:900px;display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);background:#4A3329;border:2px solid #3A281F;border-radius:22px;padding:18px;box-shadow:0 14px 30px rgba(42,28,20,.22)}
+    .diary-page{position:relative;min-height:620px;background:#FFFDF7;border:1px solid #D8D0C3;padding:22px 24px;box-shadow:inset 0 0 18px rgba(87,68,49,.05)}
+    .diary-page.left{border-radius:14px 4px 4px 14px}
+    .diary-page.right{border-radius:4px 14px 14px 4px}
+    .diary-spine{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:space-around;z-index:4}
+    .diary-ring{width:42px;height:10px;border:2px solid #9B9388;border-radius:999px;background:linear-gradient(#F7F7F7,#BDB8B1,#F7F7F7);box-shadow:0 1px 2px rgba(0,0,0,.18)}
+    .diary-page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:2px solid #6B6257;padding-bottom:8px;margin-bottom:12px}
+    .diary-daily-title{font-family:'Gowun Batang',serif;font-size:22px;font-weight:700;letter-spacing:.05em;color:#2F2A25}
+    .diary-date{font-family:'Gowun Batang',serif;font-size:15px;font-weight:700;color:#544B43}
+    .diary-weather{font-size:10px;color:#8B8176;font-weight:700}
+    .diary-nav{display:flex;align-items:center;justify-content:center;gap:7px;margin:2px 0 12px;flex-wrap:wrap}
+    .diary-nav .btn-pixel-white{background:#FFFDF7;border-color:#8A8177;color:#3B342E}
+    .diary-section-title{font-family:'Gowun Batang',serif;font-size:13px;font-weight:700;color:#37312C;margin:10px 0 7px;letter-spacing:.04em}
+    .diary-timeline{position:relative;padding-left:46px}
+    .diary-hour-row{position:relative;min-height:42px;border-top:1px solid #DED7CB}
+    .diary-hour-label{position:absolute;left:-44px;top:-7px;width:34px;text-align:right;font-size:9px;color:#8D847A;font-weight:700;font-family:'Noto Sans KR',sans-serif}
+    .diary-time-event{margin:5px 0 0;padding:6px 8px;border-left:3px solid #E6A9B3;background:rgba(252,236,239,.72);border-radius:4px;font-family:'Noto Sans KR',sans-serif;font-size:10.5px;line-height:1.45;color:#35302B;word-break:keep-all;overflow-wrap:break-word}
+    .diary-time-event.exam{border-left-color:#93B4E5;background:#EEF4FC}.diary-time-event.routine{border-left-color:#A8C9A6;background:#F1F7EF}.diary-time-event.fixed{border-left-color:#B6A2D6;background:#F5F1FA}.diary-time-event.main{border-left-color:#E39AA7;background:#FDF0F2}
+    .diary-time-event.done{opacity:.52;text-decoration:line-through;text-decoration-color:#C85F6B;text-decoration-thickness:1.5px}
+    .diary-time-event .t{display:inline-block;min-width:78px;color:#7A7067;font-size:9px;font-weight:800;margin-right:4px}
+    .diary-checklist{display:flex;flex-direction:column;gap:2px;margin-top:2px}
+    .diary-check-item{display:grid;grid-template-columns:19px 1fr auto;gap:7px;align-items:start;min-height:28px;padding:3px 0;border-bottom:1px solid #EEE8DE;font-family:'Noto Sans KR',sans-serif}
+    .diary-check-item input{width:15px;height:15px;accent-color:#C84E5B;margin-top:2px}
+    .diary-check-title{font-size:11px;line-height:1.45;color:#312D29;word-break:keep-all;overflow-wrap:break-word}
+    .diary-check-title.important{font-weight:800;background:linear-gradient(transparent 62%,#F5C8D0 62%)}
+    .diary-check-item.done .diary-check-title{text-decoration:line-through;text-decoration-color:#CF5E6C;color:#90877D}
+    .diary-check-time{font-size:9px;color:#8A8177;font-weight:800;white-space:nowrap;padding-top:2px}
+    .diary-empty-line{height:28px;border-bottom:1px solid #EEE8DE;position:relative}
+    .diary-empty-line:before{content:'□';position:absolute;left:0;top:5px;font-size:12px;color:#A49A90}
+    .diary-note-block{margin-top:16px}
+    .diary-note-textarea{width:100%;min-height:150px;resize:vertical;border:0;outline:none;padding:5px 7px 5px 26px;font-family:'Noto Sans KR',sans-serif;font-size:11px;line-height:28px;color:#3C3732;background:linear-gradient(90deg,transparent 0 20px,#E7A1A8 20px 21px,transparent 21px),repeating-linear-gradient(to bottom,transparent 0 27px,#DDD6CA 27px 28px);border-radius:4px}
+    .diary-note-actions{display:flex;justify-content:flex-end;margin-top:7px}
+    .diary-dot-area{margin-top:16px;height:170px;background-image:radial-gradient(#D9D2C7 1px,transparent 1px);background-size:14px 14px;border-top:1px solid #EAE3D8;border-bottom:1px solid #EAE3D8}
+    .diary-mini-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:11px}
+    .diary-summary-card{border:1px solid #E1D9CD;background:#FAF6EE;border-radius:8px;padding:8px;text-align:center}
+    .diary-summary-card b{display:block;font-family:'Gowun Batang',serif;font-size:16px}.diary-summary-card span{font-size:9px;color:#81776D;font-weight:700}
+    .diary-tabs{position:absolute;right:-42px;top:70px;display:flex;flex-direction:column;gap:8px;z-index:3}
+    .diary-tab-label{writing-mode:vertical-rl;transform:rotate(180deg);padding:10px 7px;border-radius:0 7px 7px 0;background:#E3DDD3;border:1px solid #BEB5A8;font-size:9px;font-weight:900;color:#62584F}
+    .diary-tab-label.active{background:#D77A57;color:#fff;border-color:#BD6547}
+    @media(max-width:900px){.diary-book{min-width:0;display:block;padding:12px}.diary-spine{display:none}.diary-page{min-height:auto;border-radius:12px!important;margin-bottom:10px;padding:16px}.diary-tabs{display:none}.diary-mini-summary{grid-template-columns:1fr 1fr 1fr}.diary-timeline{padding-left:42px}}
+
   </style>
 </head>
 <body>
@@ -4979,8 +5024,9 @@
     let weeklyPlannerAnchor=localDateKey();
 
     function setCalendarDisplayMode(mode){
-      calendarDisplayMode=mode==='week'?'week':'month';
+      calendarDisplayMode=['week','diary'].includes(mode)?mode:'month';
       if(calendarDisplayMode==='week' && calendarSelectedDate) weeklyPlannerAnchor=calendarSelectedDate;
+      if(calendarDisplayMode==='diary' && !calendarSelectedDate) calendarSelectedDate=localDateKey();
       render();
     }
     function startOfPlannerWeek(dateKey){
@@ -5039,6 +5085,45 @@
       </div>`;
     }
 
+
+    // ===== Daily binder diary =====
+    function shiftDiaryDate(delta){
+      const d=dateKeyToLocalDate(calendarSelectedDate||localDateKey());
+      d.setDate(d.getDate()+Number(delta||0));
+      calendarSelectedDate=dateKeyFromParts(d.getFullYear(),d.getMonth(),d.getDate());
+      const [y,m]=calendarSelectedDate.split('-').map(Number);calendarViewDate=new Date(y,m-1,1);render();
+    }
+    function goDiaryToday(){calendarSelectedDate=localDateKey();const d=new Date();calendarViewDate=new Date(d.getFullYear(),d.getMonth(),1);render()}
+    function normalizeDiaryNotes(){
+      state.userData.diaryNotes=state.userData.diaryNotes&&typeof state.userData.diaryNotes==='object'?state.userData.diaryNotes:{};
+      return state.userData.diaryNotes;
+    }
+    function saveDiaryNote(){
+      const v=String(document.getElementById('diary-note')?.value||'').slice(0,5000);
+      normalizeDiaryNotes()[calendarSelectedDate]=v;saveUserData();
+      const b=document.getElementById('diary-note-save');if(b){b.textContent='저장됨 ✓';setTimeout(()=>{if(b)b.textContent='메모 저장'},900)}
+    }
+    function renderDailyBinderDiary(){
+      const date=calendarSelectedDate||localDateKey();const d=dateKeyToLocalDate(date);const dayNames=['일','월','화','수','목','금','토'];
+      const entries=calendarEntriesFor(date);const timed=entries.filter(e=>plannerMinutes(e.time)!==null).sort((a,b)=>plannerMinutes(a.time)-plannerMinutes(b.time));
+      const untimed=entries.filter(e=>plannerMinutes(e.time)===null);const note=normalizeDiaryNotes()[date]||'';
+      const important=entries.filter(e=>e.important===true);const done=entries.filter(e=>isCalendarOccurrenceDone(e,e.occurrenceDate||date)).length;
+      const hours=Array.from({length:17},(_,i)=>7+i);
+      const eventByHour=new Map();timed.forEach(e=>{const h=Math.floor(plannerMinutes(e.time)/60);if(!eventByHour.has(h))eventByHour.set(h,[]);eventByHour.get(h).push(e)});
+      const leftEvents=hours.map(h=>`<div class="diary-hour-row"><span class="diary-hour-label">${String(h).padStart(2,'0')}</span>${(eventByHour.get(h)||[]).map(e=>{const done=isCalendarOccurrenceDone(e,e.occurrenceDate||date);return `<div class="diary-time-event ${plannerCategoryClass(e)} ${done?'done':''}" onclick="${e.source==='calendar'?`editDailyPlannerEntry('${e.id}','${date}')`:''}"><span class="t">${escHtml(e.time)}${e.endTime?'–'+escHtml(e.endTime):''}</span>${e.important?'⭐ ':''}${escHtml(e.title)}</div>`}).join('')}</div>`).join('');
+      const checklist=entries.map(e=>{const occ=e.occurrenceDate||date,done=isCalendarOccurrenceDone(e,occ);return `<label class="diary-check-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}','${occ}')"><span class="diary-check-title ${e.important?'important':''}" ${e.source==='calendar'?`onclick="event.preventDefault();editDailyPlannerEntry('${e.id}','${date}')"`:''}>${e.important?'⭐ ':''}${escHtml(e.title)}</span><span class="diary-check-time">${e.time?escHtml(e.time):''}</span></label>`}).join('');
+      const emptyLines=Array.from({length:Math.max(5,11-Math.min(entries.length,11))},()=>'<div class="diary-empty-line"></div>').join('');
+      return `<div class="diary-book-wrap">
+        <div class="diary-nav"><button class="btn-pixel-white" onclick="shiftDiaryDate(-1)">◀ 전날</button><strong style="font-family:'Gowun Batang',serif;font-size:14px;">${date} (${dayNames[d.getDay()]})</strong><button class="btn-pixel-white" onclick="shiftDiaryDate(1)">다음날 ▶</button><button class="btn-pixel-white" onclick="goDiaryToday()">오늘</button></div>
+        <div class="diary-book">
+          <section class="diary-page left"><div class="diary-page-head"><div><div class="diary-daily-title">DAILY</div><div class="diary-weather">오늘의 계획 · 캘린더 시간표 자동 연동</div></div><div class="diary-date">${d.getMonth()+1}월 ${d.getDate()}일 ${dayNames[d.getDay()]}요일</div></div><div class="diary-section-title">TIME PLAN</div><div class="diary-timeline">${leftEvents}</div></section>
+          <div class="diary-spine">${Array.from({length:9},()=>'<span class="diary-ring"></span>').join('')}</div>
+          <section class="diary-page right"><div class="diary-page-head"><div><div class="diary-daily-title">DAILY</div><div class="diary-weather">체크리스트 · 완료 상태도 캘린더와 동일</div></div><div class="diary-date">${d.getMonth()+1}/${d.getDate()}</div></div><div class="diary-section-title">TO DO LIST</div><div class="diary-checklist">${checklist}${emptyLines}</div><div class="diary-mini-summary"><div class="diary-summary-card"><b>${entries.length}</b><span>전체 일정</span></div><div class="diary-summary-card"><b>${done}</b><span>완료</span></div><div class="diary-summary-card"><b>${important.length}</b><span>중요 일정</span></div></div><div class="diary-note-block"><div class="diary-section-title">MEMO</div><textarea id="diary-note" class="diary-note-textarea" placeholder="오늘 메모, 회고, 꼭 기억할 것...">${escHtml(note)}</textarea><div class="diary-note-actions"><button id="diary-note-save" class="btn-pixel-white" onclick="saveDiaryNote()">메모 저장</button></div></div><div class="diary-dot-area" title="자유 메모 공간"></div></section>
+          <div class="diary-tabs"><span class="diary-tab-label">MONTHLY</span><span class="diary-tab-label active">DAILY</span><span class="diary-tab-label">WEEKLY</span><span class="diary-tab-label">MEMO</span></div>
+        </div>
+      </div>`;
+    }
+
     function renderCalendar(){
       const y=calendarViewDate.getFullYear(),m=calendarViewDate.getMonth();
       const first=new Date(y,m,1),startDay=first.getDay(),daysInMonth=new Date(y,m+1,0).getDate();
@@ -5058,8 +5143,8 @@
       const selected=calendarEntriesFor(calendarSelectedDate);
       const importantMonth=calendarImportantItemsForMonth(y,m);
       return `<div class="calendar-shell">
-        <div class="calendar-toolbar"><div><h3 style="margin:0;font-weight:900;">📅 캘린더</h3><div style="font-size:10.5px;color:#64748B;font-weight:700;margin-top:3px;">일정 · 할 일과 타이머에서 완료한 공부 시간이 날짜별로 자동 기록돼요.</div></div><div style="display:flex;align-items:center;gap:7px;"><div class="calendar-view-toggle"><button class="${calendarDisplayMode==='month'?'active':''}" onclick="setCalendarDisplayMode('month')">월간</button><button class="${calendarDisplayMode==='week'?'active':''}" onclick="setCalendarDisplayMode('week')">주간 플래너</button></div><button class="btn-pixel-white" onclick="goCalendarToday()">오늘</button></div></div>
-        ${calendarDisplayMode==='week'?renderWeeklyChecklistPlanner():`
+        <div class="calendar-toolbar"><div><h3 style="margin:0;font-weight:900;">📅 캘린더</h3><div style="font-size:10.5px;color:#64748B;font-weight:700;margin-top:3px;">일정 · 할 일과 타이머에서 완료한 공부 시간이 날짜별로 자동 기록돼요.</div></div><div style="display:flex;align-items:center;gap:7px;"><div class="calendar-view-toggle"><button class="${calendarDisplayMode==='month'?'active':''}" onclick="setCalendarDisplayMode('month')">월간</button><button class="${calendarDisplayMode==='week'?'active':''}" onclick="setCalendarDisplayMode('week')">주간 플래너</button><button class="${calendarDisplayMode==='diary'?'active':''}" onclick="setCalendarDisplayMode('diary')">데일리 다이어리</button></div><button class="btn-pixel-white" onclick="goCalendarToday()">오늘</button></div></div>
+        ${calendarDisplayMode==='week'?renderWeeklyChecklistPlanner():calendarDisplayMode==='diary'?renderDailyBinderDiary():`
         <div class="calendar-toolbar"><button class="btn-pixel-white" onclick="changeCalendarMonth(-1)">◀</button><div class="calendar-title">${y}년 ${m+1}월</div><button class="btn-pixel-white" onclick="changeCalendarMonth(1)">▶</button></div>
         <div class="calendar-important-board"><div class="calendar-important-head"><span>⭐ 이번 달 중요 일정</span><span>${importantMonth.length}개</span></div><div class="calendar-important-list">${importantMonth.length?importantMonth.map(e=>`<button class="calendar-important-item" onclick="selectCalendarDate('${e.date}')">${e.date.slice(5)} ${e.time?e.time+' ':''}${escHtml(e.title)} <span class="calendar-important-dday">${calendarDdayLabel(e.date)}</span></button>`).join(''):'<span style="font-size:10px;color:#B45309;font-weight:800;">중요 일정으로 지정한 항목이 없어요.</span>'}</div></div>
         <div class="study-heat-legend"><span>⏱ 공부시간</span><span class="study-heat-swatch study-heat-1" title="1~14분"></span><span>1~14분</span><span class="study-heat-swatch study-heat-2" title="15~29분"></span><span>15~29분</span><span class="study-heat-swatch study-heat-3" title="30~59분"></span><span>30~59분</span><span class="study-heat-swatch study-heat-4" title="1~2시간"></span><span>1~2시간</span><span class="study-heat-swatch study-heat-5" title="2시간 이상"></span><span>2시간+</span></div>
