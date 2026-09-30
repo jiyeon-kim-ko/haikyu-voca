@@ -1893,6 +1893,105 @@ html,body{
   }
 }
 
+
+/* ===== DIARY SIZE + TRUE INNER SCROLL FIX v4 ===== */
+.planner-notebook-wrap{
+  width:100%!important;
+  overflow-x:auto!important;
+  overflow-y:visible!important;
+  padding-bottom:16px!important;
+}
+.planner-cover{
+  width:1280px!important;
+  max-width:none!important;
+  min-width:1280px!important;
+  margin:0 auto!important;
+  padding:24px 30px 24px 34px!important;
+}
+.planner-spread{
+  grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr)!important;
+}
+.planner-page{
+  min-height:650px!important;
+  height:650px!important;
+  padding:20px 24px 18px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+.planner-page-head{flex:0 0 auto!important;}
+.planner-week-half-grid{
+  height:auto!important;
+  min-height:0!important;
+  flex:1 1 auto!important;
+  overflow:hidden!important;
+}
+.planner-week-full-col{
+  min-height:0!important;
+  height:100%!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+.planner-week-full-head{flex:0 0 auto!important;}
+.planner-week-full-list{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  height:0!important;
+  overflow-y:scroll!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  scrollbar-gutter:stable!important;
+  touch-action:pan-y!important;
+  padding-right:8px!important;
+}
+.planner-week-full-list::-webkit-scrollbar,
+.planner-daily-half::-webkit-scrollbar,
+.planner-month-half-cell::-webkit-scrollbar,
+.planner-memo-page::-webkit-scrollbar{width:9px;}
+.planner-week-full-list::-webkit-scrollbar-thumb,
+.planner-daily-half::-webkit-scrollbar-thumb,
+.planner-month-half-cell::-webkit-scrollbar-thumb,
+.planner-memo-page::-webkit-scrollbar-thumb{background:#CBBEAD;border-radius:99px;border:2px solid #FFFDF7;}
+.planner-week-full-list::-webkit-scrollbar-track,
+.planner-daily-half::-webkit-scrollbar-track,
+.planner-month-half-cell::-webkit-scrollbar-track,
+.planner-memo-page::-webkit-scrollbar-track{background:#F5F0E8;}
+.planner-week-half-grid.cols4{grid-template-columns:repeat(4,minmax(145px,1fr))!important;}
+.planner-week-half-grid.cols3{grid-template-columns:repeat(3,minmax(180px,1fr))!important;}
+.planner-week-full-item{font-size:12px!important;line-height:1.45!important;padding:5px 4px!important;}
+.planner-week-full-item input{width:17px!important;height:17px!important;flex:0 0 17px!important;}
+.planner-week-full-date{font-size:14px!important;}
+.planner-week-full-dday{font-size:10px!important;line-height:1.3!important;}
+.planner-week-full-item .time{font-size:9.5px!important;margin-left:4px!important;}
+.planner-daily-half{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  height:0!important;
+  overflow-y:scroll!important;
+  overscroll-behavior:contain!important;
+  touch-action:pan-y!important;
+  padding-right:8px!important;
+}
+.planner-daily-untimed{flex:0 0 auto!important;max-height:110px!important;overflow-y:auto!important;}
+.planner-month-half-grid{flex:1 1 auto!important;min-height:0!important;height:auto!important;}
+.planner-month-half-cell{
+  min-height:0!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+  touch-action:pan-y!important;
+}
+.planner-memo-page{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+}
+.planner-memo-page textarea{height:100%!important;min-height:0!important;}
+@media(max-width:1400px){
+  .planner-cover{width:1180px!important;min-width:1180px!important;}
+  .planner-week-half-grid.cols4{grid-template-columns:repeat(4,minmax(132px,1fr))!important;}
+  .planner-week-half-grid.cols3{grid-template-columns:repeat(3,minmax(170px,1fr))!important;}
+}
 </style>
 </head>
 <body>
@@ -3256,7 +3355,7 @@ html,body{
     function renderPlannerWeeklyPage(){
       const weekStart=startOfPlannerWeek(weeklyPlannerAnchor||calendarSelectedDate||localDateKey()),start=dateKeyToLocalDate(weekStart),dayNames=['일','월','화','수','목','금','토'],today=localDateKey();
       const days=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return dateKeyFromParts(d.getFullYear(),d.getMonth(),d.getDate())});
-      const cols=days.map(date=>{const d=dateKeyToLocalDate(date),entries=calendarEntriesFor(date),imp=entries.filter(e=>e.important===true);return `<div class="planner-week-full-col ${date===today?'today':''}"><div class="planner-week-full-head"><div class="planner-week-full-date">${d.getMonth()+1}/${d.getDate()} ${dayNames[d.getDay()]}</div>${imp.length?`<div class="planner-week-full-dday">★ ${calendarDdayLabel(date)} · ${escHtml(imp[0].title)}</div>`:''}</div><div class="planner-week-full-list">${entries.map(e=>{const occ=e.occurrenceDate||date,done=isCalendarOccurrenceDone(e,occ);return `<label class="planner-week-full-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}','${occ}')"><span class="txt">${e.important?'⭐ ':''}${escHtml(e.title)}${e.time?`<span class="time">${escHtml(e.time)}</span>`:''}</span></label>`}).join('')}${Array.from({length:Math.max(5,11-Math.min(entries.length,11))},()=>'<div style="height:22px;border-bottom:1px solid #EEE8DF"></div>').join('')}</div></div>`}).join('');
+      const cols=days.map(date=>{const d=dateKeyToLocalDate(date),entries=calendarEntriesFor(date),imp=entries.filter(e=>e.important===true);return `<div class="planner-week-full-col ${date===today?'today':''}"><div class="planner-week-full-head"><div class="planner-week-full-date">${d.getMonth()+1}/${d.getDate()} ${dayNames[d.getDay()]}</div>${imp.length?`<div class="planner-week-full-dday">★ ${calendarDdayLabel(date)} · ${escHtml(imp[0].title)}</div>`:''}</div><div class="planner-week-full-list planner-inner-scroll" onwheel="plannerInnerWheel(event)">${entries.map(e=>{const occ=e.occurrenceDate||date,done=isCalendarOccurrenceDone(e,occ);return `<label class="planner-week-full-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}','${occ}')"><span class="txt">${e.important?'⭐ ':''}${escHtml(e.title)}${e.time?`<span class="time">${escHtml(e.time)}</span>`:''}</span></label>`}).join('')}${Array.from({length:Math.max(5,11-Math.min(entries.length,11))},()=>'<div style="height:22px;border-bottom:1px solid #EEE8DF"></div>').join('')}</div></div>`}).join('');
       return `<section class="planner-page full"><div class="planner-page-head"><div><div class="planner-page-kicker">WEEKLY</div><div class="planner-page-sub">주간 체크 플래너 · 캘린더/할 일 연동</div></div><div class="planner-page-date">${days[0].slice(5).replace('-','/')} ~ ${days[6].slice(5).replace('-','/')}</div></div><div class="planner-week-full-grid">${cols}</div>${plannerDecorDockHtml()}</section>`;
     }
 
@@ -7541,12 +7640,28 @@ function renderPlannerMonthlyPage(){
 function renderPlannerDailyPage(){
   const date=calendarSelectedDate||localDateKey(),d=dateKeyToLocalDate(date),dayNames=['일','월','화','수','목','금','토'],entries=calendarEntriesFor(date);
   const timed=entries.filter(e=>plannerMinutes(e.time)!==null),untimed=entries.filter(e=>plannerMinutes(e.time)===null);
-  const makePage=(hours,side,label)=>`<section class="planner-page ${side}"><div class="planner-page-head"><div><div class="planner-page-kicker">DAILY</div><div class="planner-page-sub">${label}</div></div><div class="planner-page-date">${d.getMonth()+1}월 ${d.getDate()}일 ${dayNames[d.getDay()]}요일</div></div><div class="planner-daily-half">${hours.map(h=>{const arr=timed.filter(e=>Math.floor(plannerMinutes(e.time)/60)===h);return `<div class="row"><div class="h">${String(h).padStart(2,'0')}</div><div class="slot">${arr.map(e=>plannerEventHtmlCompact(e,date)).join('')}</div></div>`}).join('')}</div>${side==='right'&&untimed.length?`<div class="planner-daily-untimed"><b>시간 미정</b>${untimed.map(e=>`<span>${e.important?'⭐ ':''}${escHtml(e.title)}</span>`).join('')}</div>`:''}${plannerDecorDockHtml()}</section>`;
+  const makePage=(hours,side,label)=>`<section class="planner-page ${side}"><div class="planner-page-head"><div><div class="planner-page-kicker">DAILY</div><div class="planner-page-sub">${label}</div></div><div class="planner-page-date">${d.getMonth()+1}월 ${d.getDate()}일 ${dayNames[d.getDay()]}요일</div></div><div class="planner-daily-half planner-inner-scroll" onwheel="plannerInnerWheel(event)">${hours.map(h=>{const arr=timed.filter(e=>Math.floor(plannerMinutes(e.time)/60)===h);return `<div class="row"><div class="h">${String(h).padStart(2,'0')}</div><div class="slot">${arr.map(e=>plannerEventHtmlCompact(e,date)).join('')}</div></div>`}).join('')}</div>${side==='right'&&untimed.length?`<div class="planner-daily-untimed"><b>시간 미정</b>${untimed.map(e=>`<span>${e.important?'⭐ ':''}${escHtml(e.title)}</span>`).join('')}</div>`:''}${plannerDecorDockHtml()}</section>`;
   return makePage(Array.from({length:9},(_,i)=>6+i),'left','06:00 — 14:59')+makePage(Array.from({length:9},(_,i)=>15+i),'right','15:00 — 23:59');
 }
+function plannerInnerWheel(ev){
+  const el=ev.currentTarget;
+  if(!el)return;
+  const canScroll=el.scrollHeight>el.clientHeight+2;
+  if(!canScroll)return;
+  const atTop=el.scrollTop<=0;
+  const atBottom=Math.ceil(el.scrollTop+el.clientHeight)>=el.scrollHeight;
+  const down=ev.deltaY>0;
+  const up=ev.deltaY<0;
+  if((down&&!atBottom)||(up&&!atTop)){
+    ev.preventDefault();
+    ev.stopPropagation();
+    el.scrollTop+=ev.deltaY;
+  }
+}
+
 function weeklyColV3(date){
   const d=dateKeyToLocalDate(date),entries=calendarEntriesFor(date),imp=entries.filter(e=>e.important===true),dayNames=['일','월','화','수','목','금','토'],today=localDateKey();
-  return `<div class="planner-week-full-col ${date===today?'today':''}"><div class="planner-week-full-head"><div class="planner-week-full-date">${d.getMonth()+1}/${d.getDate()} ${dayNames[d.getDay()]}</div>${imp.length?`<div class="planner-week-full-dday">★ ${calendarDdayLabel(date)} · ${escHtml(imp[0].title)}</div>`:''}</div><div class="planner-week-full-list">${entries.map(e=>{const occ=e.occurrenceDate||date,done=isCalendarOccurrenceDone(e,occ);return `<label class="planner-week-full-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}','${occ}')"><span class="txt">${e.important?'⭐ ':''}${escHtml(e.title)}${e.time?`<span class="time">${escHtml(e.time)}</span>`:''}</span></label>`}).join('')}${Array.from({length:Math.max(6,12-Math.min(entries.length,12))},()=>'<div style="height:22px;border-bottom:1px solid #EEE8DF"></div>').join('')}</div></div>`;
+  return `<div class="planner-week-full-col ${date===today?'today':''}"><div class="planner-week-full-head"><div class="planner-week-full-date">${d.getMonth()+1}/${d.getDate()} ${dayNames[d.getDay()]}</div>${imp.length?`<div class="planner-week-full-dday">★ ${calendarDdayLabel(date)} · ${escHtml(imp[0].title)}</div>`:''}</div><div class="planner-week-full-list planner-inner-scroll" onwheel="plannerInnerWheel(event)">${entries.map(e=>{const occ=e.occurrenceDate||date,done=isCalendarOccurrenceDone(e,occ);return `<label class="planner-week-full-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}','${occ}')"><span class="txt">${e.important?'⭐ ':''}${escHtml(e.title)}${e.time?`<span class="time">${escHtml(e.time)}</span>`:''}</span></label>`}).join('')}${Array.from({length:Math.max(6,12-Math.min(entries.length,12))},()=>'<div style="height:22px;border-bottom:1px solid #EEE8DF"></div>').join('')}</div></div>`;
 }
 function renderPlannerWeeklyPage(){
   const weekStart=startOfPlannerWeek(weeklyPlannerAnchor||calendarSelectedDate||localDateKey()),start=dateKeyToLocalDate(weekStart),days=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return dateKeyFromParts(d.getFullYear(),d.getMonth(),d.getDate())});
@@ -7556,7 +7671,7 @@ function renderPlannerWeeklyPage(){
 function renderPlannerMemoPage(){
   const notes=normalizePlannerPageNotes(),base=`memo:${calendarViewDate.getFullYear()}-${String(calendarViewDate.getMonth()+1).padStart(2,'0')}`;
   const left=notes[base+':L']||'',right=notes[base+':R']||'';
-  const page=(side,val,key,label)=>`<section class="planner-page ${side}"><div class="planner-page-head"><div><div class="planner-page-kicker">MEMO</div><div class="planner-page-sub">${label}</div></div><div class="planner-page-date">${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월</div></div><div class="planner-memo-page"><textarea placeholder="자유롭게 적어두세요." oninput="normalizePlannerPageNotes()['${key}']=this.value.slice(0,8000);saveUserData()">${escHtml(val)}</textarea></div><div class="planner-memo-tools"><button onclick="addPlannerStickyNote('yellow')">💛 메모지</button><button onclick="addPlannerSticker('⭐')">⭐ 스티커</button><button onclick="addPlannerSticker('🌷')">🌷 스티커</button><button onclick="addPlannerSticker('📚')">📚 스티커</button></div>${plannerDecorDockHtml()}</section>`;
+  const page=(side,val,key,label)=>`<section class="planner-page ${side}"><div class="planner-page-head"><div><div class="planner-page-kicker">MEMO</div><div class="planner-page-sub">${label}</div></div><div class="planner-page-date">${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월</div></div><div class="planner-memo-page planner-inner-scroll"><textarea placeholder="자유롭게 적어두세요." oninput="normalizePlannerPageNotes()['${key}']=this.value.slice(0,8000);saveUserData()">${escHtml(val)}</textarea></div><div class="planner-memo-tools"><button onclick="addPlannerStickyNote('yellow')">💛 메모지</button><button onclick="addPlannerSticker('⭐')">⭐ 스티커</button><button onclick="addPlannerSticker('🌷')">🌷 스티커</button><button onclick="addPlannerSticker('📚')">📚 스티커</button></div>${plannerDecorDockHtml()}</section>`;
   return page('left',left,base+':L','LEFT PAGE')+page('right',right,base+':R','RIGHT PAGE');
 }
 function renderPlannerNotebook(){
@@ -8480,91 +8595,5 @@ function renderChallengeMode(){
       render();
     })();
   </script>
-
-<style>
-/* === INNER DIARY SCROLL FIX ===
-   Keep the whole diary spread fixed while the content inside each page scrolls. */
-.planner-spread .planner-page{
-  min-height:0 !important;
-  overflow:hidden !important;
-}
-
-/* WEEKLY: each day column scrolls independently inside the book page */
-.planner-week-half-grid{
-  min-height:0 !important;
-  overflow:hidden !important;
-}
-.planner-week-half-grid .planner-week-full-col{
-  min-width:0;
-  min-height:0;
-  height:100%;
-  display:flex !important;
-  flex-direction:column !important;
-  overflow:hidden !important;
-}
-.planner-week-half-grid .planner-week-full-head{
-  flex:0 0 auto;
-  position:sticky;
-  top:0;
-  z-index:2;
-  background:#fff;
-}
-.planner-week-half-grid .planner-week-full-col.today .planner-week-full-head{
-  background:#FFF9DD;
-}
-.planner-week-half-grid .planner-week-full-list{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  overflow-y:auto !important;
-  overflow-x:hidden !important;
-  overscroll-behavior:contain;
-  scrollbar-gutter:stable;
-  padding-right:8px;
-}
-
-/* DAILY: if one half becomes long, only that page body scrolls */
-.planner-daily-half{
-  max-height:445px;
-  overflow-y:auto;
-  overflow-x:hidden;
-  overscroll-behavior:contain;
-  scrollbar-gutter:stable;
-}
-.planner-daily-untimed{
-  max-height:110px;
-  overflow-y:auto;
-}
-
-/* MONTHLY: keep month page fixed; long mini-items scroll inside cells */
-.planner-month-half-grid .planner-month-mini{
-  max-height:46px;
-  overflow-y:auto;
-  overscroll-behavior:contain;
-}
-
-/* MEMO already scrolls via textarea; keep it contained in the page */
-.planner-memo-page textarea{
-  overflow-y:auto !important;
-  overscroll-behavior:contain;
-}
-
-/* Small, visible paper-style scrollbars */
-.planner-week-full-list::-webkit-scrollbar,
-.planner-daily-half::-webkit-scrollbar,
-.planner-daily-untimed::-webkit-scrollbar,
-.planner-month-mini::-webkit-scrollbar,
-.planner-memo-page textarea::-webkit-scrollbar{width:7px;height:7px}
-.planner-week-full-list::-webkit-scrollbar-track,
-.planner-daily-half::-webkit-scrollbar-track,
-.planner-daily-untimed::-webkit-scrollbar-track,
-.planner-month-mini::-webkit-scrollbar-track,
-.planner-memo-page textarea::-webkit-scrollbar-track{background:#F4EEE4;border-radius:999px}
-.planner-week-full-list::-webkit-scrollbar-thumb,
-.planner-daily-half::-webkit-scrollbar-thumb,
-.planner-daily-untimed::-webkit-scrollbar-thumb,
-.planner-month-mini::-webkit-scrollbar-thumb,
-.planner-memo-page textarea::-webkit-scrollbar-thumb{background:#BFAE9E;border-radius:999px;border:1px solid #F4EEE4}
-</style>
-
 </body>
 </html>
