@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
   <meta name="referrer" content="no-referrer" />
   <title>하이큐 단어 훈련소</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1993,6 +1993,237 @@ html,body{
   .planner-week-half-grid.cols3{grid-template-columns:repeat(3,minmax(170px,1fr))!important;}
 }
 </style>
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="하이큐 플래너" />
+  <meta name="theme-color" content="#fff7f3" />
+
+<style id="ios-responsive-upgrade">
+
+/* ===== iPhone / iPad native-app responsive layer ===== */
+:root{--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+html,body{overscroll-behavior:none;-webkit-text-size-adjust:100%;}
+body.ios-native-app{background:#fff7f3!important;min-height:100dvh!important;}
+body.ios-native-app .bg-cover-wrapper{min-height:100dvh!important;padding:var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left)!important;align-items:stretch!important;}
+body.ios-native-app .minihompy-window{box-shadow:none!important;max-width:none!important;width:100%!important;min-height:100dvh!important;border-radius:0!important;border:0!important;}
+body.ios-native-app .window-top-bar,body.ios-native-app .window-url-bar{display:none!important;}
+body.ios-native-app .minihompy-body{min-height:100dvh!important;}
+body.ios-native-app .hompy-main-content{max-height:none!important;min-height:0!important;overflow:auto!important;-webkit-overflow-scrolling:touch;}
+body.ios-native-app .planner-notebook-wrap{overscroll-behavior:contain;}
+body.ios-native-app button,body.ios-native-app input,body.ios-native-app select,body.ios-native-app textarea{font-size:max(16px,1em)}
+#ios-profile-toggle{display:none}
+
+/* iPad: real 3-column workspace, two-page diary stays open */
+@media (min-width:768px) and (max-width:1199px){
+  body.ios-native-app .minihompy-body{padding:12px!important;gap:10px!important;flex-direction:row!important;align-items:stretch!important;}
+  body.ios-native-app .hompy-left-side{display:flex!important;width:205px!important;padding:10px!important;border-radius:14px!important;max-height:calc(100dvh - 24px);overflow:auto;}
+  body.ios-native-app .hompy-nav-tabs{width:70px!important;flex-direction:column!important;overflow-y:auto!important;overflow-x:hidden!important;gap:5px!important;padding-bottom:0!important;max-height:calc(100dvh - 24px);}
+  body.ios-native-app .btn-tab-menu{min-width:0!important;width:100%!important;flex:0 0 auto!important;padding:10px 3px!important;font-size:11px!important;}
+  body.ios-native-app .hompy-main-content{padding:14px!important;border-radius:14px!important;max-height:calc(100dvh - 24px)!important;}
+  body.ios-native-app .planner-cover{width:1120px!important;min-width:1120px!important;max-width:none!important;}
+  body.ios-native-app .planner-notebook-wrap{overflow:auto!important;}
+  body.ios-native-app .challenge-shell{min-width:0!important;}
+  body.ios-native-app .challenge-stats{grid-template-columns:repeat(4,minmax(0,1fr))!important;}
+}
+
+/* iPhone: compact shell + bottom nav + one diary page per swipe */
+@media (max-width:767px){
+  body.ios-native-app .bg-cover-wrapper{padding-top:var(--safe-top)!important;padding-bottom:calc(72px + var(--safe-bottom))!important;}
+  body.ios-native-app .minihompy-body{padding:0!important;display:block!important;min-height:100dvh!important;background:#fff!important;}
+  body.ios-native-app .hompy-left-side{display:none!important;position:fixed!important;left:10px!important;right:10px!important;top:calc(10px + var(--safe-top))!important;width:auto!important;z-index:2000!important;max-height:72dvh!important;overflow:auto!important;box-shadow:0 16px 40px rgba(0,0,0,.25)!important;}
+  body.ios-native-app.mobile-profile-open .hompy-left-side{display:flex!important;}
+  #ios-profile-toggle{display:flex;position:fixed;right:12px;top:calc(10px + var(--safe-top));z-index:2100;width:42px;height:42px;border-radius:14px;border:1px solid #e9d9d1;background:#fff8f5;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 14px rgba(0,0,0,.12);}
+  body.ios-native-app .hompy-nav-tabs{position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:1900!important;width:100%!important;height:calc(66px + var(--safe-bottom))!important;padding:6px max(8px,var(--safe-right)) var(--safe-bottom) max(8px,var(--safe-left))!important;background:rgba(255,250,247,.96)!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid #eadbd4;display:flex!important;flex-direction:row!important;overflow-x:auto!important;overflow-y:hidden!important;gap:5px!important;scrollbar-width:none;}
+  body.ios-native-app .hompy-nav-tabs::-webkit-scrollbar{display:none}
+  body.ios-native-app .btn-tab-menu{min-width:72px!important;height:52px!important;flex:0 0 72px!important;padding:7px 4px!important;border-radius:14px!important;font-size:10.5px!important;line-height:1.15!important;}
+  body.ios-native-app .hompy-main-content{border:0!important;border-radius:0!important;padding:12px 10px calc(84px + var(--safe-bottom))!important;min-height:100dvh!important;max-height:none!important;overflow:visible!important;}
+  body.ios-native-app .main-speech-bubble{margin-right:46px!important;border-radius:14px!important;}
+  body.ios-native-app .planner-notebook-toolbar{position:sticky;top:0;z-index:30;background:#fffdf9;padding:6px 0 10px;}
+  body.ios-native-app .planner-notebook-toolbar .nav{display:flex;gap:4px;flex-wrap:wrap;}
+  body.ios-native-app .planner-cover{min-width:0!important;width:100%!important;max-width:none!important;padding:10px!important;border-radius:20px!important;overflow:hidden!important;}
+  body.ios-native-app .planner-cover:after,body.ios-native-app .planner-ribbon,body.ios-native-app .planner-binder{display:none!important;}
+  body.ios-native-app .planner-tab-rail{display:flex!important;position:static!important;flex-direction:row!important;overflow-x:auto!important;margin:0 0 8px!important;gap:4px!important;}
+  body.ios-native-app .planner-tab{writing-mode:horizontal-tb!important;transform:none!important;min-width:84px;border-radius:10px!important;}
+  body.ios-native-app .planner-spread{display:flex!important;grid-template-columns:none!important;gap:10px!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x mandatory!important;-webkit-overflow-scrolling:touch!important;padding-bottom:4px;}
+  body.ios-native-app .planner-page{flex:0 0 calc(100vw - 40px)!important;min-width:calc(100vw - 40px)!important;width:calc(100vw - 40px)!important;max-width:calc(100vw - 40px)!important;min-height:calc(100dvh - 210px)!important;scroll-snap-align:center!important;border-radius:16px!important;margin:0!important;padding:14px!important;overflow:hidden!important;}
+  body.ios-native-app .planner-month-half-grid,body.ios-native-app .planner-week-half-grid{min-width:0!important;width:100%!important;}
+  body.ios-native-app .planner-day-scroll,body.ios-native-app .planner-day-cell-scroll,body.ios-native-app .planner-daily-scroll{max-height:calc(100dvh - 330px)!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;}
+  body.ios-native-app .challenge-shell{border-radius:0!important;margin:-12px -10px 0!important;min-height:100dvh!important;}
+  body.ios-native-app .challenge-header{padding:18px 14px!important;}
+  body.ios-native-app .challenge-body{padding:12px!important;}
+  body.ios-native-app .challenge-scene,body.ios-native-app .challenge-test-panel{grid-template-columns:1fr!important;}
+  body.ios-native-app .challenge-stats{grid-template-columns:1fr 1fr!important;}
+  body.ios-native-app .challenge-company-tabs{overflow-x:auto!important;flex-wrap:nowrap!important;padding-bottom:4px;}
+  body.ios-native-app .challenge-company-tab-wrap{flex:0 0 auto;}
+  body.ios-native-app .calendar-grid{min-width:680px;}
+  body.ios-native-app .calendar-toolbar,body.ios-native-app .calendar-important-board{min-width:680px;}
+  body.ios-native-app .calendar-wrap,body.ios-native-app #tab-content:has(.calendar-grid){overflow-x:auto!important;}
+}
+
+@media (orientation:landscape) and (max-height:600px){
+  body.ios-native-app .hompy-main-content{padding-top:6px!important;}
+  body.ios-native-app .main-speech-bubble{display:none!important;}
+}
+
+
+
+/* ===== DIARY TRUE FULLSCREEN / FOCUS MODE ===== */
+.diary-fullscreen-btn{
+  white-space:nowrap;
+  border-color:#D1B52B!important;
+  background:#FFF8C7!important;
+  color:#4B3D11!important;
+  font-weight:900!important;
+}
+body.diary-focus-mode{
+  overflow:hidden!important;
+  background:#F7F2E8!important;
+}
+body.diary-focus-mode #app{
+  position:fixed!important;
+  inset:0!important;
+  z-index:999999!important;
+  width:100vw!important;
+  height:100dvh!important;
+  max-width:none!important;
+  overflow:hidden!important;
+  background:#F7F2E8!important;
+}
+body.diary-focus-mode .window-top-bar,
+body.diary-focus-mode .window-url-bar,
+body.diary-focus-mode .hompy-left-side,
+body.diary-focus-mode .hompy-nav-tabs,
+body.diary-focus-mode .main-speech-bubble{
+  display:none!important;
+}
+body.diary-focus-mode .minihompy-window{
+  position:relative!important;
+  width:100vw!important;
+  max-width:none!important;
+  min-width:0!important;
+  height:100dvh!important;
+  min-height:100dvh!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+  background:#F7F2E8!important;
+}
+body.diary-focus-mode .minihompy-body{
+  display:block!important;
+  width:100%!important;
+  height:100dvh!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:#F7F2E8!important;
+}
+body.diary-focus-mode .hompy-main-content{
+  display:block!important;
+  width:100%!important;
+  max-width:none!important;
+  height:100dvh!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:10px 16px 18px!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  overflow:auto!important;
+  overflow-x:auto!important;
+  background:#F7F2E8!important;
+  scrollbar-gutter:stable;
+  -webkit-overflow-scrolling:touch;
+}
+body.diary-focus-mode #tab-content{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  height:auto!important;
+}
+body.diary-focus-mode .planner-notebook-wrap{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  overflow:auto!important;
+  margin:0!important;
+  padding:0 0 18px!important;
+}
+body.diary-focus-mode .planner-notebook-toolbar{
+  position:sticky!important;
+  top:-10px!important;
+  z-index:250!important;
+  width:100%!important;
+  margin:0 0 8px!important;
+  padding:10px 8px!important;
+  background:rgba(247,242,232,.94)!important;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(160,140,90,.25);
+}
+body.diary-focus-mode .planner-cover{
+  width:min(1580px, calc(100vw - 34px))!important;
+  min-width:1180px!important;
+  max-width:none!important;
+  margin:0 auto!important;
+  padding:24px 34px 26px 38px!important;
+  border-radius:28px!important;
+}
+body.diary-focus-mode .planner-spread{
+  grid-template-columns:minmax(0,1fr) 42px minmax(0,1fr)!important;
+}
+body.diary-focus-mode .planner-page{
+  height:calc(100dvh - 145px)!important;
+  min-height:720px!important;
+  max-height:none!important;
+  padding:24px 28px 20px!important;
+}
+body.diary-focus-mode .planner-week-half-grid,
+body.diary-focus-mode .planner-month-half-grid,
+body.diary-focus-mode .planner-daily-half,
+body.diary-focus-mode .planner-memo-half{
+  min-height:0!important;
+  height:100%!important;
+}
+body.diary-focus-mode .planner-tab-rail{
+  right:-54px!important;
+  transform:scale(1.06);
+  transform-origin:left center;
+}
+
+@media (max-width:1100px){
+  body.diary-focus-mode .planner-cover{
+    width:1180px!important;
+    min-width:1180px!important;
+  }
+  body.diary-focus-mode .planner-page{
+    height:760px!important;
+    min-height:760px!important;
+  }
+}
+
+</style>
+<script id="ios-native-bootstrap">
+
+(function(){
+  function isIOSNative(){return !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.nativeApp)}
+  function apply(){
+    if(isIOSNative() || /iPhone|iPad|iPod/.test(navigator.userAgent)) document.body.classList.add('ios-native-app');
+    if(!document.getElementById('ios-profile-toggle')){
+      const b=document.createElement('button'); b.id='ios-profile-toggle'; b.type='button'; b.textContent='☰'; b.setAttribute('aria-label','프로필 열기');
+      b.onclick=()=>document.body.classList.toggle('mobile-profile-open'); document.body.appendChild(b);
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply); else apply();
+  window.addEventListener('resize',apply);
+  window.iOSNative={notify:function(type,payload){try{window.webkit.messageHandlers.nativeApp.postMessage({type:type,payload:payload||{}})}catch(e){}}};
+})();
+
+</script>
 </head>
 <body>
   <div id="app" class="bg-cover-wrapper"></div>
@@ -3373,7 +3604,7 @@ html,body{
       else {body=renderPlannerMemoPage();title=`${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월`;}
       const full=section!=='daily';
       const spreadHtml=full?body:body.replace('</section><section class="planner-page right">',`</section><div class="planner-binder">${Array.from({length:7},()=>'<span class="planner-ring"></span>').join('')}</div><section class="planner-page right">`);
-      return `<div class="planner-notebook-wrap"><div class="planner-notebook-toolbar"><div><div class="planner-notebook-title">📔 다이어리 플래너 · 캘린더 일정 자동 연동</div></div><div class="nav"><button class="btn-pixel-white" onclick="shiftPlannerPeriod(-1)">◀ 이전</button><strong style="font-family:'Gowun Batang',serif;font-size:14px;">${title}</strong><button class="btn-pixel-white" onclick="shiftPlannerPeriod(1)">다음 ▶</button><button class="btn-pixel-white" onclick="goPlannerToday()">오늘</button></div></div><div class="planner-cover"><div class="planner-tab-rail"><button class="planner-tab ${section==='monthly'?'active':''}" onclick="setPlannerNotebookSection('monthly')">MONTHLY</button><button class="planner-tab ${section==='daily'?'active':''}" onclick="setPlannerNotebookSection('daily')">DAILY</button><button class="planner-tab ${section==='weekly'?'active':''}" onclick="setPlannerNotebookSection('weekly')">WEEKLY</button><button class="planner-tab ${section==='memo'?'active':''}" onclick="setPlannerNotebookSection('memo')">MEMO</button></div><div class="planner-spread ${full?'single-full':''}">${spreadHtml}</div><div class="planner-ribbon"></div></div></div>`;
+      return `<div class="planner-notebook-wrap"><div class="planner-notebook-toolbar"><div><div class="planner-notebook-title">📔 다이어리 플래너 · 캘린더 일정 자동 연동</div></div><div class="nav"><button class="btn-pixel-white" onclick="shiftPlannerPeriod(-1)">◀ 이전</button><strong style="font-family:'Gowun Batang',serif;font-size:14px;">${title}</strong><button class="btn-pixel-white" onclick="shiftPlannerPeriod(1)">다음 ▶</button><button class="btn-pixel-white" onclick="goPlannerToday()">오늘</button><button class="btn-pixel-white diary-fullscreen-btn" onclick="toggleDiaryFocusMode()" title="다른 UI를 숨기고 다이어리만 크게 보기">⛶ 다이어리 전체 화면</button></div></div><div class="planner-cover"><div class="planner-tab-rail"><button class="planner-tab ${section==='monthly'?'active':''}" onclick="setPlannerNotebookSection('monthly')">MONTHLY</button><button class="planner-tab ${section==='daily'?'active':''}" onclick="setPlannerNotebookSection('daily')">DAILY</button><button class="planner-tab ${section==='weekly'?'active':''}" onclick="setPlannerNotebookSection('weekly')">WEEKLY</button><button class="planner-tab ${section==='memo'?'active':''}" onclick="setPlannerNotebookSection('memo')">MEMO</button></div><div class="planner-spread ${full?'single-full':''}">${spreadHtml}</div><div class="planner-ribbon"></div></div></div>`;
     }
 
     window.addEventListener('beforeunload', checkpointStudyTimer);
@@ -5963,7 +6194,7 @@ html,body{
       else if(section==='weekly'){body=renderPlannerWeeklyPage(); const keys=weeklyPlannerDateKeys(); title=`${keys[0].slice(5).replace('-','/')} ~ ${keys[6].slice(5).replace('-','/')}`;}
       else {body=renderPlannerMemoPage(); title=`${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월 메모`;}
       const spreadHtml = section==='weekly' ? body.replace('</section><section class="planner-page right" style="display:none"></section>','') : body.replace('</section><section class="planner-page right">',`</section><div class="planner-binder">${Array.from({length:7},()=>'<span class="planner-ring"></span>').join('')}</div><section class="planner-page right">`);
-      return `<div class="planner-notebook-wrap"><div class="planner-notebook-toolbar"><div><div class="planner-notebook-title">바른연애 다이어리 느낌의 플래너 · 캘린더와 자동 연동</div></div><div class="nav"><button class="btn-pixel-white" onclick="shiftPlannerPeriod(-1)">◀ 이전</button><strong style="font-family:'Gowun Batang',serif;font-size:14px;">${title}</strong><button class="btn-pixel-white" onclick="shiftPlannerPeriod(1)">다음 ▶</button><button class="btn-pixel-white" onclick="goPlannerToday()">오늘</button></div></div><div class="planner-cover"><div class="planner-tab-rail"><button class="planner-tab ${section==='monthly'?'active':''}" onclick="setPlannerNotebookSection('monthly')">MONTHLY</button><button class="planner-tab ${section==='daily'?'active':''}" onclick="setPlannerNotebookSection('daily')">DAILY</button><button class="planner-tab ${section==='weekly'?'active':''}" onclick="setPlannerNotebookSection('weekly')">WEEKLY</button><button class="planner-tab ${section==='memo'?'active':''}" onclick="setPlannerNotebookSection('memo')">MEMO</button></div><div class="planner-spread">${spreadHtml}</div><div class="planner-ribbon"></div></div></div>`;
+      return `<div class="planner-notebook-wrap"><div class="planner-notebook-toolbar"><div><div class="planner-notebook-title">바른연애 다이어리 느낌의 플래너 · 캘린더와 자동 연동</div></div><div class="nav"><button class="btn-pixel-white" onclick="shiftPlannerPeriod(-1)">◀ 이전</button><strong style="font-family:'Gowun Batang',serif;font-size:14px;">${title}</strong><button class="btn-pixel-white" onclick="shiftPlannerPeriod(1)">다음 ▶</button><button class="btn-pixel-white" onclick="goPlannerToday()">오늘</button><button class="btn-pixel-white diary-fullscreen-btn" onclick="toggleDiaryFocusMode()" title="다른 UI를 숨기고 다이어리만 크게 보기">⛶ 다이어리 전체 화면</button></div></div><div class="planner-cover"><div class="planner-tab-rail"><button class="planner-tab ${section==='monthly'?'active':''}" onclick="setPlannerNotebookSection('monthly')">MONTHLY</button><button class="planner-tab ${section==='daily'?'active':''}" onclick="setPlannerNotebookSection('daily')">DAILY</button><button class="planner-tab ${section==='weekly'?'active':''}" onclick="setPlannerNotebookSection('weekly')">WEEKLY</button><button class="planner-tab ${section==='memo'?'active':''}" onclick="setPlannerNotebookSection('memo')">MEMO</button></div><div class="planner-spread">${spreadHtml}</div><div class="planner-ribbon"></div></div></div>`;
     }
 
     function renderCalendar(){
@@ -7682,7 +7913,7 @@ function renderPlannerNotebook(){
   else if(section==='weekly'){body=renderPlannerWeeklyPage();const keys=weeklyPlannerDateKeys();title=`${keys[0].slice(5).replace('-','/')} ~ ${keys[6].slice(5).replace('-','/')}`;}
   else {body=renderPlannerMemoPage();title=`${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월`;}
   const spreadHtml=body.replace('</section><section class="planner-page right">',`</section><div class="planner-binder">${Array.from({length:7},()=>'<span class="planner-ring"></span>').join('')}</div><section class="planner-page right">`);
-  return `<div class="planner-notebook-wrap"><div class="planner-notebook-toolbar"><div><div class="planner-notebook-title">📔 2P 다이어리 플래너 · 캘린더 자동 연동</div></div><div class="nav"><button class="btn-pixel-white" onclick="shiftPlannerPeriod(-1)">◀ 이전</button><strong style="font-family:'Gowun Batang',serif;font-size:14px;">${title}</strong><button class="btn-pixel-white" onclick="shiftPlannerPeriod(1)">다음 ▶</button><button class="btn-pixel-white" onclick="goPlannerToday()">오늘</button></div></div><div class="planner-cover"><div class="planner-tab-rail"><button class="planner-tab ${section==='monthly'?'active':''}" onclick="setPlannerNotebookSection('monthly')">MONTHLY</button><button class="planner-tab ${section==='daily'?'active':''}" onclick="setPlannerNotebookSection('daily')">DAILY</button><button class="planner-tab ${section==='weekly'?'active':''}" onclick="setPlannerNotebookSection('weekly')">WEEKLY</button><button class="planner-tab ${section==='memo'?'active':''}" onclick="setPlannerNotebookSection('memo')">MEMO</button></div><div class="planner-spread">${spreadHtml}</div><div class="planner-ribbon"></div></div></div>`;
+  return `<div class="planner-notebook-wrap"><div class="planner-notebook-toolbar"><div><div class="planner-notebook-title">📔 2P 다이어리 플래너 · 캘린더 자동 연동</div></div><div class="nav"><button class="btn-pixel-white" onclick="shiftPlannerPeriod(-1)">◀ 이전</button><strong style="font-family:'Gowun Batang',serif;font-size:14px;">${title}</strong><button class="btn-pixel-white" onclick="shiftPlannerPeriod(1)">다음 ▶</button><button class="btn-pixel-white" onclick="goPlannerToday()">오늘</button><button class="btn-pixel-white diary-fullscreen-btn" onclick="toggleDiaryFocusMode()" title="다른 UI를 숨기고 다이어리만 크게 보기">⛶ 다이어리 전체 화면</button></div></div><div class="planner-cover"><div class="planner-tab-rail"><button class="planner-tab ${section==='monthly'?'active':''}" onclick="setPlannerNotebookSection('monthly')">MONTHLY</button><button class="planner-tab ${section==='daily'?'active':''}" onclick="setPlannerNotebookSection('daily')">DAILY</button><button class="planner-tab ${section==='weekly'?'active':''}" onclick="setPlannerNotebookSection('weekly')">WEEKLY</button><button class="planner-tab ${section==='memo'?'active':''}" onclick="setPlannerNotebookSection('memo')">MEMO</button></div><div class="planner-spread">${spreadHtml}</div><div class="planner-ribbon"></div></div></div>`;
 }
 
 function normalizeChallengePrefs(){
@@ -8594,6 +8825,58 @@ function renderChallengeMode(){
       if(getSelectedBgmTrack()?.file) syncBgmSource(false);
       render();
     })();
-  </script>
+  
+
+// ===== Diary fullscreen / focus mode =====
+function updateDiaryFullscreenButtons(){
+  const active=document.body.classList.contains('diary-focus-mode');
+  document.querySelectorAll('.diary-fullscreen-btn').forEach(btn=>{
+    btn.textContent=active?'✕ 전체 화면 종료':'⛶ 다이어리 전체 화면';
+    btn.setAttribute('aria-pressed',active?'true':'false');
+    btn.title=active?'전체 화면에서 나가기':'다른 UI를 숨기고 다이어리만 크게 보기';
+  });
+}
+
+async function toggleDiaryFocusMode(){
+  const entering=!document.body.classList.contains('diary-focus-mode');
+  document.body.classList.toggle('diary-focus-mode',entering);
+  updateDiaryFullscreenButtons();
+
+  if(entering){
+    try{
+      if(!document.fullscreenElement && document.documentElement.requestFullscreen){
+        await document.documentElement.requestFullscreen({navigationUI:'hide'});
+      }
+    }catch(err){
+      // Browser fullscreen can be blocked; CSS focus mode still works.
+    }
+    requestAnimationFrame(()=>{
+      const wrap=document.querySelector('.planner-notebook-wrap');
+      if(wrap){wrap.scrollTop=0;wrap.scrollLeft=0;}
+    });
+  }else{
+    try{
+      if(document.fullscreenElement && document.exitFullscreen){
+        await document.exitFullscreen();
+      }
+    }catch(err){}
+  }
+}
+
+document.addEventListener('fullscreenchange',()=>{
+  if(!document.fullscreenElement && document.body.classList.contains('diary-focus-mode')){
+    document.body.classList.remove('diary-focus-mode');
+  }
+  updateDiaryFullscreenButtons();
+});
+
+document.addEventListener('keydown',ev=>{
+  if(ev.key==='Escape' && document.body.classList.contains('diary-focus-mode')){
+    document.body.classList.remove('diary-focus-mode');
+    updateDiaryFullscreenButtons();
+  }
+});
+
+</script>
 </body>
 </html>
