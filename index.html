@@ -1992,6 +1992,26 @@ html,body{
   .planner-week-half-grid.cols4{grid-template-columns:repeat(4,minmax(132px,1fr))!important;}
   .planner-week-half-grid.cols3{grid-template-columns:repeat(3,minmax(170px,1fr))!important;}
 }
+
+
+/* ===== FINAL: Inspiration + scroll isolation ===== */
+.planner-inspiration-hint{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 9px;font-family:'Noto Sans KR',sans-serif;font-size:10px;font-weight:800;color:#7C6757}
+.planner-inspiration-hint span{background:#FFF7D9;border:1px solid #EADAA0;border-radius:999px;padding:4px 8px}
+.inspiration-page textarea{background:linear-gradient(90deg,transparent 0 24px,#E7A1A8 24px 25px,transparent 25px),repeating-linear-gradient(to bottom,#FFFDF7 0,#FFFDF7 27px,#DED7CB 27px,#DED7CB 28px)!important;line-height:28px!important;padding:7px 10px 7px 31px!important}
+.planner-tab-rail .planner-tab{min-width:86px}
+.planner-tab-rail .planner-tab:last-child{font-size:9px;letter-spacing:-.02em}
+
+/* Normal app pages: document owns vertical scrolling. */
+html,body{height:auto!important;min-height:100%!important;overflow-x:auto!important;overflow-y:auto!important;overscroll-behavior-y:auto!important}
+body:not(.diary-focus-mode) #app{height:auto!important;min-height:100vh!important;overflow:visible!important}
+body:not(.diary-focus-mode) .bg-cover-wrapper,
+body:not(.diary-focus-mode) .minihompy-window,
+body:not(.diary-focus-mode) .minihompy-body,
+body:not(.diary-focus-mode) .hompy-main-content,
+body:not(.diary-focus-mode) #tab-content{height:auto!important;max-height:none!important;overflow-y:visible!important;overscroll-behavior-y:auto!important}
+/* Diary spread itself may pan sideways, but only deliberate inner panels own vertical scroll. */
+body:not(.diary-focus-mode) .planner-notebook-wrap{overflow-x:auto!important;overflow-y:visible!important;overscroll-behavior-x:contain!important;overscroll-behavior-y:auto!important}
+.planner-inner-scroll{overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch}
 </style>
 
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -7940,15 +7960,23 @@ function renderPlannerMemoPage(){
   const page=(side,val,key,label)=>`<section class="planner-page ${side}"><div class="planner-page-head"><div><div class="planner-page-kicker">MEMO</div><div class="planner-page-sub">${label}</div></div><div class="planner-page-date">${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월</div></div><div class="planner-memo-page planner-inner-scroll"><textarea placeholder="자유롭게 적어두세요." oninput="normalizePlannerPageNotes()['${key}']=this.value.slice(0,8000);saveUserData()">${escHtml(val)}</textarea></div><div class="planner-memo-tools"><button onclick="addPlannerStickyNote('yellow')">💛 메모지</button><button onclick="addPlannerSticker('⭐')">⭐ 스티커</button><button onclick="addPlannerSticker('🌷')">🌷 스티커</button><button onclick="addPlannerSticker('📚')">📚 스티커</button></div>${plannerDecorDockHtml()}</section>`;
   return page('left',left,base+':L','LEFT PAGE')+page('right',right,base+':R','RIGHT PAGE');
 }
+
+function renderPlannerInspirationPage(){
+  const notes=normalizePlannerPageNotes(),base=`inspiration:${calendarViewDate.getFullYear()}-${String(calendarViewDate.getMonth()+1).padStart(2,'0')}`;
+  const left=notes[base+':L']||'',right=notes[base+':R']||'';
+  const page=(side,val,key,label,placeholder)=>`<section class="planner-page ${side}"><div class="planner-page-head"><div><div class="planner-page-kicker">INSPIRATION</div><div class="planner-page-sub">${label}</div></div><div class="planner-page-date">${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월</div></div><div class="planner-inspiration-hint"><span>✦ 좋은 문장</span><span>💡 떠오른 아이디어</span><span>✎ 나중에 써먹을 메모</span></div><div class="planner-memo-page planner-inner-scroll inspiration-page"><textarea placeholder="${placeholder}" oninput="normalizePlannerPageNotes()['${key}']=this.value.slice(0,12000);saveUserData()">${escHtml(val)}</textarea></div><div class="planner-memo-tools"><button onclick="addPlannerStickyNote('yellow')">💛 메모지</button><button onclick="addPlannerSticker('💡')">💡 스티커</button><button onclick="addPlannerSticker('✨')">✨ 스티커</button><button onclick="addPlannerSticker('✍️')">✍️ 스티커</button></div>${plannerDecorDockHtml()}</section>`;
+  return page('left',left,base+':L','QUOTES & PHRASES','좋았던 문장, 표현, 문구를 적어두세요.\n\n예) “좋은 문장...”\n출처나 떠오른 생각도 같이 적어두면 좋아요.')+page('right',right,base+':R','IDEAS & SPARKS','갑자기 떠오른 아이디어를 적어두세요.\n\n콘텐츠 소재 · 자소서 표현 · 공부 아이디어 · 하고 싶은 것 등 무엇이든 좋아요.');
+}
 function renderPlannerNotebook(){
   const section=plannerNotebookSection;
   let body='',title='';
   if(section==='monthly'){body=renderPlannerMonthlyPage();title=`${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월`;}
   else if(section==='daily'){body=renderPlannerDailyPage();title=calendarSelectedDate||localDateKey();}
   else if(section==='weekly'){body=renderPlannerWeeklyPage();const keys=weeklyPlannerDateKeys();title=`${keys[0].slice(5).replace('-','/')} ~ ${keys[6].slice(5).replace('-','/')}`;}
-  else {body=renderPlannerMemoPage();title=`${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월`;}
+  else if(section==='memo'){body=renderPlannerMemoPage();title=`${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월`;}
+  else {body=renderPlannerInspirationPage();title=`${calendarViewDate.getFullYear()}년 ${calendarViewDate.getMonth()+1}월`;}
   const spreadHtml=body.replace('</section><section class="planner-page right">',`</section><div class="planner-binder">${Array.from({length:7},()=>'<span class="planner-ring"></span>').join('')}</div><section class="planner-page right">`);
-  return `<div class="planner-notebook-wrap"><div class="planner-notebook-toolbar"><div><div class="planner-notebook-title">📔 2P 다이어리 플래너 · 캘린더 자동 연동</div></div><div class="nav"><button class="btn-pixel-white" onclick="shiftPlannerPeriod(-1)">◀ 이전</button><strong style="font-family:'Gowun Batang',serif;font-size:14px;">${title}</strong><button class="btn-pixel-white" onclick="shiftPlannerPeriod(1)">다음 ▶</button><button class="btn-pixel-white" onclick="goPlannerToday()">오늘</button><button class="btn-pixel-white diary-fullscreen-btn" onclick="toggleDiaryFocusMode()" title="다른 UI를 숨기고 다이어리만 크게 보기">⛶ 다이어리 전체 화면</button></div></div><div class="planner-cover"><div class="planner-tab-rail"><button class="planner-tab ${section==='monthly'?'active':''}" onclick="setPlannerNotebookSection('monthly')">MONTHLY</button><button class="planner-tab ${section==='daily'?'active':''}" onclick="setPlannerNotebookSection('daily')">DAILY</button><button class="planner-tab ${section==='weekly'?'active':''}" onclick="setPlannerNotebookSection('weekly')">WEEKLY</button><button class="planner-tab ${section==='memo'?'active':''}" onclick="setPlannerNotebookSection('memo')">MEMO</button></div><div class="planner-spread">${spreadHtml}</div><div class="planner-ribbon"></div></div></div>`;
+  return `<div class="planner-notebook-wrap"><div class="planner-notebook-toolbar"><div><div class="planner-notebook-title">📔 2P 다이어리 플래너 · 캘린더 자동 연동</div></div><div class="nav"><button class="btn-pixel-white" onclick="shiftPlannerPeriod(-1)">◀ 이전</button><strong style="font-family:'Gowun Batang',serif;font-size:14px;">${title}</strong><button class="btn-pixel-white" onclick="shiftPlannerPeriod(1)">다음 ▶</button><button class="btn-pixel-white" onclick="goPlannerToday()">오늘</button><button class="btn-pixel-white diary-fullscreen-btn" onclick="toggleDiaryFocusMode()" title="다른 UI를 숨기고 다이어리만 크게 보기">⛶ 다이어리 전체 화면</button></div></div><div class="planner-cover"><div class="planner-tab-rail"><button class="planner-tab ${section==='monthly'?'active':''}" onclick="setPlannerNotebookSection('monthly')">MONTHLY</button><button class="planner-tab ${section==='daily'?'active':''}" onclick="setPlannerNotebookSection('daily')">DAILY</button><button class="planner-tab ${section==='weekly'?'active':''}" onclick="setPlannerNotebookSection('weekly')">WEEKLY</button><button class="planner-tab ${section==='memo'?'active':''}" onclick="setPlannerNotebookSection('memo')">MEMO</button><button class="planner-tab ${section==='inspiration'?'active':''}" onclick="setPlannerNotebookSection('inspiration')">INSPIRATION</button></div><div class="planner-spread">${spreadHtml}</div><div class="planner-ribbon"></div></div></div>`;
 }
 
 function normalizeChallengePrefs(){
@@ -8914,18 +8942,14 @@ document.addEventListener('keydown',ev=>{
 
 
 
-// ===== Global wheel fallback: normal pages scroll anywhere under the mouse =====
-(function installGlobalWheelScrollRestore(){
-  function isEditable(el){
-    return !!el?.closest?.('textarea, select, [contenteditable="true"]');
-  }
-  function findScrollableAncestor(start){
-    let el=start instanceof Element ? start : null;
+// ===== FINAL global wheel routing =====
+// Goal: diary inner lists scroll independently; everywhere else the document scrolls naturally.
+(function installFinalWheelRouting(){
+  function nearestScrollable(start){
+    let el=start instanceof Element?start:null;
     while(el && el!==document.body && el!==document.documentElement){
-      // Diary's deliberate inner scroll areas keep native/custom behavior.
       if(el.classList?.contains('planner-inner-scroll')) return el;
-      const cs=getComputedStyle(el);
-      const oy=cs.overflowY;
+      const cs=getComputedStyle(el), oy=cs.overflowY;
       if((oy==='auto'||oy==='scroll') && el.scrollHeight>el.clientHeight+2) return el;
       el=el.parentElement;
     }
@@ -8933,24 +8957,23 @@ document.addEventListener('keydown',ev=>{
   }
   document.addEventListener('wheel',function(ev){
     if(ev.ctrlKey) return;
-    if(document.body.classList.contains('diary-focus-mode')) return;
-
-    const target=ev.target instanceof Element ? ev.target : null;
-    const scrollable=findScrollableAncestor(target);
-    if(scrollable){
-      // Let true nested scroll areas (including diary internals, textareas, lists) work natively.
+    const target=ev.target instanceof Element?ev.target:null;
+    const nested=nearestScrollable(target);
+    if(nested){
+      // Native scrolling for diary internals, modals, character lists, textareas, etc.
       return;
     }
-    if(isEditable(target)) return;
-
-    const doc=document.scrollingElement || document.documentElement;
+    if(document.body.classList.contains('diary-focus-mode')) return;
+    const doc=document.scrollingElement||document.documentElement;
     if(doc.scrollHeight<=window.innerHeight+2) return;
-
-    // Some nested layouts were swallowing the wheel even though the page scrollbar
-    // could still be dragged. Explicitly move the document in that case.
-    ev.preventDefault();
-    window.scrollBy({top:ev.deltaY,left:0,behavior:'auto'});
-  },{passive:false,capture:false});
+    // Let the browser scroll first; only rescue layouts that swallow wheel input.
+    const before=doc.scrollTop;
+    requestAnimationFrame(()=>{
+      if(Math.abs(doc.scrollTop-before)<1){
+        doc.scrollTop=Math.max(0,Math.min(doc.scrollHeight-doc.clientHeight,before+ev.deltaY));
+      }
+    });
+  },{passive:true});
 })();
 </script>
 </body>
