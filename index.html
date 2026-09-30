@@ -2206,6 +2206,41 @@ body.diary-focus-mode .planner-tab-rail{
   }
 }
 
+
+
+/* ===== GLOBAL MOUSE-WHEEL SCROLL RESTORE v1 =====
+   Normal screens use the browser/page scroll again.
+   Diary's own inner lists keep their independent scroll. */
+html, body{
+  overflow-y:auto!important;
+  overscroll-behavior-y:auto!important;
+}
+body:not(.diary-focus-mode) .bg-cover-wrapper{
+  height:auto!important;
+  min-height:100vh!important;
+  overflow:visible!important;
+}
+body:not(.diary-focus-mode) .minihompy-window,
+body:not(.diary-focus-mode) .minihompy-body{
+  height:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+body:not(.diary-focus-mode) .hompy-main-content{
+  height:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+  overscroll-behavior:auto!important;
+  scrollbar-gutter:auto!important;
+}
+/* The notebook itself may still scroll horizontally, but it must not trap
+   vertical wheel input outside an actual inner diary scroller. */
+body:not(.diary-focus-mode) .planner-notebook-wrap{
+  overflow-x:auto!important;
+  overflow-y:visible!important;
+  overscroll-behavior-x:contain!important;
+  overscroll-behavior-y:auto!important;
+}
 </style>
 <script id="ios-native-bootstrap">
 
@@ -8877,6 +8912,46 @@ document.addEventListener('keydown',ev=>{
   }
 });
 
+
+
+// ===== Global wheel fallback: normal pages scroll anywhere under the mouse =====
+(function installGlobalWheelScrollRestore(){
+  function isEditable(el){
+    return !!el?.closest?.('textarea, select, [contenteditable="true"]');
+  }
+  function findScrollableAncestor(start){
+    let el=start instanceof Element ? start : null;
+    while(el && el!==document.body && el!==document.documentElement){
+      // Diary's deliberate inner scroll areas keep native/custom behavior.
+      if(el.classList?.contains('planner-inner-scroll')) return el;
+      const cs=getComputedStyle(el);
+      const oy=cs.overflowY;
+      if((oy==='auto'||oy==='scroll') && el.scrollHeight>el.clientHeight+2) return el;
+      el=el.parentElement;
+    }
+    return null;
+  }
+  document.addEventListener('wheel',function(ev){
+    if(ev.ctrlKey) return;
+    if(document.body.classList.contains('diary-focus-mode')) return;
+
+    const target=ev.target instanceof Element ? ev.target : null;
+    const scrollable=findScrollableAncestor(target);
+    if(scrollable){
+      // Let true nested scroll areas (including diary internals, textareas, lists) work natively.
+      return;
+    }
+    if(isEditable(target)) return;
+
+    const doc=document.scrollingElement || document.documentElement;
+    if(doc.scrollHeight<=window.innerHeight+2) return;
+
+    // Some nested layouts were swallowing the wheel even though the page scrollbar
+    // could still be dragged. Explicitly move the document in that case.
+    ev.preventDefault();
+    window.scrollBy({top:ev.deltaY,left:0,behavior:'auto'});
+  },{passive:false,capture:false});
+})();
 </script>
 </body>
 </html>
