@@ -1333,7 +1333,17 @@
       }
     }
 
-</style>
+
+    /* ===== 캘린더 빠른 정리 / 일괄 삭제 ===== */
+    .calendar-clean-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:9px 0}
+    .calendar-clean-toolbar .danger,.weekly-clean-row .danger{border-color:#FCA5A5!important;color:#B91C1C!important;background:#FFF!important}
+    .calendar-clean-toolbar .danger:hover,.weekly-clean-row .danger:hover{background:#FEF2F2!important}
+    .calendar-delete-select{width:17px;height:17px;accent-color:#DC2626;flex:0 0 auto}
+    .calendar-entry.delete-selected,.weekly-item.delete-selected{outline:2px solid #FCA5A5;outline-offset:1px;background:#FEF2F2!important}
+    .weekly-clean-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 9px}
+    .weekly-delete-select{width:15px;height:15px;accent-color:#DC2626;flex:0 0 auto;margin-top:2px}
+
+  </style>
 </head>
 <body>
   <div id="app" class="bg-cover-wrapper"></div>
@@ -4911,6 +4921,59 @@
     }
 
 
+
+    // ===== 캘린더 빠른 정리 / 일괄 삭제 =====
+    let calendarDeleteMode=false;
+    const calendarDeleteSelection=new Set();
+    function calendarDeleteKey(id,source='calendar'){return `${source}|${id}`}
+    function toggleCalendarDeleteMode(){calendarDeleteMode=!calendarDeleteMode;calendarDeleteSelection.clear();render()}
+    function toggleCalendarDeleteSelection(id,source='calendar',checked=true){
+      const key=calendarDeleteKey(id,source);if(checked)calendarDeleteSelection.add(key);else calendarDeleteSelection.delete(key);
+      const badge=document.getElementById('calendar-delete-count');if(badge)badge.textContent=String(calendarDeleteSelection.size);
+    }
+    function selectDeleteEntriesForDates(dateKeys){
+      calendarDeleteSelection.clear();const seen=new Set();
+      (dateKeys||[]).forEach(date=>calendarEntriesFor(date).forEach(e=>{const key=calendarDeleteKey(e.id,e.source||'calendar');if(!seen.has(key)){seen.add(key);calendarDeleteSelection.add(key)}}));
+      render();
+    }
+    function clearCalendarDeleteSelection(){calendarDeleteSelection.clear();render()}
+    function deleteCalendarKeys(keys){
+      const calendarIds=new Set(),todoIds=new Set();
+      (keys||[]).forEach(key=>{const [source,...rest]=String(key).split('|');const id=rest.join('|');if(source==='todo')todoIds.add(id);else calendarIds.add(id)});
+      if(calendarIds.size)state.userData.calendarEvents=normalizeCalendarEvents().filter(x=>!calendarIds.has(String(x.id)));
+      if(todoIds.size)state.userData.todos=normalizeTodos().filter(x=>!todoIds.has(String(x.id)));
+      saveUserData();
+    }
+    function selectedDeleteRepeatCount(keys){
+      return (keys||[]).filter(key=>{const [source,...rest]=String(key).split('|');if(source==='todo')return false;const id=rest.join('|');return normalizeCalendarEvents().find(x=>String(x.id)===String(id))?.repeat?.enabled===true}).length;
+    }
+    function deleteSelectedCalendarEntries(){
+      if(!calendarDeleteSelection.size)return alert('삭제할 일정을 먼저 선택해주세요.');
+      const repeatCount=selectedDeleteRepeatCount([...calendarDeleteSelection]);
+      const extra=repeatCount?`
+
+⚠️ 선택 항목 중 반복 일정 ${repeatCount}개는 반복 전체가 삭제됩니다.`:'';
+      if(!confirm(`선택한 ${calendarDeleteSelection.size}개 항목을 삭제할까요?${extra}`))return;
+      deleteCalendarKeys([...calendarDeleteSelection]);calendarDeleteSelection.clear();render();
+    }
+    function deleteAllCalendarEntriesForDates(dateKeys,label='선택한 날짜'){
+      const keys=new Set();(dateKeys||[]).forEach(date=>calendarEntriesFor(date).forEach(e=>keys.add(calendarDeleteKey(e.id,e.source||'calendar'))));
+      if(!keys.size)return alert('삭제할 일정이 없어요.');
+      const repeatCount=selectedDeleteRepeatCount([...keys]);
+      const extra=repeatCount?`
+
+⚠️ 반복 일정 ${repeatCount}개는 반복 전체가 삭제됩니다.`:'';
+      if(!confirm(`${label}의 일정/할 일 ${keys.size}개를 모두 삭제할까요?${extra}`))return;
+      deleteCalendarKeys([...keys]);calendarDeleteSelection.clear();render();
+    }
+    function deleteSelectedCalendarDateAll(){deleteAllCalendarEntriesForDates([calendarSelectedDate],calendarSelectedDate)}
+    function weeklyPlannerDateKeys(){
+      const start=dateKeyToLocalDate(startOfPlannerWeek(weeklyPlannerAnchor));
+      return Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return dateKeyFromParts(d.getFullYear(),d.getMonth(),d.getDate())});
+    }
+    function selectDeleteCurrentWeek(){selectDeleteEntriesForDates(weeklyPlannerDateKeys())}
+    function deleteCurrentWeekAll(){deleteAllCalendarEntriesForDates(weeklyPlannerDateKeys(),'이번 주')}
+
     // ===== Weekly checklist planner =====
     let calendarDisplayMode='month';
     let weeklyPlannerAnchor=localDateKey();
@@ -4967,9 +5030,10 @@
       return `<div class="weekly-paper">
         <div class="weekly-paper-head"><div><div class="weekly-paper-title">📝 주간 체크 플래너</div><div class="weekly-paper-sub">사진 속 체크리스트 플래너처럼 · 캘린더 일정/할 일과 완료 상태가 그대로 연동돼요.</div></div><div class="weekly-paper-nav"><button class="btn-pixel-white" onclick="shiftWeeklyPlanner(-1)">◀</button><span>${startLabel} ~ ${endLabel}</span><button class="btn-pixel-white" onclick="shiftWeeklyPlanner(1)">▶</button><button class="btn-pixel-white" onclick="goWeeklyPlannerToday()">이번 주</button></div></div>
         ${nearest?`<div style="margin-bottom:9px;padding:8px 10px;border:1.5px solid #FDA4AF;border-radius:9px;background:#FFF1F2;color:#BE123C;font-size:10.5px;font-weight:900;">⭐ 가장 가까운 중요 일정 · ${nearest.date.slice(5)} ${escHtml(nearest.title)} · ${calendarDdayLabel(nearest.date)}</div>`:''}
+        <div class="weekly-clean-row"><button class="btn-pixel-white ${calendarDeleteMode?'danger':''}" onclick="toggleCalendarDeleteMode()">${calendarDeleteMode?'정리 모드 종료':'🗑 일정 정리'}</button>${calendarDeleteMode?`<button class="btn-pixel-white" onclick="selectDeleteCurrentWeek()">이번 주 전체 선택</button><button class="btn-pixel-white" onclick="clearCalendarDeleteSelection()">선택 해제</button><button class="btn-pixel-white danger" onclick="deleteSelectedCalendarEntries()">선택 삭제 (<span id="calendar-delete-count">${calendarDeleteSelection.size}</span>)</button>`:''}<button class="btn-pixel-white danger" onclick="deleteCurrentWeekAll()">이번 주 전체 삭제</button></div>
         <div class="weekly-check-grid">${days.map((date,idx)=>{
           const entries=calendarEntriesFor(date);const imp=entries.filter(e=>e.important===true);const d=dateKeyToLocalDate(date);
-          return `<div class="weekly-day-col ${date===today?'today':''} ${imp.length?'has-important':''}"><div class="weekly-day-head">${imp.length?'<span class="weekly-day-star">★</span>':''}<div class="weekly-day-date">${d.getMonth()+1}/${d.getDate()} ${dayNames[d.getDay()]}</div>${imp.length?`<div class="weekly-day-dday">${calendarDdayLabel(date)} · ${escHtml(imp[0].title)}</div>`:''}</div><div class="weekly-list">${entries.length?entries.map(e=>{const done=isCalendarOccurrenceDone(e,e.occurrenceDate||date);return `<label class="weekly-item ${done?'done':''}"><input type="checkbox" ${done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}','${e.occurrenceDate||date}')"><span class="weekly-item-title ${e.important?'weekly-item-important':''}" onclick="event.preventDefault();${e.source==='calendar'?`editDailyPlannerEntry('${e.id}','${date}')`:''}">${e.important?'⭐ ':''}${escHtml(e.title)}</span>${e.time?`<span class="weekly-item-time">${escHtml(e.time)}</span>`:''}</label>`}).join(''):`<div style="font-size:9.5px;color:#A8A29E;font-weight:800;padding:4px 0;">아직 일정 없음</div>`}<div class="weekly-empty-lines">${Array.from({length:Math.max(2,7-Math.min(entries.length,5))},()=>'<div class="weekly-empty-line"></div>').join('')}</div></div><div class="weekly-quick-add"><input id="weekly-add-${date}" placeholder="할 일 추가 · !로 중요" onkeydown="if(event.key==='Enter')addWeeklyPlannerTodo('${date}')"><button onclick="addWeeklyPlannerTodo('${date}')">＋</button></div></div>`
+          return `<div class="weekly-day-col ${date===today?'today':''} ${imp.length?'has-important':''}"><div class="weekly-day-head">${imp.length?'<span class="weekly-day-star">★</span>':''}<div class="weekly-day-date">${d.getMonth()+1}/${d.getDate()} ${dayNames[d.getDay()]}</div>${imp.length?`<div class="weekly-day-dday">${calendarDdayLabel(date)} · ${escHtml(imp[0].title)}</div>`:''}</div><div class="weekly-list">${entries.length?entries.map(e=>{const done=isCalendarOccurrenceDone(e,e.occurrenceDate||date);return `<label class="weekly-item ${done?'done':''} ${calendarDeleteSelection.has(calendarDeleteKey(e.id,e.source||'calendar'))?'delete-selected':''}">${calendarDeleteMode?`<input class="weekly-delete-select" type="checkbox" ${calendarDeleteSelection.has(calendarDeleteKey(e.id,e.source||'calendar'))?'checked':''} onclick="event.stopPropagation()" onchange="toggleCalendarDeleteSelection('${e.id}','${e.source||'calendar'}',this.checked)">`:''}<input type="checkbox" ${done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}','${e.occurrenceDate||date}')"><span class="weekly-item-title ${e.important?'weekly-item-important':''}" onclick="event.preventDefault();${e.source==='calendar'?`editDailyPlannerEntry('${e.id}','${date}')`:''}">${e.important?'⭐ ':''}${escHtml(e.title)}</span>${e.time?`<span class="weekly-item-time">${escHtml(e.time)}</span>`:''}</label>`}).join(''):`<div style="font-size:9.5px;color:#A8A29E;font-weight:800;padding:4px 0;">아직 일정 없음</div>`}<div class="weekly-empty-lines">${Array.from({length:Math.max(2,7-Math.min(entries.length,5))},()=>'<div class="weekly-empty-line"></div>').join('')}</div></div><div class="weekly-quick-add"><input id="weekly-add-${date}" placeholder="할 일 추가 · !로 중요" onkeydown="if(event.key==='Enter')addWeeklyPlannerTodo('${date}')"><button onclick="addWeeklyPlannerTodo('${date}')">＋</button></div></div>`
         }).join('')}</div>
         <div class="weekly-note-area"><div class="weekly-note-head"><span>✎ 이번 주 메모 / 다짐</span><span style="font-size:9px;color:#A8A29E;">${weekStart}</span></div><textarea id="weekly-planner-memo" placeholder="예: 이번 주는 이노엔 준비 끝내고 한미는 계속 깔아두기!">${escHtml(memo)}</textarea><div class="weekly-note-actions"><button id="weekly-memo-save" class="btn-pixel-white" onclick="saveWeeklyPlannerMemo()">메모 저장</button></div></div>
       </div>`;
@@ -5028,8 +5092,9 @@
               </div>
             </div>
           </div>
+          <div class="calendar-clean-toolbar"><button class="btn-pixel-white ${calendarDeleteMode?'danger':''}" onclick="toggleCalendarDeleteMode()">${calendarDeleteMode?'정리 모드 종료':'🗑 일정 정리'}</button>${calendarDeleteMode?`<button class="btn-pixel-white" onclick="selectDeleteEntriesForDates([calendarSelectedDate])">이 날짜 전체 선택</button><button class="btn-pixel-white" onclick="clearCalendarDeleteSelection()">선택 해제</button><button class="btn-pixel-white danger" onclick="deleteSelectedCalendarEntries()">선택 삭제 (<span id="calendar-delete-count">${calendarDeleteSelection.size}</span>)</button>`:''}<button class="btn-pixel-white danger" onclick="deleteSelectedCalendarDateAll()">이 날짜 전체 삭제</button></div>
           <div style="font-size:11px;font-weight:900;margin-top:12px;">${calendarSelectedDate} 기록</div>
-          <div class="calendar-entry-list">${selected.length?selected.map(e=>`<div class="calendar-entry ${e.done?'done':''} ${e.important?'important':''}">${e.kind==='todo'?`<input type="checkbox" ${e.done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}','${e.occurrenceDate||calendarSelectedDate}')">`:''}<span class="calendar-entry-time">${e.time||'종일'}</span><span class="calendar-entry-kind ${e.kind==='todo'?'todo':''}">${e.kind==='todo'?'할 일':'일정'}</span>${e.source==='todo'?`<span class="linked-todo-badge">할 일 연동</span>`:''}${e.important?`<span class="calendar-important-badge">⭐ 중요</span>`:''}${e.repeat?.enabled?`<span class="calendar-repeat-badge">🔁 ${escHtml(getRepeatSummary(e))}</span>`:''}<span class="calendar-entry-title">${escHtml(e.title)}</span>${e.kind==='schedule'?`<button class="btn-pixel-white" style="padding:5px 7px;font-size:9px;" onclick="toggleCalendarEntry('${e.id}','calendar','${e.occurrenceDate||calendarSelectedDate}')">${e.done?'완료 취소':'완료'}</button>`:''}<button class="todo-delete" title="${e.repeat?.enabled?'반복 전체 삭제':'삭제'}" onclick="deleteCalendarEntry('${e.id}','${e.source||'calendar'}')">×</button></div>`).join(''):`<div style="padding:18px;text-align:center;color:#94A3B8;font-size:11px;font-weight:800;">이 날짜에는 기록이 없어요.</div>`}</div>
+          <div class="calendar-entry-list">${selected.length?selected.map(e=>`<div class="calendar-entry ${e.done?'done':''} ${e.important?'important':''} ${calendarDeleteSelection.has(calendarDeleteKey(e.id,e.source||'calendar'))?'delete-selected':''}">${calendarDeleteMode?`<input class="calendar-delete-select" type="checkbox" ${calendarDeleteSelection.has(calendarDeleteKey(e.id,e.source||'calendar'))?'checked':''} onchange="toggleCalendarDeleteSelection('${e.id}','${e.source||'calendar'}',this.checked)">`:''}${e.kind==='todo'?`<input type="checkbox" ${e.done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}','${e.occurrenceDate||calendarSelectedDate}')">`:''}<span class="calendar-entry-time">${e.time||'종일'}</span><span class="calendar-entry-kind ${e.kind==='todo'?'todo':''}">${e.kind==='todo'?'할 일':'일정'}</span>${e.source==='todo'?`<span class="linked-todo-badge">할 일 연동</span>`:''}${e.important?`<span class="calendar-important-badge">⭐ 중요</span>`:''}${e.repeat?.enabled?`<span class="calendar-repeat-badge">🔁 ${escHtml(getRepeatSummary(e))}</span>`:''}<span class="calendar-entry-title">${escHtml(e.title)}</span>${e.kind==='schedule'?`<button class="btn-pixel-white" style="padding:5px 7px;font-size:9px;" onclick="toggleCalendarEntry('${e.id}','calendar','${e.occurrenceDate||calendarSelectedDate}')">${e.done?'완료 취소':'완료'}</button>`:''}<button class="todo-delete" title="${e.repeat?.enabled?'반복 전체 삭제':'삭제'}" onclick="deleteCalendarEntry('${e.id}','${e.source||'calendar'}')">×</button></div>`).join(''):`<div style="padding:18px;text-align:center;color:#94A3B8;font-size:11px;font-weight:800;">이 날짜에는 기록이 없어요.</div>`}</div>
         </div>
         `}
       </div>`;
