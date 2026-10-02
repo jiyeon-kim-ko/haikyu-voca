@@ -2312,24 +2312,15 @@ body:not(.diary-focus-mode) .planner-notebook-wrap{
     // 기존 캐릭터/아이템/BGM은 그대로 유지하고 사용자 파일을 추가로 합칩니다.
     // 업로드 파일은 현재 브라우저 IndexedDB에 저장됩니다.
     // --------------------------------------------------------------
-    const CUSTOM_META_KEY_BASE = 'haikyu_extra_custom_content_v2';
-    function getCustomMetaKey(){ return `${CUSTOM_META_KEY_BASE}_${state.user||'guest'}`; }
+    const CUSTOM_META_KEY = 'haikyu_extra_custom_content_v1';
     const CUSTOM_DB_NAME = 'haikyu_extra_custom_assets_v1';
     const CUSTOM_STORE = 'assets';
     let CUSTOM_CONTENT = loadCustomContent();
     const CUSTOM_ASSET_URLS = {};
 
-    function reloadPerUserLocalSettings(){
-      // 같은 브라우저를 써도 지연/경민의 로컬 커스텀 메타데이터가 섞이지 않게 사용자 전환 시 다시 로드
-      CUSTOM_CONTENT = loadCustomContent();
-      try{
-        selectedBgmId = localStorage.getItem(`haikyu_bgm_track_${state.user||'guest'}`) || BGM_TRACKS?.[0]?.id || 'haikyuu';
-      }catch(e){}
-    }
-
     function loadCustomContent(){
       try{
-        const v=JSON.parse(localStorage.getItem(getCustomMetaKey())||'null');
+        const v=JSON.parse(localStorage.getItem(CUSTOM_META_KEY)||'null');
         return {
           variants:Array.isArray(v?.variants)?v.variants:[],
           items:Array.isArray(v?.items)?v.items:[],
@@ -2341,7 +2332,7 @@ body:not(.diary-focus-mode) .planner-notebook-wrap{
       }
     }
     function saveCustomContent(){
-      localStorage.setItem(getCustomMetaKey(),JSON.stringify(CUSTOM_CONTENT));
+      localStorage.setItem(CUSTOM_META_KEY,JSON.stringify(CUSTOM_CONTENT));
     }
     function openCustomDB(){
       return new Promise((resolve,reject)=>{
@@ -3433,7 +3424,7 @@ body:not(.diary-focus-mode) .planner-notebook-wrap{
       { id: 'to_reach_you', title: 'To reach you (lyrics)', file: 'bgm/To reach you(lyrics).mp3' }
     ];
 
-    let selectedBgmId = localStorage.getItem(`haikyu_bgm_track_${state.user||'guest'}`) || BGM_TRACKS[0].id;
+    let selectedBgmId = localStorage.getItem('haikyu_bgm_track') || BGM_TRACKS[0].id;
     const BGM_FIXED_VOLUME = 0.35;
     let isBgmPlaying = false;
 
@@ -4492,7 +4483,7 @@ body:not(.diary-focus-mode) .planner-notebook-wrap{
       if (!getAllBgmTracks().some(t => t.id === trackId)) return;
       const shouldResume = isBgmPlaying;
       selectedBgmId = trackId;
-      localStorage.setItem(`haikyu_bgm_track_${state.user||'guest'}`, selectedBgmId);
+      localStorage.setItem('haikyu_bgm_track', selectedBgmId);
       syncBgmSource(shouldResume);
       render();
     }
@@ -7076,7 +7067,6 @@ body:not(.diary-focus-mode) .planner-notebook-wrap{
       state.userData = getDefaultUserData();
       challengeMode = 'job';
       challengeCompany = '';
-      if(typeof reloadPerUserLocalSettings==='function') reloadPerUserLocalSettings();
       state.variantSelecting = false;
       state.selectedDay = 'all';
       state.testSource = 'days';
@@ -7305,7 +7295,7 @@ body:not(.diary-focus-mode) .planner-notebook-wrap{
       await deleteCustomAsset(b.assetId).catch(()=>{});
       CUSTOM_CONTENT.bgm=CUSTOM_CONTENT.bgm.filter(x=>x.id!==id);
       if(selectedBgmId===id)selectedBgmId=BGM_TRACKS[0].id;
-      localStorage.setItem(`haikyu_bgm_track_${state.user||'guest'}`,selectedBgmId);
+      localStorage.setItem('haikyu_bgm_track',selectedBgmId);
       await saveCloudCustomContent();syncBgmSource(false);render();
     }
 
