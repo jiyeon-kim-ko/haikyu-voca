@@ -1344,6 +1344,19 @@
     .weekly-delete-select{width:15px;height:15px;accent-color:#DC2626;flex:0 0 auto;margin-top:2px}
 
 
+    /* ===== 일정 날짜 일괄 이동 ===== */
+    .calendar-shift-box{margin:10px 0 4px;padding:11px;border:1.5px solid #A7C7B5;border-radius:11px;background:#F4FBF7}
+    .calendar-shift-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+    .calendar-shift-title{font-size:11px;font-weight:1000;color:#315B49}
+    .calendar-shift-help{font-size:9px;color:#648071;font-weight:800;line-height:1.45}
+    .calendar-shift-grid{display:grid;grid-template-columns:1fr 1fr 150px 92px auto;gap:7px;align-items:end}
+    .calendar-shift-grid label{display:flex;flex-direction:column;gap:4px;font-size:9.5px;font-weight:900;color:#426956}
+    .calendar-shift-grid input,.calendar-shift-grid select{height:35px;border:1.5px solid #BFD8CC;border-radius:8px;background:#fff;padding:0 8px;font:inherit;font-size:10px;color:#334155}
+    .calendar-shift-preview{margin-top:8px;font-size:9.5px;font-weight:800;color:#52705F;line-height:1.5}
+    .calendar-shift-actions{display:flex;gap:6px;flex-wrap:wrap}
+    @media(max-width:820px){.calendar-shift-grid{grid-template-columns:1fr 1fr}.calendar-shift-grid label:nth-child(3),.calendar-shift-grid label:nth-child(4),.calendar-shift-actions{grid-column:1/-1}}
+
+
 
     /* ===== Daily binder diary ===== */
     .diary-book-wrap{width:100%;overflow:auto;padding:8px 2px 14px}
@@ -6002,6 +6015,67 @@ body:not(.diary-focus-mode) .planner-notebook-wrap{
     function selectDeleteCurrentWeek(){selectDeleteEntriesForDates(weeklyPlannerDateKeys())}
     function deleteCurrentWeekAll(){deleteAllCalendarEntriesForDates(weeklyPlannerDateKeys(),'이번 주')}
 
+    // ===== 일정 날짜 일괄 이동 =====
+    function shiftDateKeyByDays(dateKey,days){
+      const d=dateKeyToLocalDate(dateKey);
+      if(Number.isNaN(d.getTime()))return dateKey;
+      d.setDate(d.getDate()+Number(days||0));
+      return dateKeyFromParts(d.getFullYear(),d.getMonth(),d.getDate());
+    }
+    function calendarShiftCandidates(){
+      const from=document.getElementById('calendar-shift-from')?.value||'';
+      const to=document.getElementById('calendar-shift-to')?.value||'';
+      const category=document.getElementById('calendar-shift-category')?.value||'all';
+      if(!from||!to||to<from)return [];
+      return normalizeCalendarEvents().filter(e=>{
+        if(!e?.date || e.date<from || e.date>to)return false;
+        if(category==='all')return true;
+        return plannerCategoryClass(e)===category;
+      });
+    }
+    function previewCalendarShift(){
+      const from=document.getElementById('calendar-shift-from')?.value||'';
+      const to=document.getElementById('calendar-shift-to')?.value||'';
+      const days=Number(document.getElementById('calendar-shift-days')?.value||0);
+      const box=document.getElementById('calendar-shift-preview');
+      if(!box)return;
+      if(!from||!to){box.textContent='시작일과 종료일을 선택해주세요.';return;}
+      if(to<from){box.textContent='종료일은 시작일보다 빠를 수 없어요.';return;}
+      if(!Number.isInteger(days)||days===0){box.textContent='이동 일수는 0이 아닌 정수로 입력해주세요.';return;}
+      const arr=calendarShiftCandidates();
+      const cat=document.getElementById('calendar-shift-category')?.selectedOptions?.[0]?.textContent||'전체';
+      box.textContent=`${from} ~ ${to} · ${cat} ${arr.length}개 → ${days>0?'+':''}${days}일 이동`;
+    }
+    function moveCalendarEventsByRange(){
+      const from=document.getElementById('calendar-shift-from')?.value||'';
+      const to=document.getElementById('calendar-shift-to')?.value||'';
+      const days=Number(document.getElementById('calendar-shift-days')?.value||0);
+      if(!from||!to)return alert('시작일과 종료일을 선택해주세요.');
+      if(to<from)return alert('종료일은 시작일보다 빠를 수 없어요.');
+      if(!Number.isInteger(days)||days===0)return alert('이동 일수는 0이 아닌 정수로 입력해주세요.');
+      const arr=calendarShiftCandidates();
+      if(!arr.length)return alert('조건에 맞는 일정이 없어요.');
+      const category=document.getElementById('calendar-shift-category')?.selectedOptions?.[0]?.textContent||'전체';
+      const repeatCount=arr.filter(e=>e.repeat?.enabled===true).length;
+      const repeatNote=repeatCount?`\n반복 일정 ${repeatCount}개는 시작일·종료일·요일도 함께 이동합니다.`:'';
+      if(!confirm(`${from} ~ ${to}의 ${category} 일정 ${arr.length}개를 ${days>0?'+':''}${days}일 이동할까요?${repeatNote}`))return;
+
+      arr.forEach(e=>{
+        e.date=shiftDateKeyByDays(e.date,days);
+        if(e.repeat?.enabled===true){
+          if(e.repeat.until)e.repeat.until=shiftDateKeyByDays(e.repeat.until,days);
+          if(Array.isArray(e.repeat.weekdays))e.repeat.weekdays=e.repeat.weekdays.map(w=>(Number(w)+days%7+7)%7);
+          if(Array.isArray(e.doneDates))e.doneDates=e.doneDates.map(k=>shiftDateKeyByDays(k,days));
+        }
+      });
+      calendarSelectedDate=shiftDateKeyByDays(calendarSelectedDate,days);
+      const selectedD=dateKeyToLocalDate(calendarSelectedDate);
+      if(!Number.isNaN(selectedD.getTime()))calendarViewDate=new Date(selectedD.getFullYear(),selectedD.getMonth(),1);
+      saveUserData();
+      alert(`${arr.length}개 일정을 ${days>0?'+':''}${days}일 이동했어요.`);
+      render();
+    }
+
     // ===== Calendar / notebook planner =====
     let calendarDisplayMode='calendar';
     let plannerNotebookSection='monthly';
@@ -6333,6 +6407,17 @@ body:not(.diary-focus-mode) .planner-notebook-wrap{
             </div>
           </div>
           <div class="calendar-clean-toolbar"><button class="btn-pixel-white ${calendarDeleteMode?'danger':''}" onclick="toggleCalendarDeleteMode()">${calendarDeleteMode?'정리 모드 종료':'🗑 일정 정리'}</button>${calendarDeleteMode?`<button class="btn-pixel-white" onclick="selectDeleteEntriesForDates([calendarSelectedDate])">이 날짜 전체 선택</button><button class="btn-pixel-white" onclick="clearCalendarDeleteSelection()">선택 해제</button><button class="btn-pixel-white danger" onclick="deleteSelectedCalendarEntries()">선택 삭제 (<span id="calendar-delete-count">${calendarDeleteSelection.size}</span>)</button>`:''}<button class="btn-pixel-white danger" onclick="deleteSelectedCalendarDateAll()">이 날짜 전체 삭제</button></div>
+          <div class="calendar-shift-box">
+            <div class="calendar-shift-head"><div><div class="calendar-shift-title">↔ 일정 날짜 일괄 이동</div><div class="calendar-shift-help">기간 + 분류를 골라 여러 일정을 한 번에 앞/뒤 날짜로 옮겨요. 예: 스위치온 식사 10/6~11/2 → +1일.</div></div></div>
+            <div class="calendar-shift-grid">
+              <label>시작일<input id="calendar-shift-from" type="date" value="${calendarSelectedDate}" onchange="previewCalendarShift()"></label>
+              <label>종료일<input id="calendar-shift-to" type="date" value="${calendarSelectedDate}" onchange="previewCalendarShift()"></label>
+              <label>분류<select id="calendar-shift-category" onchange="previewCalendarShift()"><option value="all">전체 일정</option><option value="meal">🍽️ 식사</option><option value="main">🔴 메인</option><option value="exam">🔵 시험</option><option value="routine">🟢 루틴</option><option value="fixed">🟣 고정</option><option value="study">📘 공부</option><option value="rest">🌿 휴식</option><option value="personal">⚪ 개인</option><option value="schedule">일정</option></select></label>
+              <label>이동 일수<input id="calendar-shift-days" type="number" step="1" value="1" oninput="previewCalendarShift()"></label>
+              <div class="calendar-shift-actions"><button class="btn-pixel-white" onclick="previewCalendarShift()">미리보기</button><button class="btn-pixel-black" onclick="moveCalendarEventsByRange()">날짜 이동</button></div>
+            </div>
+            <div id="calendar-shift-preview" class="calendar-shift-preview">기간과 분류를 고른 뒤 미리보기를 눌러주세요.</div>
+          </div>
           <div style="font-size:11px;font-weight:900;margin-top:12px;">${calendarSelectedDate} 기록</div>
           <div class="calendar-entry-list">${selected.length?selected.map(e=>`<div class="calendar-entry ${e.done?'done':''} ${e.important?'important':''} ${calendarDeleteSelection.has(calendarDeleteKey(e.id,e.source||'calendar'))?'delete-selected':''}">${calendarDeleteMode?`<input class="calendar-delete-select" type="checkbox" ${calendarDeleteSelection.has(calendarDeleteKey(e.id,e.source||'calendar'))?'checked':''} onchange="toggleCalendarDeleteSelection('${e.id}','${e.source||'calendar'}',this.checked)">`:''}${e.kind==='todo'?`<input type="checkbox" ${e.done?'checked':''} onchange="toggleCalendarEntry('${e.id}','${e.source||'calendar'}','${e.occurrenceDate||calendarSelectedDate}')">`:''}<span class="calendar-entry-time">${e.time||'종일'}</span><span class="calendar-entry-kind ${e.kind==='todo'?'todo':''}">${e.kind==='todo'?'할 일':'일정'}</span>${e.source==='todo'?`<span class="linked-todo-badge">할 일 연동</span>`:''}${e.important?`<span class="calendar-important-badge">⭐ 중요</span>`:''}${e.repeat?.enabled?`<span class="calendar-repeat-badge">🔁 ${escHtml(getRepeatSummary(e))}</span>`:''}<span class="calendar-entry-title">${escHtml(e.title)}</span>${e.kind==='schedule'?`<button class="btn-pixel-white" style="padding:5px 7px;font-size:9px;" onclick="toggleCalendarEntry('${e.id}','calendar','${e.occurrenceDate||calendarSelectedDate}')">${e.done?'완료 취소':'완료'}</button>`:''}<button class="todo-delete" title="${e.repeat?.enabled?'반복 전체 삭제':'삭제'}" onclick="deleteCalendarEntry('${e.id}','${e.source||'calendar'}')">×</button></div>`).join(''):`<div style="padding:18px;text-align:center;color:#94A3B8;font-size:11px;font-weight:800;">이 날짜에는 기록이 없어요.</div>`}</div>
         </div>
